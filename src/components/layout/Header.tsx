@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
@@ -95,6 +95,7 @@ export default function Header() {
         </Button>
        </SheetTrigger>
        <SheetContent side="left" className="sm:max-w-xs">
+        <SheetTitle className="sr-only">Dashboard Menu</SheetTitle>
           <nav className="grid gap-6 text-lg font-medium">
              <Link href="/" className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base">
                 <Gem className="h-5 w-5 transition-all group-hover:scale-110" />
@@ -111,7 +112,7 @@ export default function Header() {
                 <div className="my-2 h-px bg-border" />
                  <h3 className="px-2.5 text-sm font-semibold text-primary">Admin</h3>
                  {adminNav.map(item => (
-                    <Link key={item.href} href={item.href} className={cn("flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground", pathname.startsWith(item.href) && "text-foreground")}>
+                    <Link key={item.href} href={item.href} className={cn("flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground", (item.exact ? pathname === item.href : pathname.startsWith(item.href)) && "text-foreground")}>
                         <item.icon className="h-5 w-5" />
                         {item.label}
                     </Link>
