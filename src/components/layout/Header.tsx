@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
-import { Gem, ShoppingCart, User, Menu, X } from 'lucide-react';
+import { Gem, ShoppingCart, User, Menu, X, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,17 +14,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { ADMIN_EMAIL } from '@/lib/constants';
 
-
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/dashboard/admin', label: 'Admin' },
-  { href: '/dashboard/orders', label: 'My Orders' },
-];
+const navLinks = [{ href: '/', label: 'Home' }];
 
 export default function Header() {
   const { cartCount } = useCart();
@@ -32,8 +28,17 @@ export default function Header() {
   const router = useRouter();
   const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user: isAuthenticated } = useUser();
+  const { user } = useUser();
   const auth = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setIsAdmin(user.email === ADMIN_EMAIL);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -55,22 +60,34 @@ export default function Header() {
 
   const NavLinks = () => (
     <>
-      {navLinks.map((link) => (
+      {navLinks.map(link => (
         <Link
           key={link.href}
           href={link.href}
           className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
-            pathname === link.href ? "text-primary" : "text-muted-foreground"
+            'text-sm font-medium transition-colors hover:text-primary',
+            pathname === link.href ? 'text-primary' : 'text-muted-foreground'
           )}
           onClick={() => setIsMobileMenuOpen(false)}
         >
           {link.label}
         </Link>
       ))}
+       {isAdmin && (
+        <Link
+          href="/dashboard/admin"
+          className={cn(
+            'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
+            pathname.startsWith('/dashboard/admin') ? 'text-primary' : 'text-muted-foreground'
+          )}
+           onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <Shield className="h-4 w-4" /> Admin
+        </Link>
+      )}
     </>
   );
-  
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -78,7 +95,7 @@ export default function Header() {
           <Gem className="h-6 w-6 text-primary" />
           <span className="font-bold text-lg">Al-Hameed</span>
         </Link>
-        
+
         <nav className="hidden md:flex gap-6 items-center">
           <NavLinks />
         </nav>
@@ -97,33 +114,41 @@ export default function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-               <Button variant="ghost" size="icon" aria-label="User account">
+              <Button variant="ghost" size="icon" aria-label="User account">
                 <User className="h-5 w-5 text-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {isAuthenticated ? (
-                 <>
+              {user ? (
+                <>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild><Link href="/dashboard/account">Profile</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/dashboard/orders">Orders</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/account">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/orders">Orders</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                 </>
               ) : (
                 <>
-                  <DropdownMenuItem asChild><Link href="/login">Log In</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/signup">Sign Up</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/login">Log In</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/signup">Sign Up</Link>
+                  </DropdownMenuItem>
                 </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden" 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle mobile menu"
           >
