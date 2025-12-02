@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Gem } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -54,6 +55,14 @@ export default function LoginPage() {
       title: "Logging In...",
       description: "You are being securely logged in.",
     });
+  }
+
+  if (isUserLoading || user) {
+    return (
+       <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (
@@ -100,6 +109,7 @@ export default function LoginPage() {
                   )}
                 />
                 <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Login
                 </Button>
               </form>

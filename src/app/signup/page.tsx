@@ -24,7 +24,6 @@ import PageTransition from "@/components/PageTransition";
 import { useToast } from "@/hooks/use-toast";
 
 const signupSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Invalid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
@@ -38,7 +37,6 @@ export default function SignupPage() {
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      fullName: "",
       email: "",
       password: "",
     },
@@ -46,7 +44,8 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-      router.push('/dashboard');
+      // User is logged in, redirect to create profile
+      router.push('/create-profile');
     }
   }, [user, isUserLoading, router]);
 
@@ -54,7 +53,7 @@ export default function SignupPage() {
     initiateEmailSignUp(auth, values.email, values.password);
     toast({
       title: "Account Created!",
-      description: "You are being logged in.",
+      description: "Redirecting to create your profile.",
     });
   }
 
@@ -70,19 +69,6 @@ export default function SignupPage() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Hassan" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="email"
