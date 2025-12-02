@@ -11,10 +11,11 @@ import { useCart } from '@/hooks/use-cart';
 import PageTransition from '@/components/PageTransition';
 
 export default function ProductDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   
-  const product = products.find(p => p.slug === params.slug);
+  const product = products.find(p => p.slug === slug);
 
   useEffect(() => {
     if (product) {
