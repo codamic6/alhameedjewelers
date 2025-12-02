@@ -30,17 +30,23 @@ export default function ProductDetailPage({
 
     const getProductBySlug = async () => {
       setLoading(true);
-      const productsRef = collection(firestore, 'products');
-      const q = query(productsRef, where('slug', '==', slug));
-      const querySnapshot = await getDocs(q);
-      
-      if (!querySnapshot.empty) {
-        const productDoc = querySnapshot.docs[0];
-        setProduct({ id: productDoc.id, ...productDoc.data() } as Product);
-      } else {
+      try {
+        const productsRef = collection(firestore, 'products');
+        const q = query(productsRef, where('slug', '==', slug));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const productDoc = querySnapshot.docs[0];
+          setProduct({ id: productDoc.id, ...productDoc.data() } as Product);
+        } else {
+          setProduct(null);
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
         setProduct(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getProductBySlug();
