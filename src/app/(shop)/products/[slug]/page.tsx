@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Plus, Minus, Loader2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useCart } from '@/hooks/use-cart';
 import PageTransition from '@/components/PageTransition';
 import { doc, collection, query, where, getDocs } from 'firebase/firestore';
@@ -16,9 +16,9 @@ import type { Product } from '@/lib/types';
 export default function ProductDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = use(params);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const firestore = useFirestore();
