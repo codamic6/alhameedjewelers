@@ -1,8 +1,9 @@
 export const firebaseConfig = {
-  "projectId": "studio-3821950900-67db9",
-  "appId": "1:343777395322:web:8c1450467efa04c88b71c3",
-  "apiKey": "AIzaSyBYDh61OJopF8rMnDjVfLQoUU-Xzl5-Nv8",
-  "authDomain": "studio-3821950900-67db9.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "343777395322"
+  apiKey: "AIzaSyBUXIUZEgySalG9P6fBIRrENHKGvaWu3a8",
+  authDomain: "al-hameed-jewelers-ac175.firebaseapp.com",
+  projectId: "al-hameed-jewelers-ac175",
+  storageBucket: "al-hameed-jewelers-ac175.firebasestorage.app",
+  messagingSenderId: "680779745760",
+  appId: "1:680779745760:web:c361b06c96ca0ea3b90385",
+  measurementId: "G-40V36DCSJQ"
 };

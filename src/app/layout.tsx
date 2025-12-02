@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
+import { Playfair_Display } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { CartProvider } from '@/hooks/use-cart';
+import { FirebaseClientProvider } from '@/firebase';
 
-const poppins = Poppins({
+const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-body',
   weight: ['400', '500', '600', '700'],
@@ -23,11 +24,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={cn('min-h-screen bg-background font-body antialiased', poppins.variable)}>
-        <CartProvider>
-          {children}
-          <Toaster />
-        </CartProvider>
+      <body className={cn('min-h-screen bg-background font-body antialiased', playfair.variable)}>
+        <FirebaseClientProvider>
+          <CartProvider>
+            {children}
+            <Toaster />
+          </CartProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );

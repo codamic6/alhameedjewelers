@@ -1,12 +1,61 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useAuth, initiateEmailSignIn, useUser } from "@/firebase";
+import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gem } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import { useToast } from "@/hooks/use-toast";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+});
 
 export default function LoginPage() {
+  const auth = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  const { user, isUserLoading } = useUser();
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
+
+  function onSubmit(values: z.infer<typeof loginSchema>) {
+    initiateEmailSignIn(auth, values.email, values.password);
+    toast({
+      title: "Logging In...",
+      description: "You are being securely logged in.",
+    });
+  }
+
   return (
     <PageTransition>
       <div className="flex items-center justify-center min-h-screen p-4">
@@ -17,24 +66,44 @@ export default function LoginPage() {
             <CardDescription>Enter your credentials to access your account.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link href="#" className="ml-auto inline-block text-sm underline text-primary">
-                    Forgot your password?
-                  </Link>
-                </div>
-                <Input id="password" type="password" required />
-              </div>
-              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground">
-                Login
-              </Button>
-            </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="hassan@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                       <div className="flex items-center">
+                        <FormLabel>Password</FormLabel>
+                        <Link href="#" className="ml-auto inline-block text-sm underline text-primary">
+                          Forgot your password?
+                        </Link>
+                      </div>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" disabled={form.formState.isSubmitting}>
+                  Login
+                </Button>
+              </form>
+            </Form>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link href="/signup" className="underline text-primary">

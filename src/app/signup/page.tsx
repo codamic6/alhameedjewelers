@@ -1,12 +1,63 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useAuth, initiateEmailSignUp, useUser } from "@/firebase";
+import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gem } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
+import { useToast } from "@/hooks/use-toast";
+
+const signupSchema = z.object({
+  fullName: z.string().min(2, "Name must be at least 2 characters."),
+  email: z.string().email("Invalid email address."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+});
 
 export default function SignupPage() {
+  const auth = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  const { user, isUserLoading } = useUser();
+
+  const form = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
+
+  async function onSubmit(values: z.infer<typeof signupSchema>) {
+    initiateEmailSignUp(auth, values.email, values.password);
+    toast({
+      title: "Account Created!",
+      description: "You are being logged in.",
+    });
+  }
+
   return (
     <PageTransition>
       <div className="flex items-center justify-center min-h-screen p-4">
@@ -17,23 +68,52 @@ export default function SignupPage() {
             <CardDescription>Join our family of exquisite jewelry lovers.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="full-name">Full Name</Label>
-                <Input id="full-name" placeholder="Hassan" required />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="hassan@example.com" required />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" />
-              </div>
-              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground">
-                Create Account
-              </Button>
-            </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Hassan" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="hassan@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" disabled={form.formState.isSubmitting}>
+                  Create Account
+                </Button>
+              </form>
+            </Form>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
               <Link href="/login" className="underline text-primary">

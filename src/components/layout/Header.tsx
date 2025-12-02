@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Gem, ShoppingCart, User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import {
@@ -15,6 +15,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useAuth, useUser } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
 
 
 const navLinks = [
@@ -26,8 +29,29 @@ const navLinks = [
 export default function Header() {
   const { cartCount } = useCart();
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const isAuthenticated = false; // Mock authentication state
+  const { user: isAuthenticated } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: 'Logged Out',
+        description: 'You have been successfully logged out.',
+      });
+      router.push('/');
+    } catch (error) {
+      console.error('Logout Error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Logout Failed',
+        description: 'An error occurred during logout. Please try again.',
+      });
+    }
+  };
 
   const NavLinks = () => (
     <>
@@ -49,7 +73,7 @@ export default function Header() {
   
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
+      <div className="container flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
           <Gem className="h-6 w-6 text-primary" />
           <span className="font-bold text-lg">Al-Hameed</span>
@@ -61,10 +85,10 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <Link href="/cart">
-            <Button variant="ghost" size="icon" aria-label="Open cart">
+            <Button variant="ghost" size="icon" aria-label="Open cart" className="relative">
               <ShoppingCart className="h-5 w-5 text-foreground" />
               {cartCount > 0 && (
-                <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {cartCount}
                 </span>
               )}
@@ -85,7 +109,7 @@ export default function Header() {
                   <DropdownMenuItem asChild><Link href="/dashboard/account">Profile</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link href="/dashboard/orders">Orders</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                 </>
               ) : (
                 <>
