@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { useCollection, useFirestore } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import {
@@ -38,9 +38,13 @@ import { useToast } from '@/hooks/use-toast';
 export default function AdminProductsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { data: products, isLoading } = useCollection<Product>(
-    firestore ? collection(firestore, 'products') : null
+  
+  const productsCollection = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'products') : null),
+    [firestore]
   );
+  const { data: products, isLoading } = useCollection<Product>(productsCollection);
+  
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
 
