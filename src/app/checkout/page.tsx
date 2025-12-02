@@ -1,0 +1,244 @@
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useCart } from '@/hooks/use-cart';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import PageTransition from '@/components/PageTransition';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, ShoppingCart } from 'lucide-react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+
+const checkoutSchema = z.object({
+  address: z.string().min(10, { message: 'Please enter a valid address.' }),
+  city: z.string().min(3, { message: 'Please enter a city.' }),
+  postalCode: z.string().min(5, { message: 'Please enter a valid postal code.' }),
+});
+
+export default function CheckoutPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const { cartItems, cartTotal, clearCart, cartCount } = useCart();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<z.infer<typeof checkoutSchema>>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      address: '',
+      city: '',
+      postalCode: '',
+    },
+  });
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.replace('/login');
+    }
+    if (!isUserLoading && cartCount === 0) {
+      router.replace('/cart');
+    }
+  }, [user, isUserLoading, cartCount, router]);
+
+  async function onSubmit(values: z.infer<typeof checkoutSchema>) {
+    if (!user || !firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'You must be logged in to place an order.',
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const orderData = {
+      userId: user.uid,
+      orderDate: new Date().toISOString(),
+      status: 'Pending' as const,
+      totalAmount: cartTotal,
+      shippingAddress: values,
+      items: cartItems.map(item => ({
+        productId: item.product.id,
+        productName: item.product.name,
+        quantity: item.quantity,
+        itemPrice: item.product.price,
+      })),
+    };
+
+    try {
+      await addDoc(collection(firestore, 'orders'), orderData);
+      
+      toast({
+        title: 'Order Placed!',
+        description: 'Your order has been successfully placed.',
+      });
+      
+      clearCart();
+      router.push('/order-confirmation');
+
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: error.message || 'Could not place your order.',
+      });
+      setIsSubmitting(false);
+    }
+  }
+
+  if (isUserLoading || cartCount === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+    <Header />
+    <PageTransition>
+      <div className="container mx-auto max-w-7xl px-4 py-12">
+        <h1 className="text-3xl md:text-4xl font-bold mb-8 text-primary">Checkout</h1>
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+            <div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Shipping Information</CardTitle>
+                    <CardDescription>Payment will be collected on delivery (POD).</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Address</FormLabel>
+                            <FormControl>
+                                <Input placeholder="House #123, Street 4" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="city"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>City</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="Karachi" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="postalCode"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Postal Code</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="75500" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <Button type="submit" size="lg" className="w-full mt-6" disabled={isSubmitting}>
+                            {isSubmitting ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <ShoppingCart className="mr-2 h-5 w-5" />
+                            )}
+                            Place Order
+                        </Button>
+                    </form>
+                    </Form>
+                </CardContent>
+            </Card>
+            </div>
+            <div className="space-y-4">
+                <Card>
+                <CardHeader>
+                    <CardTitle>Order Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {cartItems.map(({ product, quantity }) => {
+                        const image = PlaceHolderImages.find(p => p.id === product.imageId);
+                        return (
+                            <div key={product.id} className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                {image && (
+                                    <Image
+                                        src={image.imageUrl}
+                                        alt={product.name}
+                                        width={50}
+                                        height={50}
+                                        className="rounded-md object-cover"
+                                    />
+                                )}
+                                <div>
+                                    <p className="font-semibold">{product.name}</p>
+                                    <p className="text-sm text-muted-foreground">Qty: {quantity}</p>
+                                </div>
+                                </div>
+                                <p className="font-semibold">${(product.price * quantity).toLocaleString()}</p>
+                            </div>
+                        )
+                    })}
+                </CardContent>
+                </Card>
+                 <Card>
+                    <CardContent className="p-6 space-y-4">
+                        <div className="flex justify-between text-lg">
+                        <span>Subtotal</span>
+                        <span>${cartTotal.toLocaleString()}</span>
+                        </div>
+                         <div className="flex justify-between text-lg">
+                        <span>Shipping</span>
+                        <span>Free</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-2xl text-primary">
+                        <span>Total</span>
+                        <span>${cartTotal.toLocaleString()}</span>
+                        </div>
+                    </CardContent>
+                 </Card>
+            </div>
+        </div>
+      </div>
+    </PageTransition>
+    <Footer />
+    </>
+  );
+}
