@@ -16,16 +16,18 @@ export default function Recommendations({
   const [recommendations, setRecommendations] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const firestore = useFirestore();
+  
   const productsCollection = useMemoFirebase(
     () => (firestore ? collection(firestore, 'products') : null),
     [firestore]
   );
+
   const { data: products, isLoading: productsLoading } = useCollection<Product>(
     productsCollection
   );
 
   useEffect(() => {
-    if (productsLoading) return;
+    if (productsLoading || !products) return;
 
     async function fetchRecommendations() {
       try {
