@@ -100,25 +100,19 @@ export default function AdminOrdersPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders?.map(order => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
-                  <TableCell>{customerMap.get(order.userId) || 'N/A'}</TableCell>
-                  <TableCell>
-                    {new Date(order.orderDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
+          {/* Responsive Layout: Cards on mobile, Table on desktop */}
+          <div className="md:hidden">
+            {orders?.map(order => (
+              <Card key={order.id} className="mb-4">
+                <CardHeader>
+                  <CardTitle className="text-base">Order #{order.id.substring(0, 7)}</CardTitle>
+                  <CardDescription>{new Date(order.orderDate).toLocaleDateString()}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <p><span className="font-semibold">Customer:</span> {customerMap.get(order.userId) || 'N/A'}</p>
+                  <p><span className="font-semibold">Total:</span> ${order.totalAmount.toLocaleString()}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">Status:</span>
                     <Select
                       value={order.status}
                       onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
@@ -143,14 +137,65 @@ export default function AdminOrdersPage() {
                         <SelectItem value="Cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ${order.totalAmount.toLocaleString()}
-                  </TableCell>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {orders?.map(order => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
+                    <TableCell>{customerMap.get(order.userId) || 'N/A'}</TableCell>
+                    <TableCell>
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={order.status}
+                        onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
+                      >
+                        <SelectTrigger className="w-[120px] h-8 text-xs">
+                          <Badge
+                            variant={getBadgeVariant(order.status)}
+                            className={cn(
+                              'w-full justify-center',
+                              order.status === 'Delivered' && 'bg-green-600/80 text-white',
+                              order.status === 'Shipped' && 'bg-blue-500/80 text-white',
+                              order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
+                            )}
+                          >
+                            {order.status}
+                          </Badge>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Shipped">Shipped</SelectItem>
+                          <SelectItem value="Delivered">Delivered</SelectItem>
+                          <SelectItem value="Cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      ${order.totalAmount.toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
