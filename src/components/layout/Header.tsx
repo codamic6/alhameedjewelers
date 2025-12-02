@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Gem, ShoppingCart, User, Menu, X, Shield } from 'lucide-react';
+import { Gem, ShoppingCart, User, Menu, X, Shield, Search as SearchIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { usePathname, useRouter } from 'next/navigation';
@@ -19,6 +19,7 @@ import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { ADMIN_EMAIL } from '@/lib/constants';
+import Search from '../Search';
 
 const navLinks = [{ href: '/', label: 'Home' }];
 
@@ -92,16 +93,24 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black backdrop-blur supports-[backdrop-filter]:bg-black/60">
       <div className="container flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
-          <Gem className="h-6 w-6 text-primary" />
-          <span className="font-logo font-bold text-xl text-white">Al-Hameed</span>
-        </Link>
-
-        <nav className="hidden md:flex gap-6 items-center">
-          <NavLinks />
-        </nav>
-
         <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Gem className="h-6 w-6 text-primary" />
+            <span className="font-logo font-bold text-xl text-white hidden sm:inline">Al-Hameed</span>
+          </Link>
+          <div className="hidden md:flex">
+             <NavLinks />
+          </div>
+        </div>
+
+        <div className="hidden md:flex flex-1 justify-center px-8">
+          <Search />
+        </div>
+
+        <div className="flex items-center gap-2 md:gap-4">
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => router.push('/search')}>
+            <SearchIcon className="h-5 w-5 text-primary hover:text-accent" />
+          </Button>
           <Link href="/cart">
             <Button variant="ghost" size="icon" aria-label="Open cart" className="relative">
               <ShoppingCart className="h-5 w-5 text-primary hover:text-accent" />
@@ -113,38 +122,40 @@ export default function Header() {
             </Button>
           </Link>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="User account">
-                <User className="h-5 w-5 text-primary hover:text-accent" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {user ? (
-                <>
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/account">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/orders">Orders</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuItem asChild>
-                    <Link href="/login">Log In</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/signup">Sign Up</Link>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="hidden md:flex">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="User account">
+                  <User className="h-5 w-5 text-primary hover:text-accent" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {user ? (
+                  <>
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/account">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/orders">Orders</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">Log In</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/signup">Sign Up</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
           <Button
             variant="ghost"
@@ -161,6 +172,38 @@ export default function Header() {
         <div className="md:hidden bg-black border-t border-border">
           <nav className="flex flex-col items-center gap-4 py-4">
             <NavLinks />
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-white hover:text-primary">
+                  <User className="h-5 w-5 mr-2" /> My Account
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {user ? (
+                  <>
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/account">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/orders">Orders</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">Log In</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/signup">Sign Up</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
       )}
