@@ -66,7 +66,8 @@ export default function Header() {
           href={link.href}
           className={cn(
             'text-sm font-medium transition-colors hover:text-primary',
-            pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+            'font-body',
+            pathname === link.href ? 'text-primary underline' : 'text-white'
           )}
           onClick={() => setIsMobileMenuOpen(false)}
         >
@@ -77,8 +78,8 @@ export default function Header() {
         <Link
           href="/dashboard/admin"
           className={cn(
-            'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
-            pathname.startsWith('/dashboard/admin') ? 'text-primary' : 'text-muted-foreground'
+            'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary font-body',
+            pathname.startsWith('/dashboard/admin') ? 'text-primary' : 'text-white'
           )}
            onClick={() => setIsMobileMenuOpen(false)}
         >
@@ -89,11 +90,11 @@ export default function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black backdrop-blur supports-[backdrop-filter]:bg-black/60">
       <div className="container flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
           <Gem className="h-6 w-6 text-primary" />
-          <span className="font-bold text-lg">Al-Hameed</span>
+          <span className="font-logo font-bold text-xl text-white">Al-Hameed</span>
         </Link>
 
         <nav className="hidden md:flex gap-6 items-center">
@@ -103,7 +104,7 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <Link href="/cart">
             <Button variant="ghost" size="icon" aria-label="Open cart" className="relative">
-              <ShoppingCart className="h-5 w-5 text-foreground" />
+              <ShoppingCart className="h-5 w-5 text-primary hover:text-accent" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                   {cartCount}
@@ -115,7 +116,7 @@ export default function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="User account">
-                <User className="h-5 w-5 text-foreground" />
+                <User className="h-5 w-5 text-primary hover:text-accent" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -152,13 +153,13 @@ export default function Header() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle mobile menu"
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? <X className="h-5 w-5 text-primary" /> : <Menu className="h-5 w-5 text-primary" />}
           </Button>
         </div>
       </div>
       {isMobileMenuOpen && (
-        <div className="md:hidden">
-          <nav className="flex flex-col items-center gap-4 py-4 border-t">
+        <div className="md:hidden bg-black border-t border-border">
+          <nav className="flex flex-col items-center gap-4 py-4">
             <NavLinks />
           </nav>
         </div>

@@ -17,8 +17,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <motion.div
-      className="group relative overflow-hidden rounded-lg shadow-lg"
-      whileHover={{ y: -5 }}
+      className="group relative overflow-hidden rounded-lg shadow-lg bg-secondary border border-border"
+      whileHover={{ y: -5, scale: 1.03, boxShadow: '0 0 25px rgba(212,175,55,0.2)' }}
       transition={{ duration: 0.3 }}
     >
       <Link href={`/products/${product.slug}`} className="block">
@@ -35,17 +35,16 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
       </Link>
-      <div className="p-4 bg-card">
-        <h3 className="text-lg font-semibold text-foreground truncate">
+      <div className="p-4">
+        <h3 className="text-lg font-headline text-white truncate">
           <Link href={`/products/${product.slug}`}>{product.name}</Link>
         </h3>
         <p className="text-sm text-muted-foreground mb-3">{product.category}</p>
         <div className="flex items-center justify-between">
-          <p className="text-xl font-bold text-primary">${product.price.toLocaleString()}</p>
+          <p className="text-xl font-semibold text-primary font-body">${product.price.toLocaleString()}</p>
           <Button 
             size="sm" 
-            variant="outline" 
-            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            variant="secondary" 
             onClick={() => addToCart(product)}
             aria-label={`Add ${product.name} to cart`}
           >
