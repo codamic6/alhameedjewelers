@@ -1,0 +1,105 @@
+"use client";
+
+import { useCart } from '@/hooks/use-cart';
+import Image from 'next/image';
+import Link from 'next/link';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Button } from '@/components/ui/button';
+import { Plus, Minus, Trash2, ShoppingCart as ShoppingCartIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import PageTransition from '@/components/PageTransition';
+
+export default function CartPage() {
+  const { cartItems, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
+
+  if (cartCount === 0) {
+    return (
+      <PageTransition>
+        <div className="container mx-auto max-w-4xl text-center py-20">
+          <ShoppingCartIcon className="mx-auto h-24 w-24 text-muted-foreground" />
+          <h1 className="text-3xl font-bold mt-4">Your Cart is Empty</h1>
+          <p className="text-muted-foreground mt-2 mb-6">Looks like you haven't added anything to your cart yet.</p>
+          <Button asChild className="bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground">
+            <Link href="/">Start Shopping</Link>
+          </Button>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  return (
+    <PageTransition>
+      <div className="container mx-auto max-w-7xl px-4 py-12">
+        <h1 className="text-3xl md:text-4xl font-bold mb-8 text-primary">Your Shopping Cart</h1>
+        <div className="grid lg:grid-cols-3 gap-8 items-start">
+          <div className="lg:col-span-2 space-y-4">
+            {cartItems.map(({ product, quantity }) => {
+              const image = PlaceHolderImages.find(p => p.id === product.imageId);
+              return (
+                <Card key={product.id} className="flex items-center p-4">
+                  <div className="w-24 h-24 aspect-square rounded-md overflow-hidden mr-4">
+                    {image && (
+                      <Image
+                        src={image.imageUrl}
+                        alt={product.name}
+                        width={100}
+                        height={100}
+                        className="object-cover w-full h-full"
+                        data-ai-hint={image.imageHint}
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <Link href={`/products/${product.slug}`} className="font-semibold hover:text-primary">{product.name}</Link>
+                    <p className="text-sm text-muted-foreground">${product.price.toLocaleString()}</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center border rounded-md">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(product.id, quantity - 1)}>
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="w-8 text-center text-sm">{quantity}</span>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(product.id, quantity + 1)}>
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="w-20 text-right font-semibold">${(product.price * quantity).toLocaleString()}</p>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => removeFromCart(product.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+          <div className="lg:col-span-1">
+            <Card className="sticky top-24">
+              <CardHeader>
+                <CardTitle>Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>${cartTotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>Free</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg text-primary">
+                  <span>Total</span>
+                  <span>${cartTotal.toLocaleString()}</span>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button asChild size="lg" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground">
+                  <Link href="/checkout">Proceed to Checkout</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </PageTransition>
+  );
+}

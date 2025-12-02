@@ -1,3 +1,58 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "Elegant gold necklace on a dark background",
+      "imageUrl": "https://images.unsplash.com/photo-1689743801114-230453abfceb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxqZXdlbHJ5JTIwZmFzaGlvbnxlbnwwfHx8fDE3NjQ2ODc2NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "jewelry fashion"
+    },
+    {
+      "id": "prod-1",
+      "description": "Ornate Gold Necklace",
+      "imageUrl": "https://images.unsplash.com/photo-1600862754152-80a263dd564f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxnb2xkJTIwbmVja2xhY2V8ZW58MHx8fHwxNzY0NjgyMDg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gold necklace"
+    },
+    {
+      "id": "prod-2",
+      "description": "Solitaire Diamond Ring",
+      "imageUrl": "https://images.unsplash.com/photo-1529519195486-16945f0fb37f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkaWFtb25kJTIwcmluZ3xlbnwwfHx8fDE3NjQ2ODIwODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "diamond ring"
+    },
+    {
+      "id": "prod-3",
+      "description": "Gold Bangle Set",
+      "imageUrl": "https://images.unsplash.com/photo-1690175867343-2af70ea57537?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnb2xkJTIwYmFuZ2xlc3xlbnwwfHx8fDE3NjQ2Mzg0MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gold bangles"
+    },
+    {
+      "id": "prod-4",
+      "description": "Pearl Drop Earrings",
+      "imageUrl": "https://images.unsplash.com/photo-1704957205327-9fbd44d683b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZWFybCUyMGVhcnJpbmdzfGVufDB8fHx8MTc2NDY4NzY1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pearl earrings"
+    },
+    {
+      "id": "prod-5",
+      "description": "Emerald Pendant",
+      "imageUrl": "https://images.unsplash.com/photo-1536852132171-40eeebc74dbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxlbWVyYWxkJTIwcGVuZGFudHxlbnwwfHx8fDE3NjQ2ODc2NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "emerald pendant"
+    },
+    {
+      "id": "prod-6",
+      "description": "Men's Gold Chain",
+      "imageUrl": "https://images.unsplash.com/photo-1585711715631-1e6bf224f092?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxnb2xkJTIwY2hhaW58ZW58MHx8fHwxNzY0NTkwODYwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gold chain"
+    },
+    {
+      "id": "prod-7",
+      "description": "Vintage Brooch",
+      "imageUrl": "https://images.unsplash.com/photo-1654361354790-3eb1072f0998?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx2aW50YWdlJTIwYnJvb2NofGVufDB8fHx8MTc2NDY4NzY1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vintage brooch"
+    },
+    {
+      "id": "prod-8",
+      "description": "Ruby Studs",
+      "imageUrl": "https://images.unsplash.com/photo-1667013878607-908d67e88488?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxydWJ5JTIwZWFycmluZ3N8ZW58MHx8fHwxNzY0Njg3NjU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ruby earrings"
+    }
+  ]
 }

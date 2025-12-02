@@ -1,0 +1,80 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Gem, Home, ShoppingCart, Users, Package, Settings, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+const mainNav = [
+  { href: "/dashboard/account", label: "My Account", icon: Settings },
+  { href: "/dashboard/orders", label: "My Orders", icon: Package },
+];
+
+const adminNav = [
+  { href: "/dashboard/admin", label: "Dashboard", icon: Home },
+  { href: "/dashboard/admin/products", label: "Products", icon: ShoppingCart },
+  { href: "/dashboard/admin/orders", label: "Orders", icon: Package },
+  { href: "/dashboard/admin/customers", label: "Customers", icon: Users },
+];
+
+export default function DashboardSidebar() {
+  const pathname = usePathname();
+
+  const renderNav = (items: typeof mainNav) => (
+    <TooltipProvider>
+      <nav className="grid items-start gap-1 px-2 text-sm font-medium">
+        {items.map(({ href, label, icon: Icon }) => (
+          <Tooltip key={href}>
+            <TooltipTrigger asChild>
+              <Link
+                href={href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                  (pathname === href || (href !== '/dashboard/admin' && pathname.startsWith(href))) && "bg-muted text-primary"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>{label}</p>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+      </nav>
+    </TooltipProvider>
+  );
+
+  return (
+    <div className="hidden border-r bg-muted/40 md:block">
+      <div className="flex h-full max-h-screen flex-col gap-2">
+        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Gem className="h-6 w-6 text-primary" />
+            <span className="">Al-Hameed</span>
+          </Link>
+        </div>
+        <div className="flex-1">
+          <div className="py-4">
+            <h3 className="mx-4 mb-2 px-2 text-lg font-semibold tracking-tight">Account</h3>
+            {renderNav(mainNav)}
+          </div>
+          <div className="py-4">
+             <h3 className="mx-4 mb-2 px-2 text-lg font-semibold tracking-tight flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary"/>
+                Admin
+            </h3>
+            {renderNav(adminNav)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
