@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getAIRecommendations } from '@/lib/actions';
 import ProductCard from './ProductCard';
 import { Loader2 } from 'lucide-react';
-import { useCollection, useFirestore } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 
@@ -16,8 +16,12 @@ export default function Recommendations({
   const [recommendations, setRecommendations] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const firestore = useFirestore();
+  const productsCollection = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'products') : null),
+    [firestore]
+  );
   const { data: products, isLoading: productsLoading } = useCollection<Product>(
-    firestore ? collection(firestore, 'products') : null
+    productsCollection
   );
 
   useEffect(() => {
