@@ -14,12 +14,12 @@ import { useUser } from '@/firebase';
 import { useEffect, useState } from 'react';
 import { ADMIN_EMAIL } from '@/lib/constants';
 
-const mainNav = [
+export const mainNav = [
   { href: '/dashboard/account', label: 'My Account', icon: Settings },
   { href: '/dashboard/orders', label: 'My Orders', icon: Package },
 ];
 
-const adminNav = [
+export const adminNav = [
   { href: '/dashboard/admin', label: 'Dashboard', icon: Home, exact: true },
   { href: '/dashboard/admin/products', label: 'Products', icon: ShoppingCart },
   { href: '/dashboard/admin/orders', label: 'Orders', icon: Package },
