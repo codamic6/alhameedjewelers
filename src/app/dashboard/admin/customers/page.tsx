@@ -18,16 +18,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useCollection, useFirestore } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { UserProfile } from '@/lib/types';
 import { format } from 'date-fns';
 
 export default function AdminCustomersPage() {
   const firestore = useFirestore();
-  const { data: customers, isLoading } = useCollection<UserProfile>(
-    firestore ? collection(firestore, 'users') : null
+  const customersCollection = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'users') : null),
+    [firestore]
   );
+  const { data: customers, isLoading } = useCollection<UserProfile>(customersCollection);
 
   return (
     <div>
