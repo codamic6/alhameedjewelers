@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
-import { Alegreya } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { CartProvider } from '@/hooks/use-cart';
 
-const alegreya = Alegreya({
+const poppins = Poppins({
   subsets: ['latin'],
   variable: '--font-body',
+  weight: ['400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={cn('min-h-screen bg-background font-body antialiased', alegreya.variable)}>
+      <body className={cn('min-h-screen bg-background font-body antialiased', poppins.variable)}>
         <CartProvider>
           {children}
           <Toaster />
