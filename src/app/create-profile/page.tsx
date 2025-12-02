@@ -26,7 +26,7 @@ import { Gem } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import ShopLayout from '../(shop)/layout';
+import Header from '@/components/layout/Header';
 
 const profileSchema = z.object({
   firstName: z.string().min(2, { message: 'First name must be at least 2 characters.' }),
@@ -121,73 +121,74 @@ export default function CreateProfilePage() {
   }
 
   return (
-    <ShopLayout>
-        <PageTransition>
-        <div className="flex items-center justify-center min-h-screen p-4">
-            <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-                <Gem className="mx-auto h-10 w-10 text-primary mb-2" />
-                <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-                <CardDescription>Just a few more details to get you started.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                        control={form.control}
-                        name="firstName"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                            <Input placeholder="Hassan" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="lastName"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                            <Input placeholder="Ali" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    </div>
-                    <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                            <Input 
-                            {...field}
-                            onFocus={handlePhoneFocus}
-                            onClick={handlePhoneClick}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" disabled={isSubmitting}>
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save and Continue
-                    </Button>
-                </form>
-                </Form>
-            </CardContent>
-            </Card>
-        </div>
-        </PageTransition>
-    </ShopLayout>
+    <>
+      <Header />
+      <PageTransition>
+      <div className="flex items-center justify-center min-h-[calc(100vh-64px)] p-4">
+          <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+              <Gem className="mx-auto h-10 w-10 text-primary mb-2" />
+              <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
+              <CardDescription>Just a few more details to get you started.</CardDescription>
+          </CardHeader>
+          <CardContent>
+              <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                      <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                          <Input placeholder="Hassan" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                      </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                      <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                          <Input placeholder="Ali" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                      </FormItem>
+                      )}
+                  />
+                  </div>
+                  <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                          <Input 
+                          {...field}
+                          onFocus={handlePhoneFocus}
+                          onClick={handlePhoneClick}
+                          />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
+                  />
+                  <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save and Continue
+                  </Button>
+              </form>
+              </Form>
+          </CardContent>
+          </Card>
+      </div>
+      </PageTransition>
+    </>
   );
 }

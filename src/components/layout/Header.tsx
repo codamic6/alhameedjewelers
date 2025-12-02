@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Gem, ShoppingCart, User, Menu, X, Shield, Search as SearchIcon } from 'lucide-react';
+import { Gem, ShoppingCart, User, Menu, X, Shield, Search as SearchIcon, LogOut, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { usePathname, useRouter } from 'next/navigation';
@@ -40,6 +40,10 @@ export default function Header() {
       setIsAdmin(false);
     }
   }, [user]);
+  
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   const handleLogout = async () => {
     try {
@@ -75,18 +79,6 @@ export default function Header() {
           {link.label}
         </Link>
       ))}
-       {isAdmin && (
-        <Link
-          href="/dashboard/admin"
-          className={cn(
-            'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary font-body',
-            pathname.startsWith('/dashboard/admin') ? 'text-primary' : 'text-white'
-          )}
-           onClick={() => setIsMobileMenuOpen(false)}
-        >
-          <Shield className="h-4 w-4" /> Admin
-        </Link>
-      )}
     </>
   );
 
@@ -94,11 +86,20 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black backdrop-blur supports-[backdrop-filter]:bg-black/60">
       <div className="container flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
+           <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5 text-primary" /> : <Menu className="h-5 w-5 text-primary" />}
+          </Button>
           <Link href="/" className="flex items-center gap-2">
             <Gem className="h-6 w-6 text-primary" />
             <span className="font-logo font-bold text-xl text-white hidden sm:inline">Al-Hameed</span>
           </Link>
-          <div className="hidden md:flex">
+          <div className="hidden md:flex gap-6 ml-4">
              <NavLinks />
           </div>
         </div>
@@ -122,88 +123,80 @@ export default function Header() {
             </Button>
           </Link>
 
-          <div className="hidden md:flex">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="User account">
-                  <User className="h-5 w-5 text-primary hover:text-accent" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {user ? (
-                  <>
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="User account">
+                <User className="h-5 w-5 text-primary hover:text-accent" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {user ? (
+                <>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/account">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/orders">Orders</Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/account">Profile</Link>
+                      <Link href="/dashboard/admin">
+                        <Shield className="mr-2 h-4 w-4" /> Admin
+                      </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/orders">Orders</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/login">Log In</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/signup">Sign Up</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/login">Log In</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/signup">Sign Up</Link>
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle mobile menu"
-          >
-            {isMobileMenuOpen ? <X className="h-5 w-5 text-primary" /> : <Menu className="h-5 w-5 text-primary" />}
-          </Button>
         </div>
       </div>
       {isMobileMenuOpen && (
         <div className="md:hidden bg-black border-t border-border">
-          <nav className="flex flex-col items-center gap-4 py-4">
+          <nav className="flex flex-col items-start gap-1 p-4">
             <NavLinks />
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-white hover:text-primary">
-                  <User className="h-5 w-5 mr-2" /> My Account
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {user ? (
-                  <>
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/account">Profile</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/orders">Orders</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/login">Log In</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/signup">Sign Up</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <DropdownMenuSeparator className="bg-border/50 my-2" />
+            {user ? (
+                <>
+                 <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                 </Link>
+                 {isAdmin && (
+                     <Link href="/dashboard/admin" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full">
+                        <Shield className="h-4 w-4" />
+                        Admin Panel
+                     </Link>
+                 )}
+                 <button onClick={handleLogout} className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-left">
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                 </button>
+                </>
+            ) : (
+                <>
+                <Link href="/login" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full">
+                    Log In
+                 </Link>
+                 <Link href="/signup" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full">
+                    Sign Up
+                 </Link>
+                </>
+            )}
           </nav>
         </div>
       )}
