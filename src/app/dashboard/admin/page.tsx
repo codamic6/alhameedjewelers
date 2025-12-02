@@ -1,12 +1,43 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Users, Package, ShoppingCart } from "lucide-react";
-import { orders, products, customers } from "@/lib/data";
+import { useCollection, useFirestore } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { Order, Product, UserProfile } from '@/lib/types';
+import { Loader2 } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const totalRevenue = orders.filter(o => o.status === 'Delivered').reduce((sum, order) => sum + order.total, 0);
-  const totalOrders = orders.length;
-  const totalCustomers = customers.length;
-  const totalProducts = products.length;
+  const firestore = useFirestore();
+
+  const { data: orders, isLoading: ordersLoading } = useCollection<Order>(
+    firestore ? collection(firestore, 'orders') : null
+  );
+  
+  const { data: products, isLoading: productsLoading } = useCollection<Product>(
+    firestore ? collection(firestore, 'products') : null
+  );
+
+  const { data: customers, isLoading: customersLoading } = useCollection<UserProfile>(
+    firestore ? collection(firestore, 'users') : null
+  );
+
+  const isLoading = ordersLoading || productsLoading || customersLoading;
+
+  const totalRevenue = orders
+    ?.filter(o => o.status === 'Delivered')
+    .reduce((sum, order) => sum + order.totalAmount, 0) ?? 0;
+  const totalOrders = orders?.length ?? 0;
+  const totalCustomers = customers?.length ?? 0;
+  const totalProducts = products?.length ?? 0;
+
+  if (isLoading) {
+      return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -1,4 +1,5 @@
-import { customers } from "@/lib/data";
+'use client';
+
 import {
   Table,
   TableBody,
@@ -6,19 +7,28 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
+import { useCollection, useFirestore } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { UserProfile } from '@/lib/types';
+import { format } from 'date-fns';
 
 export default function AdminCustomersPage() {
+  const firestore = useFirestore();
+  const { data: customers, isLoading } = useCollection<UserProfile>(
+    firestore ? collection(firestore, 'users') : null
+  );
+
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight text-primary">Customers</h1>
@@ -30,44 +40,30 @@ export default function AdminCustomersPage() {
           <CardDescription>A list of all registered customers.</CardDescription>
         </CardHeader>
         <CardContent>
+         {isLoading ? (
+             <div className="flex justify-center items-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+             </div>
+         ) : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Join Date</TableHead>
-                <TableHead className="text-right">Total Orders</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
-                </TableHead>
+                <TableHead>Phone</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customers.map((customer) => (
+              {customers?.map((customer) => (
                 <TableRow key={customer.id}>
-                  <TableCell className="font-medium">{customer.name}</TableCell>
+                  <TableCell className="font-medium">{customer.firstName} {customer.lastName}</TableCell>
                   <TableCell>{customer.email}</TableCell>
-                  <TableCell>{customer.joinDate}</TableCell>
-                  <TableCell className="text-right">{customer.orderCount}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>View Profile</DropdownMenuItem>
-                        <DropdownMenuItem>View Orders</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+                  <TableCell>{customer.phone}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+         )}
         </CardContent>
       </Card>
     </div>

@@ -1,136 +1,38 @@
 
-/**
- * Core Philosophy: This ruleset enforces a strict user-ownership model. All user-specific data, such as orders and recommendations, is
- * stored in subcollections under that user's unique document. This ensures that users can only ever access their own information.
- * Public data, like the product catalog, is readable by everyone but writable only by administrators (a role not yet defined, so writes are currently disabled).
- *
- * Data Structure: The data is organized into two main top-level collections: `/products` for public catalog information and `/users` for
- * all user-related data. Each user document at `/users/{userId}` acts as a root for their private subcollections, including `/orders` and `/recommendations`.
- * This hierarchical structure simplifies security by tying access control directly to the document path.
- *
- * Key Security Decisions:
- * - Strict User Data Privacy: All paths under `/users/{userId}` are only accessible to the authenticated user whose UID matches `{userId}`.
- * - No User Listing: To protect user privacy, it is impossible to list all documents in the `/users` collection.
- * - Public Product Catalog: The `/products` collection is world-readable, allowing any client (authenticated or not) to browse items.
- * - Admin-Only Product Management: Writes to the `/products` collection are disabled by default, awaiting the implementation of an admin role system. This ensures a secure-by-default posture.
- *
- * Denormalization for Authorization: The rules leverage the path structure as a primary authorization mechanism. By nesting a user's orders within their own document path
- * (e.g., `/users/{userId}/orders/{orderId}`), we can write a simple and performant rule (`isOwner(userId)`) without needing to perform extra reads (`get()`) on other documents.
- * Similarly, key relational IDs (like `userId` in an `Order` document) are validated to ensure they match the document's path, maintaining structural integrity.
- *
- * Structural Segregation: Public data (`/products`) and private data (`/users`) are stored in separate top-level collections. This is a secure and performant pattern
- * that prevents accidental data leakage and simplifies queries, as a client can list items from `/products` without any risk of retrieving private user information.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // -------------------------------------------------------------------------
-    // Helper Functions
-    // -------------------------------------------------------------------------
-
-    /**
-     * Checks if the current request is from an authenticated user.
-     */
-    function isSignedIn() {
-      return request.auth != null;
+    function isAdmin() {
+      return request.auth.token.email == 'hameed234934@gmail.com';
     }
 
-    /**
-     * Checks if the currently signed-in user's ID matches the provided userId.
-     * This is the primary function for enforcing data ownership.
-     */
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+      return request.auth != null && request.auth.uid == userId;
     }
 
-    /**
-     * A robust check for update/delete operations, ensuring the user is the
-     * owner AND the document they are trying to modify actually exists.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-
-    /**
-     * @description Product documents are public and readable by anyone.
-     * @path /products/{productId}
-     * @allow (get) Any user, signed in or not, can view a product.
-     * @deny (create) A non-admin user attempts to add a new product.
-     * @principle Public read access for catalog data, with writes locked down for security until an admin system is implemented.
-     */
     match /products/{productId} {
-      allow get: if true;
-      allow list: if true;
-      // CRITICAL: Writes are disabled. The IR mentions admin-only writes, but no admin role is defined.
-      // To implement, you could check an admin claims token or a separate 'roles' collection.
-      // Example: `get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.isAdmin == true`
-      allow create: if false; // TODO: Implement admin-only creation logic.
-      allow update: if false; // TODO: Implement admin-only update logic.
-      allow delete: if false; // TODO: Implement admin-only deletion logic.
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
-    /**
-     * @description A user document contains public profile information. Users can create and manage their own document.
-     * @path /users/{userId}
-     * @allow (create) A new user (auth.uid: 'user_123') creates their own profile at `/users/user_123`.
-     * @deny (get) A signed-in user ('user_456') tries to read the profile of 'user_123'.
-     * @deny (list) Any user tries to get a list of all users in the system.
-     * @principle Enforces self-service profile management and prevents users from accessing or enumerating other users' profiles.
-     */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
-    /**
-     * @description An order document, which belongs to a specific user.
-     * @path /users/{userId}/orders/{orderId}
-     * @allow (create) A signed-in user (auth.uid: 'user_123') creates a new order for themselves.
-     * @deny (get) A signed-in user ('user_456') tries to read an order belonging to 'user_123'.
-     * @principle Restricts access to a user's own data tree, ensuring order history is private.
-     */
-    match /users/{userId}/orders/{orderId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
-
-      /**
-       * @description Represents a single item within a user's order. Access is inherited from the parent order.
-       * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
-       * @allow (get) A signed-in user ('user_123') reads an item from their own order.
-       * @deny (list) A different user ('user_456') tries to list items from an order belonging to 'user_123'.
-       * @principle Inherits ownership from the parent document path, ensuring all parts of an order are secure.
-       */
-      match /orderItems/{orderItemId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.orderId == orderId;
-        allow update: if isExistingOwner(userId) && request.resource.data.orderId == resource.data.orderId;
-        allow delete: if isExistingOwner(userId);
+    match /orders/{orderId} {
+      allow read, list: if isAdmin();
+      allow update: if isAdmin(); // For status updates
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      
+      // Allow user to see their own orders
+      match /users/{userId}/orders/{orderId} {
+        allow read, list: if isOwner(userId);
       }
-    }
-
-    /**
-     * @description A personalized product recommendation for a user. Only the user can see their recommendations.
-     * @path /users/{userId}/recommendations/{recommendationId}
-     * @allow (get) A signed-in user ('user_123') reads their own product recommendation.
-     * @deny (create) An anonymous system tries to write a recommendation without being authenticated as the user.
-     * @principle Restricts access to a user's own data tree, ensuring personalized data is private.
-     */
-    match /users/{userId}/recommendations/{recommendationId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
     }
   }
 }
-
-    

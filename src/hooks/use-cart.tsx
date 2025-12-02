@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { Product } from '@/lib/data';
+import type { Product } from '@/lib/types';
 import { useToast } from './use-toast';
 
 export type CartItem = {

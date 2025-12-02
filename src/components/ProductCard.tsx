@@ -1,11 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import type { Product } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from './ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
+import type { Product } from '@/lib/types';
 
 type ProductCardProps = {
   product: Product;

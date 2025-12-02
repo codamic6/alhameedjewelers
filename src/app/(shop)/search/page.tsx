@@ -4,18 +4,28 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Search as SearchIcon, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { products, Product } from '@/lib/data';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { Product } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
 
 export default function SearchPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<Product[]>([]);
+  const firestore = useFirestore();
+
+  const productsCollection = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'products') : null),
+    [firestore]
+  );
+  const { data: products, isLoading: productsLoading } = useCollection<Product>(productsCollection);
 
   useEffect(() => {
-    if (searchTerm.length > 1) {
+    if (searchTerm.length > 1 && products) {
       const filtered = products.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -23,7 +33,7 @@ export default function SearchPage() {
     } else {
       setResults([]);
     }
-  }, [searchTerm]);
+  }, [searchTerm, products]);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -53,42 +63,48 @@ export default function SearchPage() {
           )}
         </div>
 
-        <div className="space-y-4">
-            <AnimatePresence>
-            {results.map((product, index) => {
-                const image = PlaceHolderImages.find(p => p.id === product.imageId);
-                return(
-                <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                >
-                    <Link href={`/products/${product.slug}`}>
-                        <div className="bg-[#0A0A0A] p-4 rounded-lg flex items-center gap-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(212,175,55,0.2)]">
-                            {image && (
-                                <Image
-                                src={image.imageUrl}
-                                alt={product.name}
-                                width={60}
-                                height={60}
-                                className="rounded-md aspect-square object-cover"
-                                data-ai-hint={image.imageHint}
-                                />
-                            )}
-                            <div className="flex-1">
-                                <p className="font-body text-white">{product.name}</p>
-                                <p className="text-sm text-muted-foreground">{product.category}</p>
+        {productsLoading ? (
+            <div className="flex justify-center items-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        ) : (
+            <div className="space-y-4">
+                <AnimatePresence>
+                {results.map((product, index) => {
+                    const image = PlaceHolderImages.find(p => p.id === product.imageId);
+                    return(
+                    <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                        <Link href={`/products/${product.slug}`}>
+                            <div className="bg-[#0A0A0A] p-4 rounded-lg flex items-center gap-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(212,175,55,0.2)]">
+                                {image && (
+                                    <Image
+                                    src={image.imageUrl}
+                                    alt={product.name}
+                                    width={60}
+                                    height={60}
+                                    className="rounded-md aspect-square object-cover"
+                                    data-ai-hint={image.imageHint}
+                                    />
+                                )}
+                                <div className="flex-1">
+                                    <p className="font-body text-white">{product.name}</p>
+                                    <p className="text-sm text-muted-foreground">{product.category}</p>
+                                </div>
+                                <p className="font-semibold text-primary font-body">${product.price.toLocaleString()}</p>
                             </div>
-                            <p className="font-semibold text-primary font-body">${product.price.toLocaleString()}</p>
-                        </div>
-                    </Link>
-                </motion.div>
-                )
-            })}
-            </AnimatePresence>
-        </div>
+                        </Link>
+                    </motion.div>
+                    )
+                })}
+                </AnimatePresence>
+            </div>
+        )}
       </main>
     </div>
   );
