@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -16,6 +17,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const profileSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters.'),
@@ -33,10 +35,12 @@ type UserProfile = {
 
 export default function AccountPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Prevent requests until user is loaded
   const userDocRef = useMemoFirebase(
     () => (firestore && user ? doc(firestore, 'users', user.uid) : null),
     [firestore, user]
@@ -52,6 +56,12 @@ export default function AccountPage() {
       phone: '+92',
     },
   });
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.replace('/login');
+    }
+  }, [user, isUserLoading, router]);
 
   useEffect(() => {
     if (userProfile) {
@@ -77,7 +87,8 @@ export default function AccountPage() {
     setIsSubmitting(true);
 
     const updatedProfile = {
-      ...userProfile,
+      ...(userProfile || {}),
+      id: user.uid,
       firstName: values.firstName,
       lastName: values.lastName,
       phone: values.phone,
@@ -102,9 +113,11 @@ export default function AccountPage() {
     }
   }
   
-  if (isUserLoading || isProfileLoading) {
+  const isLoading = isUserLoading || (user && isProfileLoading);
+
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
