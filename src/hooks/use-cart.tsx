@@ -75,11 +75,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (storedCoupon) {
             const parsedCoupon = JSON.parse(storedCoupon);
             // Firestore Timestamps are not plain objects, need to convert them back
-            setCoupon({
-                ...parsedCoupon,
-                startDate: new Timestamp(parsedCoupon.startDate.seconds, parsedCoupon.startDate.nanoseconds),
-                endDate: new Timestamp(parsedCoupon.endDate.seconds, parsedCoupon.endDate.nanoseconds),
-            });
+            if (parsedCoupon.startDate && parsedCoupon.endDate) {
+              setCoupon({
+                  ...parsedCoupon,
+                  startDate: new Timestamp(parsedCoupon.startDate.seconds, parsedCoupon.startDate.nanoseconds),
+                  endDate: new Timestamp(parsedCoupon.endDate.seconds, parsedCoupon.endDate.nanoseconds),
+              });
+            }
         }
     } catch (error) {
         console.error("Failed to parse from localStorage", error);
@@ -201,17 +203,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('checkoutState');
     localStorage.removeItem('coupon');
   };
+  
+  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
   const cartTotal = cartItems.reduce(
     (total, item) => total + item.product.price * item.quantity,
     0
   );
   
-  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
-
   let couponDiscount = 0;
   if (coupon) {
-      const applicableItems = coupon.applicableProductIds.length > 0
+      const applicableItems = coupon.applicableProductIds && coupon.applicableProductIds.length > 0
           ? cartItems.filter(item => coupon.applicableProductIds.includes(item.product.id))
           : cartItems;
 

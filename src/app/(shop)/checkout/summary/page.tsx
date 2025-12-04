@@ -3,7 +3,7 @@
 
 import { useCart } from '@/hooks/use-cart';
 import { useUser, useFirestore } from '@/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -22,7 +22,7 @@ export default function SummaryPage() {
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const { cartItems, clearCart, checkoutState, cartCount, coupon, couponDiscount, totalAfterDiscount } = useCart();
+  const { cartItems, clearCart, checkoutState, cartCount, cartTotal, coupon, couponDiscount, totalAfterDiscount } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -51,10 +51,10 @@ export default function SummaryPage() {
 
     const orderData = {
       userId: user.uid,
-      orderDate: new Date().toISOString(),
+      orderDate: serverTimestamp(),
       status: 'Pending' as const,
-      subTotal: cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0),
-      couponCode: coupon?.code,
+      subTotal: cartTotal,
+      couponCode: coupon?.code || null,
       couponDiscount: couponDiscount,
       totalAmount: totalAfterDiscount,
       shippingAddress: checkoutState.shippingAddress,
@@ -68,7 +68,8 @@ export default function SummaryPage() {
     };
 
     try {
-      const docRef = await addDoc(collection(firestore, 'orders'), orderData);
+      const ordersRef = collection(firestore, 'users', user.uid, 'orders');
+      const docRef = await addDoc(ordersRef, orderData);
       
       toast({
         title: 'Order Placed!',
@@ -161,7 +162,7 @@ export default function SummaryPage() {
                          <Separator className="my-2 !mt-4"/>
                          <div className="flex justify-between">
                             <span>Subtotal</span>
-                            <span>${cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0).toLocaleString()}</span>
+                            <span>${cartTotal.toLocaleString()}</span>
                         </div>
                         {couponDiscount > 0 && (
                           <div className="flex justify-between text-green-400">

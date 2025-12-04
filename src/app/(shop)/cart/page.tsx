@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 export default function CartPage() {
   const { cartItems, updateQuantity, removeFromCart, cartTotal, cartCount, coupon, applyCoupon, removeCoupon, couponDiscount, totalAfterDiscount } = useCart();
