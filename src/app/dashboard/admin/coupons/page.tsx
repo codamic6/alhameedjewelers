@@ -123,27 +123,25 @@ export default function AdminCouponsPage() {
                 {coupons.map((coupon) => {
                   const status = getStatus(coupon);
                   return (
-                    <Card key={coupon.id} className="bg-secondary/50">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
+                    <Card key={coupon.id} className="bg-secondary/50 overflow-hidden">
+                      <CardHeader className="flex flex-row items-start justify-between gap-4 p-4">
                            <div>
-                              <CardTitle className="text-xl">{coupon.discountPercentage}% OFF</CardTitle>
+                              <CardTitle className="text-2xl font-bold text-primary">{coupon.discountPercentage}% OFF</CardTitle>
                               <Badge variant="secondary" className="mt-1 font-mono text-base">{coupon.code}</Badge>
                            </div>
-                           <Badge className={cn("text-white", status.color)}>{status.text}</Badge>
-                        </div>
+                           <Badge className={cn("text-white shrink-0", status.color)}>{status.text}</Badge>
                       </CardHeader>
-                      <CardContent className="text-sm space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Valid From:</span>
-                          <span>{format(coupon.startDate.toDate(), 'MMM d, yyyy')}</span>
+                      <CardContent className="text-sm space-y-3 px-4 pb-4">
+                        <div>
+                          <p className="text-muted-foreground text-xs">Valid From</p>
+                          <p className="font-medium">{format(coupon.startDate.toDate(), 'MMM d, yyyy')}</p>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Valid Until:</span>
-                          <span>{format(coupon.endDate.toDate(), 'MMM d, yyyy')}</span>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Valid Until</p>
+                          <p className="font-medium">{format(coupon.endDate.toDate(), 'MMM d, yyyy')}</p>
                         </div>
                       </CardContent>
-                      <CardFooter className="bg-secondary/20 flex gap-2">
+                      <CardFooter className="bg-secondary/20 flex gap-2 p-2">
                         <Button variant="outline" size="sm" className="w-full" onClick={() => handleEdit(coupon)}>
                           <Edit className="mr-2 h-4 w-4" /> Edit
                         </Button>
