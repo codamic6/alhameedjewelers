@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { Playfair_Display, Inter, Cinzel } from 'next/font/google';
+import { Alegreya, Inter, Cinzel } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { CartProvider } from '@/hooks/use-cart';
 import { FirebaseClientProvider } from '@/firebase';
 
-const playfair = Playfair_Display({
+const alegreya = Alegreya({
   subsets: ['latin'],
   variable: '--font-headline',
   weight: ['400', '500', '600', '700'],
@@ -36,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={cn('min-h-screen bg-background font-body antialiased', playfair.variable, inter.variable, cinzel.variable)}>
+      <body className={cn('min-h-screen bg-background font-body antialiased', alegreya.variable, inter.variable, cinzel.variable)}>
         <FirebaseClientProvider>
           <CartProvider>
             {children}
