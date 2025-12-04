@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -6,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth, initiateEmailSignIn, useUser } from "@/firebase";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,7 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
-export default function LoginPage() {
+function LoginForm() {
   const auth = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,19 +60,17 @@ export default function LoginPage() {
       description: "You are being securely logged in.",
     });
   }
-
+  
   if (isUserLoading || user) {
     return (
-       <div className="flex items-center justify-center min-h-screen">
+       <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     )
   }
 
   return (
-    <PageTransition>
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
             <Gem className="mx-auto h-10 w-10 text-primary mb-2" />
             <CardTitle className="text-2xl">Welcome Back</CardTitle>
@@ -125,6 +124,17 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
+  )
+}
+
+
+export default function LoginPage() {
+  return (
+    <PageTransition>
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>}>
+          <LoginForm />
+        </Suspense>
       </div>
     </PageTransition>
   );
