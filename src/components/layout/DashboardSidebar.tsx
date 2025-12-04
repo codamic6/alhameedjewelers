@@ -11,7 +11,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useUser } from '@/firebase';
-import { useEffect, useState } from 'react';
 import { ADMIN_EMAIL } from '@/lib/constants';
 
 export const mainNav = [
@@ -28,16 +27,9 @@ export const adminNav = [
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
-  const { user } = useUser();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { user, isUserLoading } = useUser();
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
-  useEffect(() => {
-    if (user) {
-      setIsAdmin(user.email === ADMIN_EMAIL);
-    } else {
-      setIsAdmin(false);
-    }
-  }, [user]);
 
   const renderNav = (items: typeof mainNav | typeof adminNav) => (
     <TooltipProvider>
@@ -73,7 +65,7 @@ export default function DashboardSidebar() {
             <h3 className="mx-4 mb-2 px-2 text-lg font-semibold tracking-tight">Account</h3>
             {renderNav(mainNav)}
           </div>
-          {isAdmin && (
+          {!isUserLoading && isAdmin && (
             <div className="py-4">
               <h3 className="mx-4 mb-2 px-2 text-lg font-semibold tracking-tight flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
