@@ -49,13 +49,13 @@ export default function CartPage() {
     <PageTransition>
       <div className="container mx-auto max-w-7xl px-4 py-12">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-primary">Your Shopping Cart</h1>
-        <div className="grid lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-2 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          <div className="md:col-span-2 space-y-4">
             {cartItems.map(({ product, quantity }) => {
               const image = PlaceHolderImages.find(p => p.id === product.imageId);
               return (
                 <Card key={product.id} className="flex items-center p-4">
-                  <div className="w-24 h-24 aspect-square rounded-md overflow-hidden mr-4">
+                  <div className="w-24 h-24 aspect-square rounded-md overflow-hidden mr-4 shrink-0">
                     {image && (
                       <Image
                         src={image.imageUrl}
@@ -67,30 +67,32 @@ export default function CartPage() {
                       />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <Link href={`/products/${product.slug}`} className="font-semibold hover:text-primary">{product.name}</Link>
-                    <p className="text-sm text-muted-foreground">${product.price.toLocaleString()}</p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center border rounded-md">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(product.id, quantity - 1)}>
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <span className="w-8 text-center text-sm">{quantity}</span>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(product.id, quantity + 1)}>
-                        <Plus className="h-4 w-4" />
+                  <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <Link href={`/products/${product.slug}`} className="font-semibold hover:text-primary">{product.name}</Link>
+                      <p className="text-sm text-muted-foreground">${product.price.toLocaleString()}</p>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-4">
+                      <div className="flex items-center border rounded-md">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(product.id, quantity - 1)}>
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center text-sm">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(product.id, quantity + 1)}>
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="text-right font-semibold">${(product.price * quantity).toLocaleString()}</p>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => removeFromCart(product.id)}>
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    <p className="w-20 text-right font-semibold">${(product.price * quantity).toLocaleString()}</p>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => removeFromCart(product.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 </Card>
               );
             })}
           </div>
-          <div className="lg:col-span-1">
+          <div className="md:col-span-1">
             <Card className="sticky top-24">
               <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
