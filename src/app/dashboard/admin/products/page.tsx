@@ -29,15 +29,18 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import ProductForm from './ProductForm';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useRouter } from 'next/navigation';
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
+  const router = useRouter();
+  const isMobile = useIsMobile();
   
   const productsCollection = useMemoFirebase(
     () => (firestore ? collection(firestore, 'products') : null),
@@ -49,13 +52,21 @@ export default function AdminProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
 
   const handleEdit = (product: Product) => {
-    setSelectedProduct(product);
-    setDialogOpen(true);
+    if (isMobile) {
+      router.push(`/dashboard/admin/products/edit/${product.id}`);
+    } else {
+      setSelectedProduct(product);
+      setDialogOpen(true);
+    }
   };
 
   const handleAdd = () => {
-    setSelectedProduct(undefined);
-    setDialogOpen(true);
+    if (isMobile) {
+      router.push('/dashboard/admin/products/new');
+    } else {
+      setSelectedProduct(undefined);
+      setDialogOpen(true);
+    }
   };
 
   const handleDelete = async (productId: string) => {

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Loader2, TicketPercent, X } from 'lucide-react';
+import { MoreHorizontal, Loader2, TicketPercent } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,10 +33,14 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AdminCouponsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
+  const router = useRouter();
+  const isMobile = useIsMobile();
   
   const couponsCollection = useMemoFirebase(
     () => (firestore ? collection(firestore, 'coupons') : null),
@@ -48,13 +52,21 @@ export default function AdminCouponsPage() {
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | undefined>(undefined);
 
   const handleEdit = (coupon: Coupon) => {
-    setSelectedCoupon(coupon);
-    setDialogOpen(true);
+    if (isMobile) {
+      router.push(`/dashboard/admin/coupons/edit/${coupon.id}`);
+    } else {
+      setSelectedCoupon(coupon);
+      setDialogOpen(true);
+    }
   };
 
   const handleAdd = () => {
-    setSelectedCoupon(undefined);
-    setDialogOpen(true);
+    if (isMobile) {
+      router.push('/dashboard/admin/coupons/new');
+    } else {
+      setSelectedCoupon(undefined);
+      setDialogOpen(true);
+    }
   };
 
   const handleDelete = async (couponId: string) => {
@@ -200,5 +212,3 @@ export default function AdminCouponsPage() {
     </Dialog>
   );
 }
-
-    
