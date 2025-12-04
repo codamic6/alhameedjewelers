@@ -32,13 +32,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 export default function AdminOrdersPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   const ordersQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'orders')) : null),
@@ -84,8 +84,11 @@ export default function AdminOrdersPage() {
       if (order.orderDate instanceof Timestamp) {
           return order.orderDate.toDate();
       }
-      // Fallback for string or other formats if necessary, though timestamp is expected
       return new Date(order.orderDate);
+  }
+
+  const toggleOrderDetails = (orderId: string) => {
+    setExpandedOrderId(currentId => currentId === orderId ? null : orderId);
   }
 
 
@@ -146,8 +149,7 @@ export default function AdminOrdersPage() {
           {/* Responsive Layout: Cards on mobile, Table on desktop */}
           <div className="md:hidden space-y-4">
             {orders?.map(order => (
-              <Collapsible key={order.id} asChild>
-                <Card>
+              <Card key={order.id}>
                     <div className="flex items-center">
                         <div className="flex-1">
                              <CardHeader>
@@ -186,18 +188,13 @@ export default function AdminOrdersPage() {
                                 </div>
                             </CardContent>
                         </div>
-                        <CollapsibleTrigger asChild>
-                             <Button variant="ghost" className="mr-4">
-                                <ChevronDown className="h-5 w-5 transition-transform data-[state=open]:rotate-180" />
-                                <span className="sr-only">Toggle details</span>
-                             </Button>
-                        </CollapsibleTrigger>
+                         <Button variant="ghost" className="mr-4" onClick={() => toggleOrderDetails(order.id)}>
+                            <ChevronDown className={cn("h-5 w-5 transition-transform", expandedOrderId === order.id && "rotate-180")} />
+                            <span className="sr-only">Toggle details</span>
+                         </Button>
                     </div>
-                    <CollapsibleContent>
-                       <OrderDetails order={order} />
-                    </CollapsibleContent>
+                    {expandedOrderId === order.id && <OrderDetails order={order} />}
                 </Card>
-              </Collapsible>
             ))}
           </div>
 
@@ -215,16 +212,13 @@ export default function AdminOrdersPage() {
               </TableHeader>
               <TableBody>
               {orders?.map(order => (
-                    <Collapsible asChild key={order.id}>
-                      <React.Fragment>
+                    <React.Fragment key={order.id}>
                         <TableRow>
                             <TableCell>
-                                <CollapsibleTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                        <ChevronDown className="h-5 w-5 transition-transform data-[state=open]:rotate-180" />
-                                        <span className="sr-only">Toggle details for order {order.id}</span>
-                                    </Button>
-                                </CollapsibleTrigger>
+                                <Button variant="ghost" size="icon" onClick={() => toggleOrderDetails(order.id)}>
+                                    <ChevronDown className={cn("h-5 w-5 transition-transform", expandedOrderId === order.id && "rotate-180")} />
+                                    <span className="sr-only">Toggle details for order {order.id}</span>
+                                </Button>
                             </TableCell>
                             <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
                             <TableCell>{customerMap.get(order.userId) || 'N/A'}</TableCell>
@@ -261,15 +255,14 @@ export default function AdminOrdersPage() {
                             ${order.totalAmount.toLocaleString()}
                             </TableCell>
                         </TableRow>
-                        <CollapsibleContent asChild>
+                        {expandedOrderId === order.id && (
                           <TableRow>
                             <TableCell colSpan={6} className="p-0">
                                 <OrderDetails order={order} />
                             </TableCell>
                           </TableRow>
-                        </CollapsibleContent>
+                        )}
                     </React.Fragment>
-                </Collapsible>
               ))}
               </TableBody>
             </Table>
