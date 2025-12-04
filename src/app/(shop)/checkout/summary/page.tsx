@@ -3,7 +3,7 @@
 
 import { useCart } from '@/hooks/use-cart';
 import { useUser, useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -68,7 +68,15 @@ export default function SummaryPage() {
     };
 
     try {
-      const ordersRef = collection(firestore, 'users', user.uid, 'orders');
+      // Increment coupon usage if a coupon was applied
+      if (coupon) {
+          const couponRef = doc(firestore, 'coupons', coupon.id);
+          await updateDoc(couponRef, {
+              timesUsed: increment(1)
+          });
+      }
+
+      const ordersRef = collection(firestore, 'orders'); // Placing orders in a top-level collection now
       const docRef = await addDoc(ordersRef, orderData);
       
       toast({
@@ -202,3 +210,5 @@ export default function SummaryPage() {
     </PageTransition>
   );
 }
+
+    

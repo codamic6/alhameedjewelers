@@ -244,6 +244,14 @@
             "type": "string"
           },
           "description": "Array of product IDs to which the coupon applies. An empty array means it applies to all products."
+        },
+        "usageLimit": {
+          "type": "number",
+          "description": "Maximum number of times the coupon can be used. 0 means unlimited."
+        },
+        "timesUsed": {
+          "type": "number",
+          "description": "Number of times the coupon has been used."
         }
       },
       "required": [
@@ -251,7 +259,9 @@
         "code",
         "discountPercentage",
         "startDate",
-        "endDate"
+        "endDate",
+        "usageLimit",
+        "timesUsed"
       ]
     }
   },

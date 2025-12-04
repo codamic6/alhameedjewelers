@@ -36,6 +36,7 @@ const couponSchema = z.object({
   startDate: z.date({ required_error: 'Start date is required.' }),
   endDate: z.date({ required_error: 'End date is required.' }),
   applicableProductIds: z.array(z.string()).optional(),
+  usageLimit: z.coerce.number().min(0, 'Usage limit cannot be negative.'),
 });
 
 type CouponFormProps = {
@@ -66,6 +67,7 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
           startDate: coupon.startDate.toDate(),
           endDate: coupon.endDate.toDate(),
           applicableProductIds: coupon.applicableProductIds || [],
+          usageLimit: coupon.usageLimit || 0,
         }
       : {
           code: '',
@@ -73,6 +75,7 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
           startDate: undefined,
           endDate: undefined,
           applicableProductIds: [],
+          usageLimit: 0,
         },
   });
 
@@ -99,7 +102,9 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
       code: values.code.toUpperCase(),
       startDate: Timestamp.fromDate(values.startDate),
       endDate: Timestamp.fromDate(values.endDate),
-      applicableProductIds: values.applicableProductIds || []
+      applicableProductIds: values.applicableProductIds || [],
+      usageLimit: values.usageLimit,
+      timesUsed: coupon?.timesUsed || 0, // Keep existing usage count on update
     };
 
     try {
@@ -152,6 +157,20 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
             )}
           />
         </div>
+         <FormField
+            control={form.control}
+            name="usageLimit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Usage Limit</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="0" {...field} />
+                </FormControl>
+                <FormDescription>The maximum number of times this coupon can be used. Leave 0 for unlimited.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
@@ -308,3 +327,5 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
   );
 }
 
+
+    

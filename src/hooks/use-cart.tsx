@@ -75,7 +75,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (storedCoupon) {
             const parsedCoupon = JSON.parse(storedCoupon);
             // Firestore Timestamps are not plain objects, need to convert them back
-            if (parsedCoupon.startDate && parsedCoupon.endDate) {
+            if (parsedCoupon.startDate?.seconds && parsedCoupon.endDate?.seconds) {
               setCoupon({
                   ...parsedCoupon,
                   startDate: new Timestamp(parsedCoupon.startDate.seconds, parsedCoupon.startDate.nanoseconds),
@@ -174,6 +174,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             return;
         }
 
+        if (couponData.usageLimit > 0 && couponData.timesUsed >= couponData.usageLimit) {
+            toast({ variant: "destructive", title: "Coupon Limit Reached", description: "This coupon has been fully used." });
+            return;
+        }
+
         setCoupon(couponData);
         toast({
             title: "Coupon Applied!",
@@ -255,3 +260,5 @@ export const useCart = () => {
   }
   return context;
 };
+
+    

@@ -38,6 +38,10 @@ export type Coupon = {
   startDate: Timestamp;
   endDate: Timestamp;
   applicableProductIds: string[];
+  usageLimit: number;
+  timesUsed: number;
 };
+
+    
 
     
