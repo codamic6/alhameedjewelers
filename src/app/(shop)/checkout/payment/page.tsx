@@ -104,11 +104,12 @@ export default function PaymentPage() {
                 </div>
               </Label>
             </RadioGroup>
-            <div className="flex justify-between pt-6 mt-4 border-t">
+            <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between pt-6 mt-4 border-t">
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => router.back()}
+                className="w-full md:w-auto"
               >
                 <ArrowLeft className="mr-2 h-5 w-5" />
                 Back
