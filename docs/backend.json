@@ -252,6 +252,14 @@
         "timesUsed": {
           "type": "number",
           "description": "Number of times the coupon has been used."
+        },
+        "minimumOrderValue": {
+          "type": "number",
+          "description": "The minimum order value required to use the coupon. 0 means no minimum."
+        },
+        "minimumItemCount": {
+          "type": "number",
+          "description": "The minimum number of items required in the cart to use the coupon. 0 means no minimum."
         }
       },
       "required": [

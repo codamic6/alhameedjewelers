@@ -43,4 +43,8 @@ export type Coupon = {
   applicableProductIds: string[];
   usageLimit: number;
   timesUsed: number;
+  minimumOrderValue?: number;
+  minimumItemCount?: number;
 };
+
+    

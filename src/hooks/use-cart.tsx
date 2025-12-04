@@ -179,6 +179,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             return;
         }
 
+        const currentCartTotal = cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+        if ((couponData.minimumOrderValue || 0) > 0 && currentCartTotal < couponData.minimumOrderValue!) {
+            toast({ variant: "destructive", title: "Minimum Order Value Not Met", description: `You need to spend at least $${couponData.minimumOrderValue} to use this coupon.` });
+            return;
+        }
+        
+        const currentCartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+        if ((couponData.minimumItemCount || 0) > 0 && currentCartCount < couponData.minimumItemCount!) {
+            toast({ variant: "destructive", title: "Minimum Item Count Not Met", description: `You need at least ${couponData.minimumItemCount} items in your cart to use this coupon.` });
+            return;
+        }
+
         setCoupon(couponData);
         toast({
             title: "Coupon Applied!",

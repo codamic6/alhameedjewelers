@@ -37,6 +37,8 @@ const couponSchema = z.object({
   endDate: z.date({ required_error: 'End date is required.' }),
   applicableProductIds: z.array(z.string()).optional(),
   usageLimit: z.coerce.number().min(0, 'Usage limit cannot be negative.'),
+  minimumOrderValue: z.coerce.number().min(0, 'Minimum value must be positive.').optional(),
+  minimumItemCount: z.coerce.number().min(0, 'Minimum items must be positive.').optional(),
 });
 
 type CouponFormProps = {
@@ -68,6 +70,8 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
           endDate: coupon.endDate.toDate(),
           applicableProductIds: coupon.applicableProductIds || [],
           usageLimit: coupon.usageLimit || 0,
+          minimumOrderValue: coupon.minimumOrderValue || 0,
+          minimumItemCount: coupon.minimumItemCount || 0,
         }
       : {
           code: '',
@@ -76,6 +80,8 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
           endDate: undefined,
           applicableProductIds: [],
           usageLimit: 0,
+          minimumOrderValue: 0,
+          minimumItemCount: 0,
         },
   });
 
@@ -104,6 +110,8 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
       endDate: Timestamp.fromDate(values.endDate),
       applicableProductIds: values.applicableProductIds || [],
       usageLimit: values.usageLimit,
+      minimumOrderValue: values.minimumOrderValue || 0,
+      minimumItemCount: values.minimumItemCount || 0,
       timesUsed: coupon?.timesUsed || 0, // Keep existing usage count on update
     };
 
@@ -126,10 +134,10 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
     }
   };
   
-  type NumberFieldName = "discountPercentage" | "usageLimit";
+  type NumberFieldName = "discountPercentage" | "usageLimit" | "minimumOrderValue" | "minimumItemCount";
 
   const handleNumberChange = (name: NumberFieldName, change: number) => {
-      const currentValue = form.getValues(name);
+      const currentValue = form.getValues(name) || 0;
       const newValue = currentValue + change;
       if (newValue >= 0) {
         form.setValue(name, newValue, { shouldValidate: true });
@@ -176,6 +184,56 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
               </FormItem>
             )}
           />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <FormField
+                control={form.control}
+                name="minimumOrderValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Minimum Order Value ($)</FormLabel>
+                    <FormControl>
+                       <div className="relative">
+                            <Input type="number" placeholder="0" {...field} className="pr-12" />
+                            <div className="absolute inset-y-0 right-0 flex items-center">
+                                 <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-r-none" onClick={() => handleNumberChange('minimumOrderValue', -5)} tabIndex={-1}>
+                                    <Minus className="h-4 w-4" />
+                                </Button>
+                                 <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-l-none" onClick={() => handleNumberChange('minimumOrderValue', 5)} tabIndex={-1}>
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </FormControl>
+                    <FormDescription>Minimum cart total to apply coupon. 0 for no minimum.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="minimumItemCount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Minimum Item Count</FormLabel>
+                    <FormControl>
+                       <div className="relative">
+                            <Input type="number" placeholder="0" {...field} className="pr-12" />
+                            <div className="absolute inset-y-0 right-0 flex items-center">
+                                 <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-r-none" onClick={() => handleNumberChange('minimumItemCount', -1)} tabIndex={-1}>
+                                    <Minus className="h-4 w-4" />
+                                </Button>
+                                 <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-l-none" onClick={() => handleNumberChange('minimumItemCount', 1)} tabIndex={-1}>
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </FormControl>
+                     <FormDescription>Minimum number of items in cart. 0 for no minimum.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
         </div>
          <FormField
             control={form.control}
@@ -357,3 +415,5 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
     </Form>
   );
 }
+
+    
