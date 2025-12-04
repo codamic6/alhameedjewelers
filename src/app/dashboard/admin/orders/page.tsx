@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Loader2, ChevronDown } from 'lucide-react';
+import { MoreHorizontal, Loader2, ChevronDown, User, Truck, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -84,7 +84,9 @@ export default function AdminOrdersPage() {
       if (order.orderDate instanceof Timestamp) {
           return order.orderDate.toDate();
       }
-      return new Date(order.orderDate);
+      // Handle cases where orderDate might be a string if not converted
+      const date = new Date(order.orderDate);
+      return isNaN(date.getTime()) ? new Date() : date;
   }
 
   const toggleOrderDetails = (orderId: string) => {
@@ -100,35 +102,71 @@ export default function AdminOrdersPage() {
     );
   }
 
-  const OrderDetails = ({ order }: { order: Order }) => (
-    <div className="bg-background/50 p-4 space-y-3">
-        <h4 className="font-semibold text-sm text-primary">Order Items</h4>
-        {order.items.map((item, index) => (
-            <div key={index} className="flex justify-between items-center text-sm">
-                <div>
-                    <p className="font-medium text-white">{item.productName}</p>
-                    <p className="text-muted-foreground">Qty: {item.quantity}</p>
+  const OrderDetails = ({ order }: { order: Order }) => {
+    const shipping = order.shippingAddress;
+    return (
+        <div className="bg-background/50 p-4 space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+                 {/* Shipping Details */}
+                <div className="space-y-3">
+                    <h4 className="font-semibold text-sm text-primary flex items-center gap-2"><Truck className="h-4 w-4"/> Shipping To</h4>
+                    {shipping ? (
+                        <div className="text-sm text-muted-foreground bg-secondary/30 p-3 rounded-md">
+                            <p className="font-semibold text-white">{shipping.firstName} {shipping.lastName}</p>
+                            <p>{shipping.address}, {shipping.city}, {shipping.postalCode}</p>
+                            <p>{shipping.country}</p>
+                            <Separator className="my-2"/>
+                            <p>Email: {shipping.email}</p>
+                            <p>Phone: {shipping.phone}</p>
+                        </div>
+                    ) : <p>No shipping address available.</p>}
                 </div>
-                <p className="font-mono text-muted-foreground">${(item.itemPrice * item.quantity).toLocaleString()}</p>
+                 {/* Order Items */}
+                <div className="space-y-3">
+                    <h4 className="font-semibold text-sm text-primary">Order Items</h4>
+                    {order.items.map((item, index) => (
+                        <div key={index} className="flex justify-between items-center text-sm">
+                            <div>
+                                <p className="font-medium text-white">{item.productName}</p>
+                                <p className="text-muted-foreground">Qty: {item.quantity}</p>
+                            </div>
+                            <p className="font-mono text-muted-foreground">${(item.itemPrice * item.quantity).toLocaleString()}</p>
+                        </div>
+                    ))}
+                </div>
             </div>
-        ))}
-         <Separator className="my-2"/>
-         <div className="flex justify-end text-sm space-x-4 pr-1">
-             <span>Subtotal:</span>
-             <span className="font-semibold">${order.subTotal.toLocaleString()}</span>
-         </div>
-         {order.couponDiscount > 0 && (
-             <div className="flex justify-end text-sm space-x-4 pr-1 text-green-400">
-                <span>Discount ({order.couponCode}):</span>
-                <span className="font-semibold">-${order.couponDiscount.toLocaleString()}</span>
-            </div>
-         )}
-         <div className="flex justify-end font-bold text-base space-x-4 pr-1">
-             <span>Total:</span>
-             <span className="text-primary">${order.totalAmount.toLocaleString()}</span>
-         </div>
-    </div>
-);
+             <Separator className="my-4"/>
+             <div className="grid md:grid-cols-2 gap-6">
+                  {/* Payment Method */}
+                 <div className="space-y-3">
+                    <h4 className="font-semibold text-sm text-primary flex items-center gap-2"><CreditCard className="h-4 w-4"/> Payment Method</h4>
+                    <div className="text-sm text-muted-foreground bg-secondary/30 p-3 rounded-md">
+                        <p className="font-semibold text-white">{order.paymentMethod}</p>
+                        <p>Payment to be collected upon delivery.</p>
+                    </div>
+                </div>
+                {/* Totals */}
+                <div className="space-y-2 text-sm">
+                     <div className="flex justify-between items-center">
+                         <span>Subtotal:</span>
+                         <span className="font-semibold">${order.subTotal.toLocaleString()}</span>
+                     </div>
+                     {order.couponDiscount > 0 && (
+                         <div className="flex justify-between items-center text-green-400">
+                            <span>Discount ({order.couponCode}):</span>
+                            <span className="font-semibold">-${order.couponDiscount.toLocaleString()}</span>
+                        </div>
+                     )}
+                     <Separator className="my-2"/>
+                     <div className="flex justify-between items-center font-bold text-base">
+                         <span>Grand Total:</span>
+                         <span className="text-primary">${order.totalAmount.toLocaleString()}</span>
+                     </div>
+                </div>
+             </div>
+        </div>
+    );
+  };
 
 
   return (
@@ -149,46 +187,46 @@ export default function AdminOrdersPage() {
           {/* Responsive Layout: Cards on mobile, Table on desktop */}
           <div className="md:hidden space-y-4">
             {orders?.map(order => (
-              <Card key={order.id}>
-                    <div className="flex items-center">
-                        <div className="flex-1">
-                             <CardHeader>
-                                <CardTitle className="text-base">Order #{order.id.substring(0, 7)}</CardTitle>
+              <Card key={order.id} className="overflow-hidden">
+                    <div className="flex items-start p-4">
+                        <div className="flex-1 space-y-3">
+                            <div>
+                                <CardTitle className="text-lg">Order #{order.id.substring(0, 7)}</CardTitle>
                                 <CardDescription>{getOrderDate(order).toLocaleDateString()}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-2 text-sm pb-4">
-                                <p><span className="font-semibold text-muted-foreground">Customer:</span> {customerMap.get(order.userId) || 'N/A'}</p>
-                                <p><span className="font-semibold text-muted-foreground">Total:</span> ${order.totalAmount.toLocaleString()}</p>
-                                <div className="flex items-center gap-2">
-                                    <span className="font-semibold text-muted-foreground">Status:</span>
-                                    <Select
-                                    value={order.status}
-                                    onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
+                            </div>
+                            <div className="text-sm space-y-1">
+                                <p className="flex items-center gap-2 text-muted-foreground"><User className="h-4 w-4"/> {customerMap.get(order.userId) || 'N/A'}</p>
+                                <p className="font-semibold text-white">Total: ${order.totalAmount.toLocaleString()}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="font-semibold text-muted-foreground text-sm">Status:</span>
+                                <Select
+                                value={order.status}
+                                onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
+                                >
+                                <SelectTrigger className="w-auto h-auto p-0 bg-transparent border-none focus:ring-0 shadow-none">
+                                    <Badge
+                                    variant={getBadgeVariant(order.status)}
+                                    className={cn(
+                                        'justify-center',
+                                        order.status === 'Delivered' && 'bg-green-600/80 text-white',
+                                        order.status === 'Shipped' && 'bg-blue-500/80 text-white',
+                                        order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
+                                    )}
                                     >
-                                    <SelectTrigger className="w-auto h-auto p-0 bg-transparent border-none focus:ring-0 shadow-none">
-                                        <Badge
-                                        variant={getBadgeVariant(order.status)}
-                                        className={cn(
-                                            'justify-center',
-                                            order.status === 'Delivered' && 'bg-green-600/80 text-white',
-                                            order.status === 'Shipped' && 'bg-blue-500/80 text-white',
-                                            order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
-                                        )}
-                                        >
-                                        {order.status}
-                                        </Badge>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Pending">Pending</SelectItem>
-                                        <SelectItem value="Shipped">Shipped</SelectItem>
-                                        <SelectItem value="Delivered">Delivered</SelectItem>
-                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                    </SelectContent>
-                                    </Select>
-                                </div>
-                            </CardContent>
+                                    {order.status}
+                                    </Badge>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Pending">Pending</SelectItem>
+                                    <SelectItem value="Shipped">Shipped</SelectItem>
+                                    <SelectItem value="Delivered">Delivered</SelectItem>
+                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                         <Button variant="ghost" className="mr-4" onClick={() => toggleOrderDetails(order.id)}>
+                         <Button variant="ghost" size="icon" onClick={() => toggleOrderDetails(order.id)}>
                             <ChevronDown className={cn("h-5 w-5 transition-transform", expandedOrderId === order.id && "rotate-180")} />
                             <span className="sr-only">Toggle details</span>
                          </Button>
@@ -213,7 +251,7 @@ export default function AdminOrdersPage() {
               <TableBody>
               {orders?.map(order => (
                     <React.Fragment key={order.id}>
-                        <TableRow>
+                        <TableRow className={cn(expandedOrderId === order.id && "border-b-0")}>
                             <TableCell>
                                 <Button variant="ghost" size="icon" onClick={() => toggleOrderDetails(order.id)}>
                                     <ChevronDown className={cn("h-5 w-5 transition-transform", expandedOrderId === order.id && "rotate-180")} />
@@ -255,8 +293,8 @@ export default function AdminOrdersPage() {
                             ${order.totalAmount.toLocaleString()}
                             </TableCell>
                         </TableRow>
-                        {expandedOrderId === order.id && (
-                          <TableRow>
+                         {expandedOrderId === order.id && (
+                          <TableRow className="bg-background hover:bg-background">
                             <TableCell colSpan={6} className="p-0">
                                 <OrderDetails order={order} />
                             </TableCell>
