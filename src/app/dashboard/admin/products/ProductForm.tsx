@@ -102,7 +102,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
             <FormItem>
               <FormLabel>Product Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Ornate Gold Necklace" {...field} />
+                <Input placeholder="Ornate Gold Necklace" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
