@@ -3,24 +3,24 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore } from 'firebase/firestore';
 
-// IMPORTANT: DO NOT MODIFY THIS FUNCTION
-export function initializeFirebase() {
-  if (getApps().length > 0) {
-    return getSdks(getApp());
-  }
-  
-  const firebaseApp = initializeApp(firebaseConfig);
-  return getSdks(firebaseApp);
+function getSdks(app: FirebaseApp) {
+  return {
+    firebaseApp: app,
+    auth: getAuth(app),
+    firestore: getFirestore(app),
+  };
 }
 
-export function getSdks(firebaseApp: FirebaseApp) {
-  return {
-    firebaseApp,
-    auth: getAuth(firebaseApp),
-    firestore: getFirestore(firebaseApp)
-  };
+export function initializeFirebase() {
+  if (getApps().length) {
+    const app = getApp();
+    return getSdks(app);
+  } else {
+    const app = initializeApp(firebaseConfig);
+    return getSdks(app);
+  }
 }
 
 export * from './provider';
