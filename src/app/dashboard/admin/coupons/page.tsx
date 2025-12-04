@@ -77,7 +77,7 @@ export default function AdminCouponsPage() {
         try {
             await deleteDoc(doc(firestore, 'coupons', couponId));
             toast({ title: "Coupon Deleted", description: "The coupon has been successfully deleted."});
-        } catch (error: any) => {
+        } catch (error: any) {
             toast({ variant: 'destructive', title: "Error", description: error.message });
         }
      }
