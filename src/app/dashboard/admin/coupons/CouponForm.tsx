@@ -19,7 +19,7 @@ import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Coupon, Product } from '@/lib/types';
-import { Loader2, Calendar as CalendarIcon, X } from 'lucide-react';
+import { Loader2, Calendar as CalendarIcon, X, Plus, Minus, ChevronsUpDown } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -125,6 +125,16 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
         setIsSubmitting(false);
     }
   };
+  
+  type NumberFieldName = "discountPercentage" | "usageLimit";
+
+  const handleNumberChange = (name: NumberFieldName, change: number) => {
+      const currentValue = form.getValues(name);
+      const newValue = currentValue + change;
+      if (newValue >= 0) {
+        form.setValue(name, newValue, { shouldValidate: true });
+      }
+  };
 
   return (
     <Form {...form}>
@@ -150,7 +160,17 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
               <FormItem>
                 <FormLabel>Discount (%)</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="10" {...field} />
+                    <div className="relative">
+                        <Input type="number" placeholder="10" {...field} className="pr-12" />
+                         <div className="absolute inset-y-0 right-0 flex items-center">
+                            <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-r-none" onClick={() => handleNumberChange('discountPercentage', -1)} tabIndex={-1}>
+                                <Minus className="h-4 w-4" />
+                            </Button>
+                             <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-l-none" onClick={() => handleNumberChange('discountPercentage', 1)} tabIndex={-1}>
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -164,7 +184,17 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
               <FormItem>
                 <FormLabel>Usage Limit</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
+                   <div className="relative">
+                        <Input type="number" placeholder="0" {...field} className="pr-12" />
+                        <div className="absolute inset-y-0 right-0 flex items-center">
+                             <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-r-none" onClick={() => handleNumberChange('usageLimit', -1)} tabIndex={-1}>
+                                <Minus className="h-4 w-4" />
+                            </Button>
+                             <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-l-none" onClick={() => handleNumberChange('usageLimit', 1)} tabIndex={-1}>
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
                 </FormControl>
                 <FormDescription>The maximum number of times this coupon can be used. Leave 0 for unlimited.</FormDescription>
                 <FormMessage />
@@ -272,15 +302,16 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
                                 <Button
                                     variant="outline"
                                     role="combobox"
-                                    className="w-full justify-between h-auto min-h-10"
+                                    className={cn("w-full justify-between h-auto min-h-10", selectedProducts.length === 0 && "text-muted-foreground font-normal")}
                                 >
                                     <div className="flex-wrap flex gap-1 items-center">
                                         {selectedProducts.length > 0 ? selectedProducts.map(p => (
                                             <Badge key={p.id} variant="secondary" className="gap-1">
                                                 {p.name}
                                             </Badge>
-                                        )) : <span className="text-muted-foreground font-normal">Select products...</span>}
+                                        )) : "Select products..."}
                                     </div>
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                             </FormControl>
                         </PopoverTrigger>
@@ -326,6 +357,3 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
     </Form>
   );
 }
-
-
-    
