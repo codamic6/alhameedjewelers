@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -42,6 +42,14 @@ export default function OrdersPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight text-primary">
@@ -61,44 +69,83 @@ export default function OrdersPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile View: Card List */}
+              <div className="md:hidden space-y-4">
                 {userOrders?.map(order => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
-                    <TableCell>
-                      {new Date(order.orderDate).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={getBadgeVariant(order.status)}
-                        className={cn(
-                          order.status === 'Delivered' &&
-                            'bg-green-600/80 text-white',
-                          order.status === 'Shipped' &&
-                            'bg-blue-500/80 text-white',
-                          order.status === 'Pending' &&
-                            'text-yellow-400 border-yellow-400'
-                        )}
-                      >
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ${order.totalAmount.toLocaleString()}
-                    </TableCell>
-                  </TableRow>
+                  <Card key={order.id} className="bg-secondary/50">
+                    <CardHeader>
+                      <CardTitle className="text-base flex justify-between">
+                        <span>Order ID</span>
+                        <span className="font-mono text-sm text-muted-foreground">{order.id.substring(0, 7)}...</span>
+                      </CardTitle>
+                      <CardDescription>{new Date(order.orderDate).toLocaleDateString()}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                       <div className="flex justify-between items-center">
+                         <span className="text-muted-foreground">Status</span>
+                         <Badge
+                            variant={getBadgeVariant(order.status)}
+                            className={cn(
+                              order.status === 'Delivered' && 'bg-green-600/80 text-white',
+                              order.status === 'Shipped' && 'bg-blue-500/80 text-white',
+                              order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
+                            )}
+                          >
+                            {order.status}
+                          </Badge>
+                       </div>
+                       <div className="flex justify-between items-center">
+                         <span className="text-muted-foreground">Total</span>
+                         <span className="font-semibold text-white">${order.totalAmount.toLocaleString()}</span>
+                       </div>
+                    </CardContent>
+                  </Card>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+
+              {/* Desktop View: Table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {userOrders?.map(order => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
+                        <TableCell>
+                          {new Date(order.orderDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={getBadgeVariant(order.status)}
+                            className={cn(
+                              order.status === 'Delivered' &&
+                                'bg-green-600/80 text-white',
+                              order.status === 'Shipped' &&
+                                'bg-blue-500/80 text-white',
+                              order.status === 'Pending' &&
+                                'text-yellow-400 border-yellow-400'
+                            )}
+                          >
+                            {order.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ${order.totalAmount.toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
