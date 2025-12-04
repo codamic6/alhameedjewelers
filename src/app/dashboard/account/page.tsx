@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -145,7 +146,7 @@ export default function AccountPage() {
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Hassan" {...field} />
+                        <Input placeholder="First Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -158,7 +159,7 @@ export default function AccountPage() {
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ali" {...field} />
+                        <Input placeholder="Last Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
