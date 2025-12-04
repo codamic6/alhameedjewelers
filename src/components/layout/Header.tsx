@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ADMIN_EMAIL } from '@/lib/constants';
 import Search from '../Search';
 import { mainNav, adminNav } from './DashboardSidebar';
+import { Separator } from '../ui/separator';
 
 const topNavLinks = [
   { href: '/', label: 'Home' },
@@ -72,16 +73,17 @@ export default function Header() {
     }
   };
 
-  const NavLinks = () => (
+  const NavLinks = ({ inSheet = false }: { inSheet?: boolean }) => (
     <>
       {topNavLinks.map(link => (
         <Link
           key={link.href}
           href={link.href}
           className={cn(
-            'text-sm font-medium transition-colors hover:text-primary',
+            'font-medium transition-colors hover:text-primary',
             'font-body',
-            pathname === link.href ? 'text-primary' : 'text-white'
+            pathname === link.href ? 'text-primary' : 'text-white',
+            inSheet ? 'text-lg py-2' : 'text-sm',
           )}
           onClick={() => setIsMobileMenuOpen(false)}
         >
@@ -100,7 +102,7 @@ export default function Header() {
         </Button>
        </SheetTrigger>
        <SheetContent side="left" className="sm:max-w-xs">
-        <SheetTitle className="sr-only">Dashboard Menu</SheetTitle>
+         <SheetTitle className="sr-only">Dashboard Menu</SheetTitle>
           <nav className="grid gap-6 text-lg font-medium">
              <Link href="/" className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base">
                 <Gem className="h-5 w-5 transition-all group-hover:scale-110" />
@@ -136,15 +138,52 @@ export default function Header() {
            {isDashboard ? (
              <DashboardMobileNav />
            ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle mobile menu"
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5 text-primary" /> : <Menu className="h-5 w-5 text-primary" />}
-            </Button>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  aria-label="Toggle mobile menu"
+                >
+                  <Menu className="h-5 w-5 text-primary" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+                <nav className="flex flex-col gap-4 p-4">
+                  <NavLinks inSheet={true} />
+                  <Separator className="bg-border/50 my-2" />
+                   {user ? (
+                      <>
+                      <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                          <LayoutDashboard className="h-5 w-5" />
+                          Dashboard
+                      </Link>
+                      {isAdmin && (
+                          <Link href="/dashboard/admin" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                              <Shield className="h-5 w-5" />
+                              Admin Panel
+                          </Link>
+                      )}
+                      <button onClick={handleLogout} className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-left text-lg">
+                          <LogOut className="h-5 w-5" />
+                          Logout
+                      </button>
+                      </>
+                  ) : (
+                      <>
+                      <Link href="/login" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                          Log In
+                      </Link>
+                      <Link href="/signup" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                          Sign Up
+                      </Link>
+                      </>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
            )}
           <Link href="/" className="flex items-center gap-2">
             <Gem className="h-6 w-6 text-primary" />
@@ -220,41 +259,6 @@ export default function Header() {
 
         </div>
       </div>
-      {isMobileMenuOpen && !isDashboard && (
-        <div className="md:hidden bg-black border-t border-border">
-          <nav className="flex flex-col items-start gap-1 p-4">
-            <NavLinks />
-            <DropdownMenuSeparator className="bg-border/50 my-2" />
-            {user ? (
-                <>
-                 <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full">
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                 </Link>
-                 {isAdmin && (
-                     <Link href="/dashboard/admin" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full">
-                        <Shield className="h-4 w-4" />
-                        Admin Panel
-                     </Link>
-                 )}
-                 <button onClick={handleLogout} className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-left">
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                 </button>
-                </>
-            ) : (
-                <>
-                <Link href="/login" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full">
-                    Log In
-                 </Link>
-                 <Link href="/signup" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full">
-                    Sign Up
-                 </Link>
-                </>
-            )}
-          </nav>
-        </div>
-      )}
     </header>
   );
 }
