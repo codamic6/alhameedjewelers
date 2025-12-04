@@ -58,18 +58,18 @@ export default function Search() {
   return (
     <div className="relative w-full max-w-xl" ref={searchRef}>
       <div className="relative">
-        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
+        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search gold jewelry..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          className="w-full h-[48px] bg-[#111111] border border-[#2B2B2B] rounded-lg text-white placeholder:text-[#777777] pl-12 pr-10 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all duration-200 ease-in-out"
+          className="w-full h-10 bg-secondary border border-border rounded-full text-white placeholder:text-muted-foreground pl-12 pr-10 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_10px_rgba(212,175,55,0.2)] transition-all duration-200 ease-in-out"
         />
         {searchTerm && (
           <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-            <X className="h-5 w-5 text-primary" />
+            <X className="h-5 w-5 text-muted-foreground" />
           </button>
         )}
       </div>
@@ -81,7 +81,7 @@ export default function Search() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="absolute top-full mt-2 w-full bg-[#0A0A0A] rounded-lg border border-[#1A1A1A] shadow-lg overflow-hidden z-10 max-h-96 overflow-y-auto"
+            className="absolute top-full mt-2 w-full bg-secondary rounded-lg border border-border shadow-lg overflow-hidden z-10 max-h-96 overflow-y-auto"
           >
             {productsLoading && (
                 <div className="flex justify-center items-center h-20">
@@ -96,7 +96,7 @@ export default function Search() {
                         <li key={product.id}>
                             <Link
                             href={`/products/${product.slug}`}
-                            className="flex items-center p-3 h-[70px] hover:bg-[#1A1A1A] transition-colors duration-200 ease-in-out"
+                            className="flex items-center p-3 h-[70px] hover:bg-muted/50 transition-colors duration-200 ease-in-out"
                             >
                             {image && (
                                 <Image
