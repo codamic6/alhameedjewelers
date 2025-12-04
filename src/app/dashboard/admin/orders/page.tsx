@@ -163,7 +163,7 @@ export default function AdminOrdersPage() {
                                     value={order.status}
                                     onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
                                     >
-                                    <SelectTrigger className="w-auto h-auto p-0 bg-transparent border-none focus:ring-0">
+                                    <SelectTrigger className="w-auto h-auto p-0 bg-transparent border-none focus:ring-0 shadow-none">
                                         <Badge
                                         variant={getBadgeVariant(order.status)}
                                         className={cn(
@@ -213,15 +213,16 @@ export default function AdminOrdersPage() {
                   <TableHead className="text-right">Total</TableHead>
                 </TableRow>
               </TableHeader>
-              {orders?.map(order => (
-                <React.Fragment key={order.id}>
-                    <Collapsible asChild content={
-                         <TableRow>
-                            <TableCell colSpan={6} className="p-0">
-                                <OrderDetails order={order} />
-                            </TableCell>
-                        </TableRow>
-                    }>
+               <TableBody>
+                {orders?.map(order => (
+                  <Collapsible asChild key={order.id} content={
+                       <TableRow>
+                          <TableCell colSpan={6} className="p-0">
+                              <OrderDetails order={order} />
+                          </TableCell>
+                      </TableRow>
+                  }>
+                      <React.Fragment>
                         <TableRow>
                             <TableCell>
                                 <CollapsibleTrigger asChild>
@@ -266,12 +267,13 @@ export default function AdminOrdersPage() {
                             ${order.totalAmount.toLocaleString()}
                             </TableCell>
                         </TableRow>
-                    </Collapsible>
-                    <CollapsibleContent asChild>
-                        <></>
-                    </CollapsibleContent>
-              </React.Fragment>
-              ))}
+                         <CollapsibleContent asChild>
+                          <></>
+                        </CollapsibleContent>
+                      </React.Fragment>
+                  </Collapsible>
+                ))}
+              </TableBody>
             </Table>
           </div>
         </CardContent>
