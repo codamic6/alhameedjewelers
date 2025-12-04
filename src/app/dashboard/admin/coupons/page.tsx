@@ -133,66 +133,69 @@ export default function AdminCouponsPage() {
               <>
                  {/* Mobile View */}
                 <div className="md:hidden">
-                  <Accordion type="single" collapsible className="w-full">
+                   <Accordion type="single" collapsible className="w-full">
                     {coupons.map((coupon) => {
                       const status = getStatus(coupon);
                       return (
                         <AccordionItem value={coupon.id} key={coupon.id}>
-                          <div className="flex items-center justify-between w-full py-2">
-                              <AccordionTrigger className="flex-1 hover:no-underline pr-2 py-0">
-                                  <div className="text-left">
-                                    <Badge variant="secondary" className="text-base mb-1">{coupon.code}</Badge>
-                                    <p className="text-sm text-muted-foreground">{coupon.discountPercentage}% OFF</p>
-                                  </div>
-                              </AccordionTrigger>
-                              <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      aria-haspopup="true"
-                                      size="icon"
-                                      variant="ghost"
-                                      className="h-8 w-8"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <MoreHorizontal className="h-4 w-4" />
-                                      <span className="sr-only">Toggle menu</span>
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem onClick={(e) => {e.stopPropagation(); handleEdit(coupon)}}>
-                                      Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                      className="text-destructive"
-                                      onClick={(e) => {e.stopPropagation(); handleDelete(coupon.id)}}
-                                  >
-                                      Delete
-                                  </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                              </DropdownMenu>
-                          </div>
-                          <AccordionContent>
-                              <div className="text-sm space-y-2 pt-2 border-t border-dashed">
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Status</span>
-                                  <Badge className={cn("text-white", status.color)}>{status.text}</Badge>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Valid From</span>
-                                  <span>{format(coupon.startDate.toDate(), 'MMM d, yyyy')}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Valid Until</span>
-                                  <span>{format(coupon.endDate.toDate(), 'MMM d, yyyy')}</span>
+                          <div className="flex items-center w-full py-2">
+                            <AccordionTrigger className="flex-1 hover:no-underline py-0 pr-2">
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex-1 text-left">
+                                  <Badge variant="secondary" className="text-base mb-1">{coupon.code}</Badge>
+                                  <p className="text-sm text-muted-foreground">{coupon.discountPercentage}% OFF</p>
                                 </div>
                               </div>
+                            </AccordionTrigger>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  aria-haspopup="true"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8 shrink-0"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Toggle menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(coupon) }}>
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={(e) => { e.stopPropagation(); handleDelete(coupon.id) }}
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                          <AccordionContent>
+                            <div className="text-sm space-y-2 pt-2 border-t border-dashed">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Status</span>
+                                <Badge className={cn("text-white", status.color)}>{status.text}</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Valid From</span>
+                                <span>{format(coupon.startDate.toDate(), 'MMM d, yyyy')}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Valid Until</span>
+                                <span>{format(coupon.endDate.toDate(), 'MMM d, yyyy')}</span>
+                              </div>
+                            </div>
                           </AccordionContent>
                         </AccordionItem>
                       )
                     })}
                   </Accordion>
                 </div>
+
 
                 {/* Desktop View */}
                 <div className="hidden md:block">
@@ -288,4 +291,3 @@ export default function AdminCouponsPage() {
     </Dialog>
   );
 }
-
