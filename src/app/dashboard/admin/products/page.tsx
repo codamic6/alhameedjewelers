@@ -11,9 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Loader2, Edit, Trash2, ShoppingBag } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -99,98 +99,138 @@ export default function AdminProductsPage() {
             Add Product
           </Button>
         </div>
+        
+        <div className="mt-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : products && products.length > 0 ? (
+            <>
+              {/* Mobile View */}
+              <div className="md:hidden space-y-4">
+                {products.map((product) => {
+                  const image = PlaceHolderImages.find(p => p.id === product.imageId);
+                  return (
+                    <Card key={product.id} className="bg-secondary/50 overflow-hidden">
+                      <div className="flex items-start p-4 gap-4">
+                        {image && (
+                          <Image
+                            alt={product.name}
+                            className="aspect-square rounded-md object-cover"
+                            height="80"
+                            src={image.imageUrl}
+                            width="80"
+                            data-ai-hint={image.imageHint}
+                          />
+                        )}
+                        <div className="flex-1">
+                          <CardTitle className="text-lg text-primary">{product.name}</CardTitle>
+                          <Badge variant="outline" className="mt-1">{product.category}</Badge>
+                          <p className="font-semibold text-white mt-2">${product.price.toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <CardFooter className="bg-secondary/20 flex gap-2 p-2">
+                        <Button variant="outline" size="sm" className="w-full" onClick={() => handleEdit(product)}>
+                          <Edit className="mr-2 h-4 w-4" /> Edit
+                        </Button>
+                        <Button variant="destructive" size="sm" className="w-full" onClick={() => handleDelete(product.id)}>
+                           <Trash2 className="mr-2 h-4 w-4" /> Delete
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
 
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>All Products</CardTitle>
-            <CardDescription>
-              A list of all products in your store.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center items-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              {/* Desktop View */}
+              <div className="hidden md:block">
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="hidden w-[100px] sm:table-cell">
+                          <span className="sr-only">Image</span>
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead className="text-right">Price</TableHead>
+                        <TableHead>
+                          <span className="sr-only">Actions</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products?.map(product => {
+                        const image = PlaceHolderImages.find(
+                          img => img.id === product.imageId
+                        );
+                        return (
+                          <TableRow key={product.id}>
+                            <TableCell className="hidden sm:table-cell">
+                              {image && (
+                                <Image
+                                  alt={product.name}
+                                  className="aspect-square rounded-md object-cover"
+                                  height="64"
+                                  src={image.imageUrl}
+                                  width="64"
+                                  data-ai-hint={image.imageHint}
+                                />
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {product.name}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{product.category}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              ${product.price.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => handleEdit(product)}>
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => handleDelete(product.id)}
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </Card>
               </div>
-            ) : (
-              <div className="relative w-full overflow-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="hidden w-[100px] sm:table-cell">
-                        <span className="sr-only">Image</span>
-                      </TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead>
-                        <span className="sr-only">Actions</span>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products?.map(product => {
-                      const image = PlaceHolderImages.find(
-                        img => img.id === product.imageId
-                      );
-                      return (
-                        <TableRow key={product.id}>
-                          <TableCell className="hidden sm:table-cell">
-                            {image && (
-                              <Image
-                                alt={product.name}
-                                className="aspect-square rounded-md object-cover"
-                                height="64"
-                                src={image.imageUrl}
-                                width="64"
-                                data-ai-hint={image.imageHint}
-                              />
-                            )}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {product.name}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{product.category}</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            ${product.price.toLocaleString()}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  aria-haspopup="true"
-                                  size="icon"
-                                  variant="ghost"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Toggle menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => handleEdit(product)}>
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-destructive"
-                                  onClick={() => handleDelete(product.id)}
-                                >
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </>
+          ) : (
+             <div className="text-center py-10 border-2 border-dashed rounded-lg">
+              <ShoppingBag className="mx-auto h-12 w-12 text-muted-foreground"/>
+              <h3 className="mt-2 text-lg font-semibold text-white">No products yet</h3>
+              <p className="mt-1 text-sm text-muted-foreground">You haven't added any products. Get started by creating your first one.</p>
+              <Button className="mt-4" onClick={handleAdd}>Create Product</Button>
+            </div>
+          )}
+        </div>
       </div>
 
       <DialogContent className="sm:max-w-[625px]">
