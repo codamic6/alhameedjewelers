@@ -212,7 +212,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
             <FormItem>
               <FormLabel>Tags</FormLabel>
               <FormControl>
-                <>
+                <div>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {tags.map((tag) => (
                       <Badge key={tag} variant="secondary">
@@ -233,7 +233,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleTagKeyDown}
                   />
-                </>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -247,5 +247,3 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
     </Form>
   );
 }
-
-    
