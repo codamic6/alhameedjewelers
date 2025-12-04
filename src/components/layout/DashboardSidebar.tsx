@@ -68,10 +68,7 @@ export default function DashboardSidebar() {
   return (
     <div className="hidden border-r bg-muted/40 md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-          {/* This space is intentionally left blank to align with the header */}
-        </div>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pt-8">
           <div className="py-4">
             <h3 className="mx-4 mb-2 px-2 text-lg font-semibold tracking-tight">Account</h3>
             {renderNav(mainNav)}
