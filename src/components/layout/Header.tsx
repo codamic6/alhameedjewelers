@@ -23,7 +23,12 @@ import { ADMIN_EMAIL } from '@/lib/constants';
 import Search from '../Search';
 import { mainNav, adminNav } from './DashboardSidebar';
 
-const topNavLinks = [{ href: '/', label: 'Home' }];
+const topNavLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/products', label: 'Products' },
+  { href: '/help', label: 'Help' },
+  { href: '/faqs', label: 'FAQs' },
+];
 
 export default function Header() {
   const { cartCount } = useCart();
@@ -76,7 +81,7 @@ export default function Header() {
           className={cn(
             'text-sm font-medium transition-colors hover:text-primary',
             'font-body',
-            pathname === link.href ? 'text-primary underline' : 'text-white'
+            pathname === link.href ? 'text-primary' : 'text-white'
           )}
           onClick={() => setIsMobileMenuOpen(false)}
         >

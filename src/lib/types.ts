@@ -17,7 +17,8 @@ export type Order = {
   totalAmount: number;
   status: OrderStatus;
   shippingAddress: any;
-  items: { productId: string; quantity: number; itemPrice: number }[];
+  paymentMethod: string;
+  items: { productId: string; productName: string; quantity: number; itemPrice: number }[];
 };
 
 export type UserProfile = {
