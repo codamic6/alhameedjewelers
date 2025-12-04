@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
+import React from 'react';
 
 export default function AdminOrdersPage() {
   const firestore = useFirestore();
@@ -203,65 +204,72 @@ export default function AdminOrdersPage() {
                   <TableHead className="text-right">Total</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {orders?.map(order => (
-                  <Collapsible key={order.id} asChild>
-                    <>
-                        <TableRow>
-                            <TableCell>
-                                <CollapsibleTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                        <ChevronDown className="h-5 w-5 transition-transform data-[state=open]:rotate-180" />
-                                        <span className="sr-only">Toggle details</span>
-                                    </Button>
-                                </CollapsibleTrigger>
-                            </TableCell>
-                            <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
-                            <TableCell>{customerMap.get(order.userId) || 'N/A'}</TableCell>
-                            <TableCell>
-                            {new Date(order.orderDate).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                            <Select
-                                value={order.status}
-                                onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
-                            >
-                                <SelectTrigger className="w-[120px] h-8 text-xs">
-                                <Badge
-                                    variant={getBadgeVariant(order.status)}
-                                    className={cn(
-                                    'w-full justify-center',
-                                    order.status === 'Delivered' && 'bg-green-600/80 text-white',
-                                    order.status === 'Shipped' && 'bg-blue-500/80 text-white',
-                                    order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
-                                    )}
-                                >
-                                    {order.status}
-                                </Badge>
-                                </SelectTrigger>
-                                <SelectContent>
-                                <SelectItem value="Pending">Pending</SelectItem>
-                                <SelectItem value="Shipped">Shipped</SelectItem>
-                                <SelectItem value="Delivered">Delivered</SelectItem>
-                                <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            </TableCell>
-                            <TableCell className="text-right">
-                            ${order.totalAmount.toLocaleString()}
+              {orders?.map(order => (
+                <Collapsible asChild key={order.id}
+                content={
+                    <TableBody>
+                         <TableRow>
+                            <TableCell colSpan={6}>
+                                <OrderDetails order={order} />
                             </TableCell>
                         </TableRow>
-                        <CollapsibleContent asChild>
-                           <TableRow>
-                               <TableCell colSpan={6}>
-                                   <OrderDetails order={order} />
-                               </TableCell>
-                           </TableRow>
-                        </CollapsibleContent>
-                    </>
-                  </Collapsible>
-                ))}
-              </TableBody>
+                    </TableBody>
+                }>
+                    <TableBody>
+                    <TableRow>
+                        <TableCell>
+                            <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <ChevronDown className="h-5 w-5 transition-transform data-[state=open]:rotate-180" />
+                                    <span className="sr-only">Toggle details</span>
+                                </Button>
+                            </CollapsibleTrigger>
+                        </TableCell>
+                        <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
+                        <TableCell>{customerMap.get(order.userId) || 'N/A'}</TableCell>
+                        <TableCell>
+                        {new Date(order.orderDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                        <Select
+                            value={order.status}
+                            onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
+                        >
+                            <SelectTrigger className="w-[120px] h-8 text-xs">
+                            <Badge
+                                variant={getBadgeVariant(order.status)}
+                                className={cn(
+                                'w-full justify-center',
+                                order.status === 'Delivered' && 'bg-green-600/80 text-white',
+                                order.status === 'Shipped' && 'bg-blue-500/80 text-white',
+                                order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
+                                )}
+                            >
+                                {order.status}
+                            </Badge>
+                            </SelectTrigger>
+                            <SelectContent>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="Shipped">Shipped</SelectItem>
+                            <SelectItem value="Delivered">Delivered</SelectItem>
+                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                        ${order.totalAmount.toLocaleString()}
+                        </TableCell>
+                    </TableRow>
+                    <CollapsibleContent asChild>
+                       <TableRow>
+                           <TableCell colSpan={6} className="p-0">
+                               <OrderDetails order={order} />
+                           </TableCell>
+                       </TableRow>
+                    </CollapsibleContent>
+                    </TableBody>
+              </Collapsible>
+              ))}
             </Table>
           </div>
         </CardContent>
