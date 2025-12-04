@@ -15,7 +15,10 @@ export type OrderStatus = 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled';
 export type Order = {
   id: string;
   userId: string;
-  orderDate: string; // ISO string
+  orderDate: Timestamp | string; // Can be a timestamp or an ISO string initially
+  subTotal: number;
+  couponCode: string | null;
+  couponDiscount: number;
   totalAmount: number;
   status: OrderStatus;
   shippingAddress: any;
@@ -41,7 +44,3 @@ export type Coupon = {
   usageLimit: number;
   timesUsed: number;
 };
-
-    
-
-    

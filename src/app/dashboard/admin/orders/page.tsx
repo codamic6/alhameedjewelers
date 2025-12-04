@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -21,7 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, doc, updateDoc, query } from 'firebase/firestore';
+import { collection, doc, updateDoc, query, Timestamp } from 'firebase/firestore';
 import { Order, OrderStatus, UserProfile } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -33,7 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 export default function AdminOrdersPage() {
   const firestore = useFirestore();
@@ -74,10 +75,18 @@ export default function AdminOrdersPage() {
     }
   };
   
-  const customerMap = useMemoFirebase(() => {
+  const customerMap = useMemo(() => {
     if (!users) return new Map();
     return new Map(users.map(user => [user.id, `${user.firstName} ${user.lastName}`]));
   }, [users]);
+
+  const getOrderDate = (order: Order) => {
+      if (order.orderDate instanceof Timestamp) {
+          return order.orderDate.toDate();
+      }
+      // Fallback for string or other formats if necessary, though timestamp is expected
+      return new Date(order.orderDate);
+  }
 
 
   if (isLoading) {
@@ -143,7 +152,7 @@ export default function AdminOrdersPage() {
                         <div className="flex-1">
                              <CardHeader>
                                 <CardTitle className="text-base">Order #{order.id.substring(0, 7)}</CardTitle>
-                                <CardDescription>{new Date(order.orderDate).toLocaleDateString()}</CardDescription>
+                                <CardDescription>{getOrderDate(order).toLocaleDateString()}</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-2 text-sm pb-4">
                                 <p><span className="font-semibold text-muted-foreground">Customer:</span> {customerMap.get(order.userId) || 'N/A'}</p>
@@ -154,11 +163,11 @@ export default function AdminOrdersPage() {
                                     value={order.status}
                                     onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
                                     >
-                                    <SelectTrigger className="w-[120px] h-8 text-xs">
+                                    <SelectTrigger className="w-auto h-auto p-0 bg-transparent border-none focus:ring-0">
                                         <Badge
                                         variant={getBadgeVariant(order.status)}
                                         className={cn(
-                                            'w-full justify-center',
+                                            'justify-center',
                                             order.status === 'Delivered' && 'bg-green-600/80 text-white',
                                             order.status === 'Shipped' && 'bg-blue-500/80 text-white',
                                             order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
@@ -205,70 +214,63 @@ export default function AdminOrdersPage() {
                 </TableRow>
               </TableHeader>
               {orders?.map(order => (
-                <Collapsible asChild key={order.id}
-                content={
-                    <TableBody>
+                <React.Fragment key={order.id}>
+                    <Collapsible asChild content={
                          <TableRow>
-                            <TableCell colSpan={6}>
+                            <TableCell colSpan={6} className="p-0">
                                 <OrderDetails order={order} />
                             </TableCell>
                         </TableRow>
-                    </TableBody>
-                }>
-                    <TableBody>
-                    <TableRow>
-                        <TableCell>
-                            <CollapsibleTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                    <ChevronDown className="h-5 w-5 transition-transform data-[state=open]:rotate-180" />
-                                    <span className="sr-only">Toggle details</span>
-                                </Button>
-                            </CollapsibleTrigger>
-                        </TableCell>
-                        <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
-                        <TableCell>{customerMap.get(order.userId) || 'N/A'}</TableCell>
-                        <TableCell>
-                        {new Date(order.orderDate).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                        <Select
-                            value={order.status}
-                            onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
-                        >
-                            <SelectTrigger className="w-[120px] h-8 text-xs">
-                            <Badge
-                                variant={getBadgeVariant(order.status)}
-                                className={cn(
-                                'w-full justify-center',
-                                order.status === 'Delivered' && 'bg-green-600/80 text-white',
-                                order.status === 'Shipped' && 'bg-blue-500/80 text-white',
-                                order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
-                                )}
+                    }>
+                        <TableRow>
+                            <TableCell>
+                                <CollapsibleTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <ChevronDown className="h-5 w-5 transition-transform data-[state=open]:rotate-180" />
+                                        <span className="sr-only">Toggle details</span>
+                                    </Button>
+                                </CollapsibleTrigger>
+                            </TableCell>
+                            <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
+                            <TableCell>{customerMap.get(order.userId) || 'N/A'}</TableCell>
+                            <TableCell>
+                                {getOrderDate(order).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                            <Select
+                                value={order.status}
+                                onValueChange={(value: OrderStatus) => handleStatusChange(order.id, value)}
                             >
-                                {order.status}
-                            </Badge>
-                            </SelectTrigger>
-                            <SelectContent>
-                            <SelectItem value="Pending">Pending</SelectItem>
-                            <SelectItem value="Shipped">Shipped</SelectItem>
-                            <SelectItem value="Delivered">Delivered</SelectItem>
-                            <SelectItem value="Cancelled">Cancelled</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        </TableCell>
-                        <TableCell className="text-right">
-                        ${order.totalAmount.toLocaleString()}
-                        </TableCell>
-                    </TableRow>
+                                <SelectTrigger className="w-auto h-auto p-0 bg-transparent border-none focus:ring-0 shadow-none">
+                                <Badge
+                                    variant={getBadgeVariant(order.status)}
+                                    className={cn(
+                                    'justify-center',
+                                    order.status === 'Delivered' && 'bg-green-600/80 text-white',
+                                    order.status === 'Shipped' && 'bg-blue-500/80 text-white',
+                                    order.status === 'Pending' && 'text-yellow-400 border-yellow-400'
+                                    )}
+                                >
+                                    {order.status}
+                                </Badge>
+                                </SelectTrigger>
+                                <SelectContent>
+                                <SelectItem value="Pending">Pending</SelectItem>
+                                <SelectItem value="Shipped">Shipped</SelectItem>
+                                <SelectItem value="Delivered">Delivered</SelectItem>
+                                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            </TableCell>
+                            <TableCell className="text-right">
+                            ${order.totalAmount.toLocaleString()}
+                            </TableCell>
+                        </TableRow>
+                    </Collapsible>
                     <CollapsibleContent asChild>
-                       <TableRow>
-                           <TableCell colSpan={6} className="p-0">
-                               <OrderDetails order={order} />
-                           </TableCell>
-                       </TableRow>
+                        <></>
                     </CollapsibleContent>
-                    </TableBody>
-              </Collapsible>
+              </React.Fragment>
               ))}
             </Table>
           </div>
