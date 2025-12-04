@@ -13,7 +13,7 @@ import type { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { useFirestore } from '@/firebase';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 
 export default function ProductDetailPage({
@@ -119,6 +119,7 @@ export default function ProductDetailPage({
                 </div>
               </DialogTrigger>
                <DialogContent className="max-w-4xl p-2 bg-transparent border-none shadow-none">
+                 <DialogTitle className="sr-only">{product.name} - Enlarged View</DialogTitle>
                  {mainImage && (
                     <Image
                       src={mainImage.imageUrl}
