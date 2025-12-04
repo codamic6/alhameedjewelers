@@ -91,7 +91,7 @@ export default function Search() {
             {results.length > 0 ? (
                  <ul>
                     {results.map((product) => {
-                        const image = PlaceHolderImages.find(p => p.id === product.imageId);
+                        const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
                         return (
                         <li key={product.id}>
                             <Link

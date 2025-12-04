@@ -52,7 +52,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-2 space-y-4">
             {cartItems.map(({ product, quantity }) => {
-              const image = PlaceHolderImages.find(p => p.id === product.imageId);
+              const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
               return (
                 <Card key={product.id} className="flex items-center p-4">
                   <div className="w-24 h-24 aspect-square rounded-md overflow-hidden mr-4 shrink-0">

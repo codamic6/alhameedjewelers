@@ -71,7 +71,7 @@ export default function SearchPage() {
             <div className="space-y-4">
                 <AnimatePresence>
                 {results.map((product, index) => {
-                    const image = PlaceHolderImages.find(p => p.id === product.imageId);
+                    const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
                     return(
                     <motion.div
                         key={product.id}

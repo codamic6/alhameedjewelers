@@ -13,7 +13,7 @@ type ProductCardProps = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
-  const image = PlaceHolderImages.find(p => p.id === product.imageId);
+  const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
 
   return (
     <motion.div

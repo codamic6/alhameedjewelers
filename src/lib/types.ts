@@ -7,7 +7,7 @@ export type Product = {
   description: string;
   price: number;
   category: string;
-  imageId: string;
+  imageIds: string[]; // Changed from imageId to imageIds
   tags?: string[];
 };
 
@@ -54,5 +54,3 @@ export type Category = {
   slug: string;
   description: string;
 };
-
-    

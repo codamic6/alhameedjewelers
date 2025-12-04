@@ -6,6 +6,7 @@ import * as z from 'zod';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,17 +26,21 @@ import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Product, Category } from '@/lib/types';
-import { Loader2, X } from 'lucide-react';
-import { useState, KeyboardEvent } from 'react';
+import { Loader2, X, ChevronsUpDown, Check } from 'lucide-react';
+import { useState, KeyboardEvent, useMemo } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
+
 
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   price: z.coerce.number().positive('Price must be a positive number'),
   category: z.string().min(1, 'Please select a category'),
-  imageId: z.string().min(1, 'Please select an image'),
+  imageIds: z.array(z.string()).min(1, 'Please select at least one image'),
   tags: z.array(z.string()).optional(),
 });
 
@@ -49,6 +54,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const [imagePopoverOpen, setImagePopoverOpen] = useState(false);
 
   const categoriesCollection = useMemoFirebase(
     () => (firestore ? collection(firestore, 'categories') : null),
@@ -62,18 +68,20 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
       ? {
           ...product,
           tags: product.tags || [],
+          imageIds: product.imageIds || [],
         }
       : {
           name: '',
           description: '',
           price: 0,
           category: '',
-          imageId: '',
+          imageIds: [],
           tags: [],
         },
   });
   
   const tags = form.watch('tags') || [];
+  const selectedImageIds = form.watch('imageIds') || [];
 
   const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && tagInput.trim() !== '') {
@@ -89,6 +97,18 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   const removeTag = (tagToRemove: string) => {
     form.setValue('tags', tags.filter(tag => tag !== tagToRemove));
   };
+
+  const toggleImage = (imageId: string) => {
+    const currentIds = form.getValues('imageIds') || [];
+    const newIds = currentIds.includes(imageId)
+      ? currentIds.filter(id => id !== imageId)
+      : [...currentIds, imageId];
+    form.setValue('imageIds', newIds, { shouldValidate: true, shouldDirty: true });
+  }
+
+  const selectedImages = useMemo(() => {
+    return PlaceHolderImages.filter(p => selectedImageIds.includes(p.id)) ?? [];
+  }, [selectedImageIds]);
 
 
   const onSubmit = async (values: z.infer<typeof productSchema>) => {
@@ -183,28 +203,65 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
             )}
           />
         </div>
-         <FormField
-            control={form.control}
-            name="imageId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product Image</FormLabel>
-                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an image" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {PlaceHolderImages.map(img => (
-                        <SelectItem key={img.id} value={img.id}>{img.description}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+        <FormField
+          control={form.control}
+          name="imageIds"
+          render={({ field }) => (
+            <FormItem>
+                <FormLabel>Product Images</FormLabel>
+                <Popover open={imagePopoverOpen} onOpenChange={setImagePopoverOpen}>
+                    <PopoverTrigger asChild>
+                         <FormControl>
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn("w-full justify-between h-auto min-h-10", selectedImages.length === 0 && "text-muted-foreground font-normal")}
+                            >
+                                <div className="flex-wrap flex gap-1 items-center">
+                                    {selectedImages.length > 0 ? selectedImages.map(p => (
+                                        <Badge key={p.id} variant="secondary" className="gap-1">
+                                            {p.description}
+                                        </Badge>
+                                    )) : "Select images..."}
+                                </div>
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                         <Command>
+                            <CommandInput placeholder="Search image..." />
+                            <CommandList>
+                                <CommandEmpty>No images found.</CommandEmpty>
+                                <CommandGroup>
+                                    {PlaceHolderImages.map((image) => {
+                                        const isSelected = selectedImageIds.includes(image.id);
+                                        return (
+                                            <CommandItem
+                                                key={image.id}
+                                                onSelect={() => toggleImage(image.id)}
+                                                value={image.description}
+                                            >
+                                               <Check
+                                                    className={cn(
+                                                    "mr-2 h-4 w-4",
+                                                    isSelected ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                />
+                                                {image.description}
+                                            </CommandItem>
+                                        )
+                                    })}
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
+                 <FormDescription>Select one or more images for the product.</FormDescription>
                 <FormMessage />
-              </FormItem>
-            )}
-          />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="tags"

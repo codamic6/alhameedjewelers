@@ -145,7 +145,7 @@ export default function SummaryPage() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                         {cartItems.map(({ product, quantity }) => {
-                            const image = PlaceHolderImages.find(p => p.id === product.imageId);
+                            const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
                             return (
                                 <div key={product.id} className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-3">
@@ -210,5 +210,3 @@ export default function SummaryPage() {
     </PageTransition>
   );
 }
-
-    
