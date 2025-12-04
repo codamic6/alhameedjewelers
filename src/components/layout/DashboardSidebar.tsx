@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent } from 'lucide-react';
+import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -21,6 +21,7 @@ export const mainNav = [
 export const adminNav = [
   { href: '/dashboard/admin', label: 'Dashboard', icon: Home, exact: true },
   { href: '/dashboard/admin/products', label: 'Products', icon: ShoppingCart },
+  { href: '/dashboard/admin/categories', label: 'Categories', icon: LayoutGrid },
   { href: '/dashboard/admin/orders', label: 'Orders', icon: Package },
   { href: '/dashboard/admin/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/admin/coupons', label: 'Coupons', icon: TicketPercent },
@@ -80,5 +81,3 @@ export default function DashboardSidebar() {
     </div>
   );
 }
-
-    

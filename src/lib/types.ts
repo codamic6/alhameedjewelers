@@ -35,7 +35,7 @@ export type UserProfile = {
 };
 
 export type Coupon = {
-  id: string;
+  id:string;
   code: string;
   discountPercentage: number;
   startDate: Timestamp;
@@ -47,4 +47,9 @@ export type Coupon = {
   minimumItemCount?: number;
 };
 
-    
+export type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+};
