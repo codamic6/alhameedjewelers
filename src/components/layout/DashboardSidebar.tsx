@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Gem, Home, ShoppingCart, Users, Package, Settings, Shield } from 'lucide-react';
+import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -23,6 +23,7 @@ export const adminNav = [
   { href: '/dashboard/admin/products', label: 'Products', icon: ShoppingCart },
   { href: '/dashboard/admin/orders', label: 'Orders', icon: Package },
   { href: '/dashboard/admin/customers', label: 'Customers', icon: Users },
+  { href: '/dashboard/admin/coupons', label: 'Coupons', icon: TicketPercent },
 ];
 
 export default function DashboardSidebar() {
@@ -79,3 +80,5 @@ export default function DashboardSidebar() {
     </div>
   );
 }
+
+    

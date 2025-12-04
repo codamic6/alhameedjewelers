@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase/firestore';
+
 export type Product = {
   id: string;
   name: string;
@@ -28,3 +30,14 @@ export type UserProfile = {
   email: string;
   phone: string;
 };
+
+export type Coupon = {
+  id: string;
+  code: string;
+  discountPercentage: number;
+  startDate: Timestamp;
+  endDate: Timestamp;
+  applicableProductIds: string[];
+};
+
+    

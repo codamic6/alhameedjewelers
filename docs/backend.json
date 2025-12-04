@@ -209,6 +209,50 @@
         "recommendationScore",
         "timestamp"
       ]
+    },
+    "Coupon": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Coupon",
+      "type": "object",
+      "description": "Represents a discount coupon.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the coupon."
+        },
+        "code": {
+          "type": "string",
+          "description": "The coupon code to be entered by the user."
+        },
+        "discountPercentage": {
+          "type": "number",
+          "description": "The discount percentage (e.g., 10 for 10%)."
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date from which the coupon is valid."
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date until which the coupon is valid."
+        },
+        "applicableProductIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of product IDs to which the coupon applies. An empty array means it applies to all products."
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "discountPercentage",
+        "startDate",
+        "endDate"
+      ]
     }
   },
   "auth": {
@@ -313,8 +357,26 @@
             }
           ]
         }
+      },
+       {
+        "path": "/coupons/{couponId}",
+        "definition": {
+          "entityName": "Coupon",
+          "schema": {
+            "$ref": "#/backend/entities/Coupon"
+          },
+          "description": "Stores discount coupon information. Only administrators can create, update, or delete coupons. All users can read them.",
+          "params": [
+            {
+              "name": "couponId",
+              "description": "Unique identifier for the coupon."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore data structure is designed to support the Al-Hameed Jewelers application, focusing on products, user management, orders, and personalized recommendations. The structure prioritizes Authorization Independence, DBAC, and supports secure list operations (QAPs).  Authorization Independence is achieved via path-based ownership and avoiding `get()` calls in security rules by storing user specific data under their own paths. This means no data outside of request.auth.uid is required for permission checks. Segregation of data is achieved via placing each entity in their own collection.  User-owned data (Orders, Recommendations) are stored in subcollections under the `/users/{userId}` path, ensuring clear ownership. This simplifies security rules, enabling only the authenticated user to access their own data, and administrators to manage all users data.\n\nThe `products` collection stores product details, accessible for reading by all users, while write access is restricted to administrators (not modeled here, but could be managed via a `/roles_admin/{uid}` collection check in rules). Orders and OrderItems are structured to ensure data integrity and easy retrieval of order information. Each user has their own subcollection for `orders`, facilitating efficient data access and management.\n\nRecommendations are also stored under each user's path, enabling personalized product suggestions.  The Payment on Delivery nature of this application impacts data structure very little but is taken into consideration."
+    "reasoning": "The Firestore data structure is designed to support the Al-Hameed Jewelers application, focusing on products, user management, orders, and personalized recommendations. The structure prioritizes Authorization Independence, DBAC, and supports secure list operations (QAPs).  Authorization Independence is achieved via path-based ownership and avoiding `get()` calls in security rules by storing user specific data under their own paths. This means no data outside of request.auth.uid is required for permission checks. Segregation of data is achieved via placing each entity in their own collection.  User-owned data (Orders, Recommendations) are stored in subcollections under the `/users/{userId}` path, ensuring clear ownership. This simplifies security rules, enabling only the authenticated user to access their own data, and administrators to manage all users data.\n\nThe `products` collection stores product details, accessible for reading by all users, while write access is restricted to administrators (not modeled here, but could be managed via a `/roles_admin/{uid}` collection check in rules). Orders and OrderItems are structured to ensure data integrity and easy retrieval of order information. Each user has their own subcollection for `orders`, facilitating efficient data access and management.\n\nRecommendations are also stored under each user's path, enabling personalized product suggestions.  The Payment on Delivery nature of this application impacts data structure very little but is taken into consideration. A new `coupons` collection is added to store discount information, with access restricted to admins for management."
   }
 }
+
+    
