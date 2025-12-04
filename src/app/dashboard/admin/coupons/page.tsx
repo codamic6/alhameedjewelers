@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -137,8 +138,8 @@ export default function AdminCouponsPage() {
                       const status = getStatus(coupon);
                       return (
                         <AccordionItem value={coupon.id} key={coupon.id}>
-                          <div className="flex items-center justify-between w-full">
-                              <AccordionTrigger className="flex-1 hover:no-underline pr-2">
+                          <div className="flex items-center justify-between w-full py-2">
+                              <AccordionTrigger className="flex-1 hover:no-underline pr-2 py-0">
                                   <div className="text-left">
                                     <Badge variant="secondary" className="text-base mb-1">{coupon.code}</Badge>
                                     <p className="text-sm text-muted-foreground">{coupon.discountPercentage}% OFF</p>
@@ -159,12 +160,12 @@ export default function AdminCouponsPage() {
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
                                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem onClick={() => handleEdit(coupon)}>
+                                  <DropdownMenuItem onClick={(e) => {e.stopPropagation(); handleEdit(coupon)}}>
                                       Edit
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                       className="text-destructive"
-                                      onClick={() => handleDelete(coupon.id)}
+                                      onClick={(e) => {e.stopPropagation(); handleDelete(coupon.id)}}
                                   >
                                       Delete
                                   </DropdownMenuItem>
@@ -287,3 +288,4 @@ export default function AdminCouponsPage() {
     </Dialog>
   );
 }
+

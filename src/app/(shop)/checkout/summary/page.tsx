@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useCart } from '@/hooks/use-cart';
@@ -21,7 +22,7 @@ export default function SummaryPage() {
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const { cartItems, cartTotal, clearCart, checkoutState, cartCount } = useCart();
+  const { cartItems, clearCart, checkoutState, cartCount, coupon, couponDiscount, totalAfterDiscount } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -52,7 +53,10 @@ export default function SummaryPage() {
       userId: user.uid,
       orderDate: new Date().toISOString(),
       status: 'Pending' as const,
-      totalAmount: cartTotal,
+      subTotal: cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0),
+      couponCode: coupon?.code,
+      couponDiscount: couponDiscount,
+      totalAmount: totalAfterDiscount,
       shippingAddress: checkoutState.shippingAddress,
       paymentMethod: checkoutState.paymentMethod,
       items: cartItems.map(item => ({
@@ -157,8 +161,14 @@ export default function SummaryPage() {
                          <Separator className="my-2 !mt-4"/>
                          <div className="flex justify-between">
                             <span>Subtotal</span>
-                            <span>${cartTotal.toLocaleString()}</span>
+                            <span>${cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0).toLocaleString()}</span>
                         </div>
+                        {couponDiscount > 0 && (
+                          <div className="flex justify-between text-green-400">
+                            <span>Discount ({coupon?.code})</span>
+                            <span>-${couponDiscount.toLocaleString()}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between">
                             <span>Shipping</span>
                             <span>Free</span>
@@ -166,7 +176,7 @@ export default function SummaryPage() {
                         <Separator className="my-2"/>
                         <div className="flex justify-between font-bold text-lg text-primary">
                             <span>Total</span>
-                            <span>${cartTotal.toLocaleString()}</span>
+                            <span>${totalAfterDiscount.toLocaleString()}</span>
                         </div>
                     </CardContent>
                     <CardFooter className="flex-col gap-4 items-stretch">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCart } from '@/hooks/use-cart';
@@ -5,12 +6,27 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus, Trash2, ShoppingCart as ShoppingCartIcon } from 'lucide-react';
+import { Plus, Minus, Trash2, ShoppingCart as ShoppingCartIcon, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import PageTransition from '@/components/PageTransition';
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 
 export default function CartPage() {
-  const { cartItems, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, cartTotal, cartCount, coupon, applyCoupon, removeCoupon, couponDiscount, totalAfterDiscount } = useCart();
+  const [couponCode, setCouponCode] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    setIsApplyingCoupon(true);
+    await applyCoupon(couponCode);
+    setIsApplyingCoupon(false);
+    setCouponCode('');
+  };
+
 
   if (cartCount === 0) {
     return (
@@ -78,17 +94,50 @@ export default function CartPage() {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {!coupon && (
+                  <div className="space-y-2">
+                    <Label htmlFor="coupon">Have a coupon?</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        id="coupon" 
+                        placeholder="Coupon code" 
+                        value={couponCode} 
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        />
+                      <Button onClick={handleApplyCoupon} disabled={isApplyingCoupon}>
+                        {isApplyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                 {coupon && (
+                  <div className="text-sm">
+                    <p>Applied Coupon:</p>
+                    <Badge variant="secondary" className="flex justify-between items-center text-base">
+                      <span>{coupon.code}</span>
+                       <Button variant="ghost" size="icon" className="h-5 w-5 -mr-1" onClick={removeCoupon}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                    </Badge>
+                  </div>
+                 )}
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span>${cartTotal.toLocaleString()}</span>
                 </div>
+                 {couponDiscount > 0 && (
+                  <div className="flex justify-between text-green-400">
+                    <span>Discount</span>
+                    <span>-${couponDiscount.toLocaleString()}</span>
+                  </div>
+                 )}
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span>Free</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg text-primary">
                   <span>Total</span>
-                  <span>${cartTotal.toLocaleString()}</span>
+                  <span>${totalAfterDiscount.toLocaleString()}</span>
                 </div>
               </CardContent>
               <CardFooter>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -26,6 +27,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Check } from 'lucide-react';
 
 
 const couponSchema = z.object({
@@ -45,6 +47,8 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
 
   const productsCollection = useMemoFirebase(
     () => (firestore ? collection(firestore, 'products') : null),
@@ -59,6 +63,7 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
           ...coupon,
           startDate: coupon.startDate.toDate(),
           endDate: coupon.endDate.toDate(),
+          applicableProductIds: coupon.applicableProductIds || [],
         }
       : {
           code: '',
@@ -69,22 +74,18 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
         },
   });
 
-  const selectedProducts = useMemo(() => {
-    const ids = form.watch('applicableProductIds') || [];
-    return products?.filter(p => ids.includes(p.id)) ?? [];
-  }, [form, products]);
+  const selectedProductIds = form.watch('applicableProductIds') || [];
   
-  const unselectedProducts = useMemo(() => {
-    const ids = form.watch('applicableProductIds') || [];
-    return products?.filter(p => !ids.includes(p.id)) ?? [];
-  }, [form, products]);
+  const selectedProducts = useMemo(() => {
+    return products?.filter(p => selectedProductIds.includes(p.id)) ?? [];
+  }, [selectedProductIds, products]);
 
   const toggleProduct = (productId: string) => {
     const currentIds = form.getValues('applicableProductIds') || [];
     const newIds = currentIds.includes(productId)
       ? currentIds.filter(id => id !== productId)
       : [...currentIds, productId];
-    form.setValue('applicableProductIds', newIds, { shouldValidate: true });
+    form.setValue('applicableProductIds', newIds, { shouldValidate: true, shouldDirty: true });
   }
 
   const onSubmit = async (values: z.infer<typeof couponSchema>) => {
@@ -238,36 +239,48 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
                 <FormItem>
                     <FormLabel>Applicable Products</FormLabel>
                     <FormDescription>Select products this coupon applies to. Leave empty to apply to all products.</FormDescription>
-                    <Popover>
+                     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                         <PopoverTrigger asChild>
                              <FormControl>
-                                <div className="border rounded-md min-h-10 px-3 py-2 flex-wrap flex gap-1 items-center cursor-pointer">
-                                    {selectedProducts.map(p => (
-                                        <Badge key={p.id} variant="secondary" className="gap-1">
-                                            {p.name}
-                                            <button onClick={() => toggleProduct(p.id)} className="rounded-full hover:bg-background/50">
-                                                <X className="h-3 w-3"/>
-                                            </button>
-                                        </Badge>
-                                    ))}
-                                    {selectedProducts.length === 0 && <span className="text-muted-foreground text-sm">Select products...</span>}
-                                </div>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className="w-full justify-between h-auto min-h-10"
+                                >
+                                    <div className="flex-wrap flex gap-1 items-center">
+                                        {selectedProducts.length > 0 ? selectedProducts.map(p => (
+                                            <Badge key={p.id} variant="secondary" className="gap-1">
+                                                {p.name}
+                                            </Badge>
+                                        )) : <span className="text-muted-foreground font-normal">Select products...</span>}
+                                    </div>
+                                </Button>
                             </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                              <Command>
                                 <CommandInput placeholder="Search product..." />
                                 <CommandList>
                                     <CommandEmpty>No products found.</CommandEmpty>
                                     <CommandGroup>
-                                        {unselectedProducts?.map((product) => (
-                                            <CommandItem
-                                                key={product.id}
-                                                onSelect={() => toggleProduct(product.id)}
-                                            >
-                                                {product.name}
-                                            </CommandItem>
-                                        ))}
+                                        {products?.map((product) => {
+                                            const isSelected = selectedProductIds.includes(product.id);
+                                            return (
+                                                <CommandItem
+                                                    key={product.id}
+                                                    onSelect={() => toggleProduct(product.id)}
+                                                    value={product.name}
+                                                >
+                                                   <Check
+                                                        className={cn(
+                                                        "mr-2 h-4 w-4",
+                                                        isSelected ? "opacity-100" : "opacity-0"
+                                                        )}
+                                                    />
+                                                    {product.name}
+                                                </CommandItem>
+                                            )
+                                        })}
                                     </CommandGroup>
                                 </CommandList>
                             </Command>
@@ -287,4 +300,3 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
   );
 }
 
-    

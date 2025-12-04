@@ -1,9 +1,13 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { Product } from '@/lib/types';
+import type { Product, Coupon } from '@/lib/types';
 import { useToast } from './use-toast';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+
 
 export type CartItem = {
   product: Product;
@@ -36,6 +40,11 @@ type CartContextType = {
   cartCount: number;
   checkoutState: CheckoutState;
   setCheckoutState: (newState: Partial<CheckoutState>) => void;
+  coupon: Coupon | null;
+  applyCoupon: (code: string) => Promise<void>;
+  removeCoupon: () => void;
+  couponDiscount: number;
+  totalAfterDiscount: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -49,22 +58,32 @@ const initialCheckoutState: CheckoutState = {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [checkoutState, setCheckoutState] = useState<CheckoutState>(initialCheckoutState);
+  const [coupon, setCoupon] = useState<Coupon | null>(null);
+
   const { toast } = useToast();
+  const firestore = useFirestore();
 
   useEffect(() => {
     try {
         const storedCart = localStorage.getItem('cartItems');
-        if (storedCart) {
-            setCartItems(JSON.parse(storedCart));
-        }
+        if (storedCart) setCartItems(JSON.parse(storedCart));
+        
         const storedCheckoutState = localStorage.getItem('checkoutState');
-        if (storedCheckoutState) {
-            setCheckoutState(JSON.parse(storedCheckoutState));
+        if (storedCheckoutState) setCheckoutState(JSON.parse(storedCheckoutState));
+
+        const storedCoupon = localStorage.getItem('coupon');
+        if (storedCoupon) {
+            const parsedCoupon = JSON.parse(storedCoupon);
+            // Firestore Timestamps are not plain objects, need to convert them back
+            setCoupon({
+                ...parsedCoupon,
+                startDate: new Timestamp(parsedCoupon.startDate.seconds, parsedCoupon.startDate.nanoseconds),
+                endDate: new Timestamp(parsedCoupon.endDate.seconds, parsedCoupon.endDate.nanoseconds),
+            });
         }
     } catch (error) {
         console.error("Failed to parse from localStorage", error);
-        localStorage.removeItem('cartItems');
-        localStorage.removeItem('checkoutState');
+        localStorage.clear();
     }
   }, []);
 
@@ -75,6 +94,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem('checkoutState', JSON.stringify(checkoutState));
   }, [checkoutState]);
+  
+   useEffect(() => {
+    if (coupon) {
+      localStorage.setItem('coupon', JSON.stringify(coupon));
+    } else {
+      localStorage.removeItem('coupon');
+    }
+  }, [coupon]);
+
 
   const handleSetCheckoutState = (newState: Partial<CheckoutState>) => {
     setCheckoutState(prevState => ({...prevState, ...newState}));
@@ -115,20 +143,84 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       );
     }
   };
+  
+  const applyCoupon = async (code: string) => {
+    if (!firestore) {
+        toast({ variant: "destructive", title: "Error", description: "Could not connect to the database." });
+        return;
+    }
+    const couponsRef = collection(firestore, 'coupons');
+    const q = query(couponsRef, where("code", "==", code.toUpperCase()));
+
+    try {
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            toast({ variant: "destructive", title: "Invalid Coupon", description: "This coupon code does not exist." });
+            return;
+        }
+
+        const couponDoc = querySnapshot.docs[0];
+        const couponData = { id: couponDoc.id, ...couponDoc.data() } as Coupon;
+        
+        const now = new Date();
+        if (couponData.startDate.toDate() > now) {
+            toast({ variant: "destructive", title: "Coupon Not Yet Active", description: "This coupon is not valid yet." });
+            return;
+        }
+        if (couponData.endDate.toDate() < now) {
+            toast({ variant: "destructive", title: "Coupon Expired", description: "This coupon has expired." });
+            return;
+        }
+
+        setCoupon(couponData);
+        toast({
+            title: "Coupon Applied!",
+            description: `You've got a ${couponData.discountPercentage}% discount.`,
+            className: 'bg-green-600 border-green-600 text-white',
+            icon: <CheckCircle className="h-5 w-5" />
+        });
+    } catch (error) {
+        console.error("Error applying coupon:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not apply the coupon." });
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    toast({
+        title: "Coupon Removed",
+        icon: <XCircle className="h-5 w-5 text-destructive" />,
+    });
+  }
 
   const clearCart = () => {
     setCartItems([]);
     setCheckoutState(initialCheckoutState);
+    setCoupon(null);
     localStorage.removeItem('cartItems');
     localStorage.removeItem('checkoutState');
+    localStorage.removeItem('coupon');
   };
 
   const cartTotal = cartItems.reduce(
     (total, item) => total + item.product.price * item.quantity,
     0
   );
-
+  
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+
+  let couponDiscount = 0;
+  if (coupon) {
+      const applicableItems = coupon.applicableProductIds.length > 0
+          ? cartItems.filter(item => coupon.applicableProductIds.includes(item.product.id))
+          : cartItems;
+
+      const applicableTotal = applicableItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+      couponDiscount = (applicableTotal * coupon.discountPercentage) / 100;
+  }
+  
+  const totalAfterDiscount = cartTotal - couponDiscount;
+
 
   return (
     <CartContext.Provider
@@ -142,6 +234,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         cartCount,
         checkoutState,
         setCheckoutState: handleSetCheckoutState,
+        coupon,
+        applyCoupon,
+        removeCoupon,
+        couponDiscount,
+        totalAfterDiscount,
       }}
     >
       {children}
