@@ -215,8 +215,8 @@ export default function AdminOrdersPage() {
               </TableHeader>
               <TableBody>
               {orders?.map(order => (
-                <Collapsible asChild key={order.id}>
-                    <React.Fragment>
+                    <Collapsible asChild key={order.id}>
+                      <React.Fragment>
                         <TableRow>
                             <TableCell>
                                 <CollapsibleTrigger asChild>
@@ -279,3 +279,4 @@ export default function AdminOrdersPage() {
     </div>
   );
 }
+
