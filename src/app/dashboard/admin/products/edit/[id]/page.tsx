@@ -2,12 +2,13 @@
 
 import ProductForm from '../../ProductForm';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useRouter, useParams } from 'next/navigation';
 import PageTransition from '@/components/PageTransition';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -38,8 +39,15 @@ export default function EditProductPage() {
     <PageTransition>
         <Card>
             <CardHeader>
-                <CardTitle>Edit Product</CardTitle>
-                <CardDescription>Update the details for "{product.name}".</CardDescription>
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <div className="flex-1">
+                        <CardTitle>Edit Product</CardTitle>
+                        <CardDescription>Update the details for "{product.name}".</CardDescription>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent>
                 <ProductForm product={product} onFinished={() => router.push('/dashboard/admin/products')} />

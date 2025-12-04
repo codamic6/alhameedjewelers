@@ -2,12 +2,13 @@
 
 import CouponForm from '../../CouponForm';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useRouter, useParams } from 'next/navigation';
 import PageTransition from '@/components/PageTransition';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Coupon } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function EditCouponPage() {
   const router = useRouter();
@@ -38,8 +39,15 @@ export default function EditCouponPage() {
     <PageTransition>
         <Card>
             <CardHeader>
-                <CardTitle>Edit Coupon</CardTitle>
-                <CardDescription>Update the details for the coupon code "{coupon.code}".</CardDescription>
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <div className="flex-1">
+                        <CardTitle>Edit Coupon</CardTitle>
+                        <CardDescription>Update the details for the coupon code "{coupon.code}".</CardDescription>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent>
                 <CouponForm coupon={coupon} onFinished={() => router.push('/dashboard/admin/coupons')} />

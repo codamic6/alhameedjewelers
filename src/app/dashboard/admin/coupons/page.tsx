@@ -18,6 +18,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { Badge } from '@/components/ui/badge';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
@@ -35,6 +41,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Separator } from '@/components/ui/separator';
 
 export default function AdminCouponsPage() {
   const firestore = useFirestore();
@@ -124,60 +131,65 @@ export default function AdminCouponsPage() {
             ) : coupons && coupons.length > 0 ? (
               <>
                  {/* Mobile View */}
-                <div className="md:hidden space-y-4">
-                  {coupons.map((coupon) => {
-                    const status = getStatus(coupon);
-                    return (
-                       <Card key={coupon.id} className="bg-secondary/50">
-                        <CardHeader className="flex flex-row items-start justify-between">
-                          <div>
-                            <CardTitle className="text-lg">
-                               <Badge variant="secondary" className="text-base">{coupon.code}</Badge>
-                            </CardTitle>
-                            <CardDescription>{coupon.discountPercentage}% OFF</CardDescription>
-                          </div>
-                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                aria-haspopup="true"
-                                size="icon"
-                                variant="ghost"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => handleEdit(coupon)}>
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleDelete(coupon.id)}
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </CardHeader>
-                        <CardContent className="text-sm space-y-2">
-                           <div className="flex justify-between">
-                             <span className="text-muted-foreground">Status</span>
-                             <Badge className={cn("text-white", status.color)}>{status.text}</Badge>
-                           </div>
-                           <div className="flex justify-between">
-                             <span className="text-muted-foreground">Valid From</span>
-                             <span>{format(coupon.startDate.toDate(), 'MMM d, yyyy')}</span>
-                           </div>
-                           <div className="flex justify-between">
-                             <span className="text-muted-foreground">Valid Until</span>
-                             <span>{format(coupon.endDate.toDate(), 'MMM d, yyyy')}</span>
-                           </div>
-                        </CardContent>
-                       </Card>
-                    )
-                  })}
+                <div className="md:hidden">
+                  <Accordion type="single" collapsible className="w-full">
+                    {coupons.map((coupon) => {
+                      const status = getStatus(coupon);
+                      return (
+                        <AccordionItem value={coupon.id} key={coupon.id}>
+                          <AccordionTrigger className="hover:no-underline">
+                            <div className="flex justify-between items-center w-full">
+                                <div className="text-left">
+                                  <Badge variant="secondary" className="text-base mb-1">{coupon.code}</Badge>
+                                  <p className="text-sm text-muted-foreground">{coupon.discountPercentage}% OFF</p>
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                    <Button
+                                        aria-haspopup="true"
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-8 w-8"
+                                    >
+                                        <MoreHorizontal className="h-4 w-4" />
+                                        <span className="sr-only">Toggle menu</span>
+                                    </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuItem onClick={() => handleEdit(coupon)}>
+                                        Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        className="text-destructive"
+                                        onClick={() => handleDelete(coupon.id)}
+                                    >
+                                        Delete
+                                    </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                              <div className="text-sm space-y-2 pt-2 border-t border-dashed">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Status</span>
+                                  <Badge className={cn("text-white", status.color)}>{status.text}</Badge>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Valid From</span>
+                                  <span>{format(coupon.startDate.toDate(), 'MMM d, yyyy')}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Valid Until</span>
+                                  <span>{format(coupon.endDate.toDate(), 'MMM d, yyyy')}</span>
+                                </div>
+                              </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      )
+                    })}
+                  </Accordion>
                 </div>
 
                 {/* Desktop View */}
