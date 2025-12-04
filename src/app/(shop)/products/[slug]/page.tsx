@@ -16,8 +16,7 @@ import { useFirestore } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 export default function ProductDetailPage({
   params,
@@ -31,19 +30,7 @@ export default function ProductDetailPage({
   const firestore = useFirestore();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
-  const [showStickyBar, setShowStickyBar] = useState(false);
-
-  // Sticky bar visibility on scroll for mobile
-  const { scrollY } = useScroll();
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (window.innerWidth < 768 && latest > 500) {
-      setShowStickyBar(true);
-    } else {
-      setShowStickyBar(false);
-    }
-  });
-
+  const [selectedImageId, setSelectedImageId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!firestore || !slug) return;
@@ -60,7 +47,7 @@ export default function ProductDetailPage({
           const productData = { id: productDoc.id, ...productDoc.data() } as Product;
           setProduct(productData);
           if (productData.imageIds && productData.imageIds.length > 0) {
-            setSelectedImage(productData.imageIds[0]);
+            setSelectedImageId(productData.imageIds[0]);
           }
         } else {
           setProduct(null);
@@ -80,9 +67,7 @@ export default function ProductDetailPage({
 
   useEffect(() => {
     if (product) {
-      const viewed = JSON.parse(
-        sessionStorage.getItem('viewedProducts') || '[]'
-      );
+      const viewed = JSON.parse(sessionStorage.getItem('viewedProducts') || '[]');
       if (!viewed.includes(product.name)) {
         viewed.push(product.name);
         sessionStorage.setItem('viewedProducts', JSON.stringify(viewed));
@@ -106,95 +91,27 @@ export default function ProductDetailPage({
   }
 
   const images = (product.imageIds || []).map(id => PlaceHolderImages.find(p => p.id === id)).filter(Boolean);
-  const mainImage = PlaceHolderImages.find(p => p.id === selectedImage);
+  const selectedImage = PlaceHolderImages.find(p => p.id === selectedImageId);
   
-  const ProductDetails = () => (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-3xl md:text-4xl font-bold text-primary">{product.name}</h1>
-      <p className="text-2xl font-bold text-accent">
-        ${product.price.toLocaleString()}
-      </p>
-      
-      <Separator />
-
-      <p className="text-muted-foreground leading-relaxed">
-        {product.description}
-      </p>
-
-      {product.tags && product.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {product.tags.map(tag => (
-            <Badge key={tag} variant="outline">{tag}</Badge>
-          ))}
-        </div>
-      )}
-      
-      <Separator />
-
-      <div className="flex items-center gap-4 mt-2">
-          <div className="flex items-center border rounded-full h-12">
-              <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              className="rounded-full"
-              >
-              <Minus className="h-4 w-4" />
-              </Button>
-              <span className="w-12 text-center font-bold">{quantity}</span>
-              <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setQuantity(q => q + 1)}
-              className="rounded-full"
-              >
-              <Plus className="h-4 w-4" />
-              </Button>
-          </div>
-          <Button variant="ghost" size="icon" className="rounded-full h-12 w-12 border">
-              <Heart className="h-5 w-5" />
-              <span className="sr-only">Add to favorites</span>
-          </Button>
-      </div>
-
-      <div className="flex-col sm:flex-row items-center gap-4 mt-4 hidden md:flex">
-        <Button
-          size="lg"
-          className="flex-1 bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground"
-          onClick={() => addToCart(product, quantity)}
-        >
-          <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-        </Button>
-         <Button
-          size="lg"
-          variant="outline"
-          className="flex-1"
-          onClick={handleBuyNow}
-        >
-          <CreditCard className="mr-2 h-5 w-5" /> Buy Now
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
     <PageTransition>
-      <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12">
+      <div className="container mx-auto max-w-7xl px-0 md:px-4 py-8 md:py-12">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
           
-          {/* Image Gallery - Desktop */}
-          <div className="hidden md:flex flex-col gap-4 items-center">
+          {/* --- IMAGE GALLERY --- */}
+          {/* Desktop Gallery */}
+          <div className="hidden md:flex flex-col gap-4 sticky top-24">
             <Dialog>
               <DialogTrigger asChild>
                 <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg cursor-zoom-in group">
-                  {mainImage && (
+                  {selectedImage && (
                     <Image
-                      src={mainImage.imageUrl}
+                      src={selectedImage.imageUrl}
                       alt={product.name}
                       width={800}
                       height={800}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      data-ai-hint={mainImage.imageHint}
+                      data-ai-hint={selectedImage.imageHint}
                       priority
                     />
                   )}
@@ -205,14 +122,14 @@ export default function ProductDetailPage({
               </DialogTrigger>
                <DialogContent className="max-w-4xl p-2 bg-transparent border-none shadow-none">
                  <DialogTitle className="sr-only">{product.name} - Enlarged View</DialogTitle>
-                 {mainImage && (
+                 {selectedImage && (
                     <Image
-                      src={mainImage.imageUrl}
+                      src={selectedImage.imageUrl}
                       alt={product.name}
                       width={1200}
                       height={1200}
                       className="w-full h-auto object-contain rounded-lg"
-                      data-ai-hint={mainImage.imageHint}
+                      data-ai-hint={selectedImage.imageHint}
                     />
                  )}
                </DialogContent>
@@ -222,10 +139,10 @@ export default function ProductDetailPage({
                 {images.map(image => image && (
                   <button 
                     key={image.id}
-                    onClick={() => setSelectedImage(image.id)}
+                    onClick={() => setSelectedImageId(image.id)}
                     className={cn(
                       "aspect-square rounded-md overflow-hidden ring-offset-background ring-offset-2 focus:ring-2 focus:outline-none",
-                      selectedImage === image.id ? "ring-2 ring-primary" : "ring-1 ring-transparent hover:ring-primary/50"
+                      selectedImageId === image.id ? "ring-2 ring-primary" : "ring-1 ring-transparent hover:ring-primary/50"
                     )}
                   >
                     <Image
@@ -241,8 +158,8 @@ export default function ProductDetailPage({
             )}
           </div>
           
-          {/* Image Carousel - Mobile */}
-          <div className="md:hidden -mx-4">
+          {/* Mobile Carousel */}
+          <div className="md:hidden w-full">
               <Carousel className="w-full">
                   <CarouselContent>
                       {images.map(image => image && (
@@ -260,30 +177,79 @@ export default function ProductDetailPage({
                           </CarouselItem>
                       ))}
                   </CarouselContent>
+                  {images.length > 1 && (
+                    <>
+                      <CarouselPrevious className="left-2" />
+                      <CarouselNext className="right-2" />
+                    </>
+                  )}
               </Carousel>
           </div>
 
-          {/* Product Details for both mobile and desktop */}
-          <ProductDetails />
+          {/* --- PRODUCT DETAILS --- */}
+          <div className="flex flex-col gap-4 px-4 md:px-0">
+              <h1 className="text-3xl md:text-4xl font-bold text-primary">{product.name}</h1>
+              <p className="text-2xl font-bold text-accent">${product.price.toLocaleString()}</p>
+              
+              <Separator />
+
+              <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+
+              {product.tags && product.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {product.tags.map(tag => ( <Badge key={tag} variant="outline">{tag}</Badge> ))}
+                </div>
+              )}
+              
+              <Separator />
+
+              {/* Desktop-only action buttons */}
+              <div className="hidden md:flex flex-col gap-4 mt-4">
+                  <div className="flex items-center gap-4">
+                      <div className="flex items-center border rounded-full h-12">
+                          <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))} className="rounded-full"><Minus className="h-4 w-4" /></Button>
+                          <span className="w-12 text-center font-bold">{quantity}</span>
+                          <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)} className="rounded-full"><Plus className="h-4 w-4" /></Button>
+                      </div>
+                      <Button variant="ghost" size="icon" className="rounded-full h-12 w-12 border">
+                          <Heart className="h-5 w-5" />
+                          <span className="sr-only">Add to favorites</span>
+                      </Button>
+                  </div>
+                  <div className="flex items-center gap-4">
+                      <Button size="lg" className="flex-1" onClick={() => addToCart(product, quantity)}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
+                      <Button size="lg" variant="outline" className="flex-1" onClick={handleBuyNow}><CreditCard className="mr-2 h-5 w-5" /> Buy Now</Button>
+                  </div>
+              </div>
+          </div>
         </div>
       </div>
 
-       {/* Sticky Add to Cart Bar for Mobile */}
-      <motion.div 
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-secondary/80 backdrop-blur-sm border-t border-border p-4 flex items-center justify-between gap-4"
-        initial={{ y: "100%" }}
-        animate={{ y: showStickyBar ? 0 : "100%" }}
-        transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
-      >
-        <div>
-          <p className="text-sm text-muted-foreground">Price</p>
-          <p className="font-bold text-lg text-primary">${product.price.toLocaleString()}</p>
+      {/* Sticky Action Bar for Mobile */}
+      <div className="md:hidden sticky bottom-0 left-0 right-0 bg-secondary/80 backdrop-blur-sm border-t p-4 space-y-4">
+        <div className="flex items-center justify-between">
+            <div className="flex items-center border rounded-full h-12 bg-background">
+                <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))} className="rounded-full h-12 w-12"><Minus className="h-5 w-5" /></Button>
+                <span className="w-12 text-center font-bold text-lg">{quantity}</span>
+                <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)} className="rounded-full h-12 w-12"><Plus className="h-5 w-5" /></Button>
+            </div>
+             <div className="text-right">
+                <p className="text-sm text-muted-foreground">Total Price</p>
+                <p className="font-bold text-xl text-primary">${(product.price * quantity).toLocaleString()}</p>
+             </div>
         </div>
-        <Button size="lg" className="flex-1" onClick={() => addToCart(product, quantity)}>
-          <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-        </Button>
-      </motion.div>
-
+        <div className="flex items-center gap-2">
+            <Button size="lg" variant="outline" className="flex-1" onClick={() => addToCart(product, quantity)}>
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                Add to Cart
+            </Button>
+            <Button size="lg" className="flex-1" onClick={handleBuyNow}>
+                Buy Now
+            </Button>
+        </div>
+      </div>
     </PageTransition>
   );
 }
+
+    
