@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Loader2, TicketPercent } from 'lucide-react';
+import { MoreHorizontal, Loader2, TicketPercent, ArrowLeft } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -137,39 +137,40 @@ export default function AdminCouponsPage() {
                       const status = getStatus(coupon);
                       return (
                         <AccordionItem value={coupon.id} key={coupon.id}>
-                          <AccordionTrigger className="hover:no-underline">
-                            <div className="flex justify-between items-center w-full">
-                                <div className="text-left">
-                                  <Badge variant="secondary" className="text-base mb-1">{coupon.code}</Badge>
-                                  <p className="text-sm text-muted-foreground">{coupon.discountPercentage}% OFF</p>
-                                </div>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-between w-full">
+                              <AccordionTrigger className="flex-1 hover:no-underline pr-2">
+                                  <div className="text-left">
+                                    <Badge variant="secondary" className="text-base mb-1">{coupon.code}</Badge>
+                                    <p className="text-sm text-muted-foreground">{coupon.discountPercentage}% OFF</p>
+                                  </div>
+                              </AccordionTrigger>
+                              <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
                                     <Button
-                                        aria-haspopup="true"
-                                        size="icon"
-                                        variant="ghost"
-                                        className="h-8 w-8"
+                                      aria-haspopup="true"
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-8 w-8"
+                                      onClick={(e) => e.stopPropagation()}
                                     >
-                                        <MoreHorizontal className="h-4 w-4" />
-                                        <span className="sr-only">Toggle menu</span>
+                                      <MoreHorizontal className="h-4 w-4" />
+                                      <span className="sr-only">Toggle menu</span>
                                     </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                    <DropdownMenuItem onClick={() => handleEdit(coupon)}>
-                                        Edit
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="text-destructive"
-                                        onClick={() => handleDelete(coupon.id)}
-                                    >
-                                        Delete
-                                    </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                          </AccordionTrigger>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => handleEdit(coupon)}>
+                                      Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                      className="text-destructive"
+                                      onClick={() => handleDelete(coupon.id)}
+                                  >
+                                      Delete
+                                  </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                              </DropdownMenu>
+                          </div>
                           <AccordionContent>
                               <div className="text-sm space-y-2 pt-2 border-t border-dashed">
                                 <div className="flex justify-between">
