@@ -122,41 +122,21 @@ export default function AdminCouponsPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : coupons && coupons.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Discount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Valid From</TableHead>
-                    <TableHead>Valid Until</TableHead>
-                    <TableHead>
-                      <span className="sr-only">Actions</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {coupons?.map(coupon => {
+              <>
+                 {/* Mobile View */}
+                <div className="md:hidden space-y-4">
+                  {coupons.map((coupon) => {
                     const status = getStatus(coupon);
                     return (
-                      <TableRow key={coupon.id}>
-                        <TableCell className="font-medium">
-                          <Badge variant="secondary" className="text-base">{coupon.code}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {coupon.discountPercentage}%
-                        </TableCell>
-                         <TableCell>
-                          <Badge className={cn("text-white", status.color)}>{status.text}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {format(coupon.startDate.toDate(), 'MMM d, yyyy')}
-                        </TableCell>
-                        <TableCell>
-                           {format(coupon.endDate.toDate(), 'MMM d, yyyy')}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
+                       <Card key={coupon.id} className="bg-secondary/50">
+                        <CardHeader className="flex flex-row items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg">
+                               <Badge variant="secondary" className="text-base">{coupon.code}</Badge>
+                            </CardTitle>
+                            <CardDescription>{coupon.discountPercentage}% OFF</CardDescription>
+                          </div>
+                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
                                 aria-haspopup="true"
@@ -180,12 +160,94 @@ export default function AdminCouponsPage() {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    );
+                        </CardHeader>
+                        <CardContent className="text-sm space-y-2">
+                           <div className="flex justify-between">
+                             <span className="text-muted-foreground">Status</span>
+                             <Badge className={cn("text-white", status.color)}>{status.text}</Badge>
+                           </div>
+                           <div className="flex justify-between">
+                             <span className="text-muted-foreground">Valid From</span>
+                             <span>{format(coupon.startDate.toDate(), 'MMM d, yyyy')}</span>
+                           </div>
+                           <div className="flex justify-between">
+                             <span className="text-muted-foreground">Valid Until</span>
+                             <span>{format(coupon.endDate.toDate(), 'MMM d, yyyy')}</span>
+                           </div>
+                        </CardContent>
+                       </Card>
+                    )
                   })}
-                </TableBody>
-              </Table>
+                </div>
+
+                {/* Desktop View */}
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Code</TableHead>
+                        <TableHead>Discount</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Valid From</TableHead>
+                        <TableHead>Valid Until</TableHead>
+                        <TableHead>
+                          <span className="sr-only">Actions</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {coupons?.map(coupon => {
+                        const status = getStatus(coupon);
+                        return (
+                          <TableRow key={coupon.id}>
+                            <TableCell className="font-medium">
+                              <Badge variant="secondary" className="text-base">{coupon.code}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              {coupon.discountPercentage}%
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={cn("text-white", status.color)}>{status.text}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              {format(coupon.startDate.toDate(), 'MMM d, yyyy')}
+                            </TableCell>
+                            <TableCell>
+                              {format(coupon.endDate.toDate(), 'MMM d, yyyy')}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    aria-haspopup="true"
+                                    size="icon"
+                                    variant="ghost"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Toggle menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => handleEdit(coupon)}>
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => handleDelete(coupon.id)}
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             ) : (
                 <div className="text-center py-10 border-2 border-dashed rounded-lg">
                     <TicketPercent className="mx-auto h-12 w-12 text-muted-foreground"/>
