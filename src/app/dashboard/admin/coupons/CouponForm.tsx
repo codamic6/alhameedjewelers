@@ -47,7 +47,9 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [productPopoverOpen, setProductPopoverOpen] = useState(false);
+  const [startDatePopoverOpen, setStartDatePopoverOpen] = useState(false);
+  const [endDatePopoverOpen, setEndDatePopoverOpen] = useState(false);
 
 
   const productsCollection = useMemoFirebase(
@@ -122,7 +124,7 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
            <FormField
             control={form.control}
             name="code"
@@ -151,14 +153,14 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
             control={form.control}
             name="startDate"
             render={({ field }) => (
                 <FormItem className="flex flex-col">
                 <FormLabel>Start Date</FormLabel>
-                <Popover>
+                <Popover open={startDatePopoverOpen} onOpenChange={setStartDatePopoverOpen}>
                     <PopoverTrigger asChild>
                     <FormControl>
                         <Button
@@ -181,7 +183,10 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
                     <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => {
+                            field.onChange(date);
+                            setStartDatePopoverOpen(false);
+                        }}
                         initialFocus
                     />
                     </PopoverContent>
@@ -196,7 +201,7 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
             render={({ field }) => (
                 <FormItem className="flex flex-col">
                 <FormLabel>End Date</FormLabel>
-                <Popover>
+                <Popover open={endDatePopoverOpen} onOpenChange={setEndDatePopoverOpen}>
                     <PopoverTrigger asChild>
                     <FormControl>
                         <Button
@@ -219,7 +224,10 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
                     <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => {
+                            field.onChange(date);
+                            setEndDatePopoverOpen(false);
+                        }}
                         disabled={(date) =>
                             form.getValues('startDate') ? date < form.getValues('startDate') : false
                         }
@@ -239,7 +247,7 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
                 <FormItem>
                     <FormLabel>Applicable Products</FormLabel>
                     <FormDescription>Select products this coupon applies to. Leave empty to apply to all products.</FormDescription>
-                     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                     <Popover open={productPopoverOpen} onOpenChange={setProductPopoverOpen}>
                         <PopoverTrigger asChild>
                              <FormControl>
                                 <Button
