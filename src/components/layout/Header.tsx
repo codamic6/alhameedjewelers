@@ -156,27 +156,27 @@ export default function Header() {
                   <Separator className="bg-border/50 my-2" />
                    {user ? (
                       <>
-                      <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                      <Link href="/dashboard" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
                           <LayoutDashboard className="h-5 w-5" />
                           Dashboard
                       </Link>
                       {isAdmin && (
-                          <Link href="/dashboard/admin" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                          <Link href="/dashboard/admin" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
                               <Shield className="h-5 w-5" />
                               Admin Panel
                           </Link>
                       )}
-                      <button onClick={handleLogout} className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-left text-lg">
+                      <button onClick={handleLogout} className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-left text-lg">
                           <LogOut className="h-5 w-5" />
                           Logout
                       </button>
                       </>
                   ) : (
                       <>
-                      <Link href="/login" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                      <Link href="/login" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
                           Log In
                       </Link>
-                      <Link href="/signup" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                      <Link href="/signup" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
                           Sign Up
                       </Link>
                       </>
