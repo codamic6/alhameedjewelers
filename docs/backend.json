@@ -42,6 +42,13 @@
         "weight": {
           "type": "number",
           "description": "Weight of the product in grams."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of tags associated with the product."
         }
       },
       "required": [
@@ -442,3 +449,5 @@
     "reasoning": "The Firestore data structure is designed to support the Al-Hameed Jewelers application, focusing on products, user management, orders, and personalized recommendations. The structure prioritizes Authorization Independence, DBAC, and supports secure list operations (QAPs).  Authorization Independence is achieved via path-based ownership and avoiding `get()` calls in security rules by storing user specific data under their own paths. This means no data outside of request.auth.uid is required for permission checks. Segregation of data is achieved via placing each entity in their own collection.  User-owned data (Orders, Recommendations) are stored in subcollections under the `/users/{userId}` path, ensuring clear ownership. This simplifies security rules, enabling only the authenticated user to access their own data, and administrators to manage all users data.\n\nThe `products` collection stores product details, accessible for reading by all users, while write access is restricted to administrators (not modeled here, but could be managed via a `/roles_admin/{uid}` collection check in rules). Orders and OrderItems are structured to ensure data integrity and easy retrieval of order information. Each user has their own subcollection for `orders`, facilitating efficient data access and management.\n\nRecommendations are also stored under each user's path, enabling personalized product suggestions.  The Payment on Delivery nature of this application impacts data structure very little but is taken into consideration. A new `coupons` collection is added to store discount information, with access restricted to admins for management. A new 'categories' collection is added for managing product categories."
   }
 }
+
+    

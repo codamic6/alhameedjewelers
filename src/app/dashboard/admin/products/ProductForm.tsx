@@ -21,13 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import type { Product } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import type { Product, Category } from '@/lib/types';
+import { Loader2, X } from 'lucide-react';
+import { useState, KeyboardEvent } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Badge } from '@/components/ui/badge';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -35,6 +36,7 @@ const productSchema = z.object({
   price: z.coerce.number().positive('Price must be a positive number'),
   category: z.string().min(1, 'Please select a category'),
   imageId: z.string().min(1, 'Please select an image'),
+  tags: z.array(z.string()).optional(),
 });
 
 type ProductFormProps = {
@@ -46,16 +48,20 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tagInput, setTagInput] = useState('');
+
+  const categoriesCollection = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'categories') : null),
+    [firestore]
+  );
+  const { data: categories } = useCollection<Category>(categoriesCollection);
 
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
     defaultValues: product
       ? {
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          category: product.category,
-          imageId: product.imageId,
+          ...product,
+          tags: product.tags || [],
         }
       : {
           name: '',
@@ -63,8 +69,27 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
           price: 0,
           category: '',
           imageId: '',
+          tags: [],
         },
   });
+  
+  const tags = form.watch('tags') || [];
+
+  const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && tagInput.trim() !== '') {
+      e.preventDefault();
+      const newTag = tagInput.trim();
+      if (!tags.includes(newTag)) {
+        form.setValue('tags', [...tags, newTag]);
+      }
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    form.setValue('tags', tags.filter(tag => tag !== tagToRemove));
+  };
+
 
   const onSubmit = async (values: z.infer<typeof productSchema>) => {
     if (!firestore) return;
@@ -148,12 +173,9 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Necklaces">Necklaces</SelectItem>
-                      <SelectItem value="Rings">Rings</SelectItem>
-                      <SelectItem value="Bracelets">Bracelets</SelectItem>
-                      <SelectItem value="Earrings">Earrings</SelectItem>
-                      <SelectItem value="Chains">Chains</SelectItem>
-                      <SelectItem value="Accessories">Accessories</SelectItem>
+                      {categories?.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 <FormMessage />
@@ -183,6 +205,40 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
               </FormItem>
             )}
           />
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tags</FormLabel>
+              <FormControl>
+                <>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                        <button
+                          type="button"
+                          className="ml-2 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          onClick={() => removeTag(tag)}
+                        >
+                          <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                  <Input
+                    placeholder="Add tags and press Enter..."
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                  />
+                </>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {product ? 'Update Product' : 'Add Product'}
@@ -191,3 +247,5 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
     </Form>
   );
 }
+
+    

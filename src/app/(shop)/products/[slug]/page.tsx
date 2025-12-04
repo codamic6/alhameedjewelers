@@ -11,6 +11,7 @@ import { useCart } from '@/hooks/use-cart';
 import PageTransition from '@/components/PageTransition';
 import { doc, collection, query, where, getDocs } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
 
 
 export default function ProductDetailPage({
@@ -101,6 +102,14 @@ export default function ProductDetailPage({
               {product.description}
             </p>
 
+            {product.tags && product.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {product.tags.map(tag => (
+                  <Badge key={tag} variant="outline">{tag}</Badge>
+                ))}
+              </div>
+            )}
+
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center border rounded-md">
                 <Button
@@ -133,3 +142,5 @@ export default function ProductDetailPage({
     </PageTransition>
   );
 }
+
+    

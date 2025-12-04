@@ -8,6 +8,7 @@ export type Product = {
   price: number;
   category: string;
   imageId: string;
+  tags?: string[];
 };
 
 export type OrderStatus = 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled';
@@ -53,3 +54,5 @@ export type Category = {
   slug: string;
   description: string;
 };
+
+    
