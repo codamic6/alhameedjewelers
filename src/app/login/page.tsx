@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -32,6 +32,9 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const auth = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
+
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
 
@@ -45,9 +48,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-      router.push('/dashboard');
+      router.push(redirect || '/dashboard');
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, redirect]);
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
     initiateEmailSignIn(auth, values.email, values.password);

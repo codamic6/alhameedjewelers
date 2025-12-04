@@ -4,12 +4,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useCart } from '@/hooks/use-cart';
-import { useUser, useFirestore } from '@/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { collection, addDoc, doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import type { UserProfile } from '@/lib/types';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,9 +31,14 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
 const checkoutSchema = z.object({
+  firstName: z.string().min(2, { message: 'Please enter a valid first name.' }),
+  lastName: z.string().min(2, { message: 'Please enter a valid last name.' }),
+  email: z.string().email({ message: 'Please enter a valid email address.' }),
+  phone: z.string().min(10, { message: 'Please enter a valid phone number.'}),
   address: z.string().min(10, { message: 'Please enter a valid address.' }),
   city: z.string().min(3, { message: 'Please enter a city.' }),
-  postalCode: z.string().min(5, { message: 'Please enter a valid postal code.' }),
+  postalCode: z.string().min(4, { message: 'Please enter a valid postal code.' }),
+  country: z.string().min(3, { message: 'Please enter a country.' }),
 });
 
 export default function CheckoutPage() {
@@ -43,18 +49,50 @@ export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart, cartCount } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const userDocRef = useMemoFirebase(
+    () => (firestore && user ? doc(firestore, 'users', user.uid) : null),
+    [firestore, user]
+  );
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
+
   const form = useForm<z.infer<typeof checkoutSchema>>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
       address: '',
       city: '',
       postalCode: '',
+      country: 'Pakistan',
     },
   });
+  
+   useEffect(() => {
+    if (userProfile) {
+      form.reset({
+        firstName: userProfile.firstName || '',
+        lastName: userProfile.lastName || '',
+        email: userProfile.email || '',
+        phone: userProfile.phone || '',
+        address: '', // address fields are not in profile
+        city: '',
+        postalCode: '',
+        country: 'Pakistan',
+      });
+    } else if (user) {
+        form.reset({
+            ...form.getValues(),
+            email: user.email || '',
+        });
+    }
+  }, [user, userProfile, form]);
+
 
   useEffect(() => {
     if (!isUserLoading && !user) {
-      router.replace('/login');
+      router.replace('/login?redirect=/checkout');
     }
     if (!isUserLoading && cartCount === 0) {
       router.replace('/cart');
@@ -88,7 +126,7 @@ export default function CheckoutPage() {
     };
 
     try {
-      await addDoc(collection(firestore, 'orders'), orderData);
+      const docRef = await addDoc(collection(firestore, 'orders'), orderData);
       
       toast({
         title: 'Order Placed!',
@@ -96,7 +134,7 @@ export default function CheckoutPage() {
       });
       
       clearCart();
-      router.push('/order-confirmation');
+      router.push(`/order-confirmation?orderId=${docRef.id}`);
 
     } catch (error: any) {
       toast({
@@ -108,7 +146,7 @@ export default function CheckoutPage() {
     }
   }
 
-  if (isUserLoading || cartCount === 0) {
+  if (isUserLoading || cartCount === 0 || isProfileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -132,54 +170,21 @@ export default function CheckoutPage() {
                 <CardContent>
                     <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                        control={form.control}
-                        name="address"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Address</FormLabel>
-                            <FormControl>
-                                <Input placeholder="House #123, Street 4" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
                         <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="city"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>City</FormLabel>
-                                    <FormControl>
-                                    <Input placeholder="Karachi" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="postalCode"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Postal Code</FormLabel>
-                                    <FormControl>
-                                    <Input placeholder="75500" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
+                            <FormField control={form.control} name="firstName" render={({ field }) => ( <FormItem><FormLabel>First Name</FormLabel><FormControl><Input placeholder="Hassan" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="lastName" render={({ field }) => ( <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input placeholder="Ali" {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
+                        <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="hassan@example.com" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input placeholder="+92 300 1234567" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="address" render={({ field }) => ( <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="House #123, Street 4" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField control={form.control} name="city" render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="Karachi" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="postalCode" render={({ field }) => ( <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="75500" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                        <FormField control={form.control} name="country" render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
 
                         <Button type="submit" size="lg" className="w-full mt-6" disabled={isSubmitting}>
-                            {isSubmitting ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <ShoppingCart className="mr-2 h-5 w-5" />
-                            )}
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShoppingCart className="mr-2 h-5 w-5" />}
                             Place Order
                         </Button>
                     </form>
