@@ -215,14 +215,8 @@ export default function AdminOrdersPage() {
               </TableHeader>
                <TableBody>
                 {orders?.map(order => (
-                  <Collapsible asChild key={order.id} content={
-                       <TableRow>
-                          <TableCell colSpan={6} className="p-0">
-                              <OrderDetails order={order} />
-                          </TableCell>
-                      </TableRow>
-                  }>
-                      <React.Fragment>
+                  <Collapsible asChild key={order.id}>
+                      <>
                         <TableRow>
                             <TableCell>
                                 <CollapsibleTrigger asChild>
@@ -267,10 +261,14 @@ export default function AdminOrdersPage() {
                             ${order.totalAmount.toLocaleString()}
                             </TableCell>
                         </TableRow>
-                         <CollapsibleContent asChild>
-                          <></>
+                        <CollapsibleContent asChild>
+                          <TableRow>
+                            <TableCell colSpan={6} className="p-0">
+                                <OrderDetails order={order} />
+                            </TableCell>
+                          </TableRow>
                         </CollapsibleContent>
-                      </React.Fragment>
+                      </>
                   </Collapsible>
                 ))}
               </TableBody>
