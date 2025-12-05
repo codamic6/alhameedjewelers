@@ -101,32 +101,41 @@ export default function Header() {
             <span className="sr-only">Toggle Menu</span>
         </Button>
        </SheetTrigger>
-       <SheetContent side="left" className="sm:max-w-xs">
+       <SheetContent side="left" className="sm:max-w-xs flex flex-col p-0">
          <SheetTitle className="sr-only">Dashboard Menu</SheetTitle>
-          <nav className="grid gap-6 text-lg font-medium">
-             <Link href="/" className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base">
-                <Gem className="h-5 w-5 transition-all group-hover:scale-110" />
-                <span className="sr-only">Al-Hameed</span>
+         <div className="p-4 border-b">
+            <Link href="/" className="group flex h-10 shrink-0 items-center gap-2 font-semibold md:text-base">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Gem className="h-5 w-5 transition-all group-hover:scale-110" />
+                </div>
+                <span className="font-logo text-xl">Al-Hameed</span>
             </Link>
-            {mainNav.map(item => (
-                <Link key={item.href} href={item.href} className={cn("flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground", pathname.startsWith(item.href) && "text-foreground")}>
-                    <item.icon className="h-5 w-5" />
-                    {item.label}
-                </Link>
-            ))}
-             {isAdmin && (
-                <>
-                <div className="my-2 h-px bg-border" />
-                 <h3 className="px-2.5 text-sm font-semibold text-primary">Admin</h3>
-                 {adminNav.map(item => (
-                    <Link key={item.href} href={item.href} className={cn("flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground", (item.exact ? pathname === item.href : pathname.startsWith(item.href)) && "text-foreground")}>
-                        <item.icon className="h-5 w-5" />
-                        {item.label}
-                    </Link>
-                ))}
-                </>
-             )}
-          </nav>
+         </div>
+          <div className="flex-1 overflow-y-auto">
+            <nav className="grid gap-2 text-lg font-medium p-4">
+              {mainNav.map(item => (
+                  <Link key={item.href} href={item.href} className={cn("flex items-center gap-4 px-2.5 py-2 text-muted-foreground hover:text-foreground rounded-lg", pathname.startsWith(item.href) && "bg-muted text-foreground")}>
+                      <item.icon className="h-5 w-5" />
+                      {item.label}
+                  </Link>
+              ))}
+              {isAdmin && (
+                  <>
+                  <Separator className="my-2" />
+                  <h3 className="px-2.5 text-base font-semibold text-primary flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Admin
+                  </h3>
+                  {adminNav.map(item => (
+                      <Link key={item.href} href={item.href} className={cn("flex items-center gap-4 px-2.5 py-2 text-muted-foreground hover:text-foreground rounded-lg", (item.exact ? pathname === item.href : pathname.startsWith(item.href)) && "bg-muted text-foreground")}>
+                          <item.icon className="h-5 w-5" />
+                          {item.label}
+                      </Link>
+                  ))}
+                  </>
+              )}
+            </nav>
+          </div>
        </SheetContent>
     </Sheet>
   )
