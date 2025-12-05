@@ -137,7 +137,7 @@ export default function ProductDetailPage({
   }
 
   if (!product) {
-    notfound();
+    notFound();
   }
 
   const isVideo = (url: string) => /\.(mp4|mov|avi|webm)$/i.test(url);
@@ -177,7 +177,7 @@ export default function ProductDetailPage({
                     </div>
                   </div>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl p-2 bg-transparent border-none shadow-none">
+                <DialogContent className="max-w-4xl w-full p-2 bg-transparent border-none shadow-none">
                     <DialogTitle className="sr-only">{product.name} - Enlarged View</DialogTitle>
                    {selectedImageUrl && (
                         isVideo(selectedImageUrl) ? (
@@ -190,7 +190,7 @@ export default function ProductDetailPage({
                             alt={product.name}
                             width={1200}
                             height={1200}
-                            className="w-full h-auto object-contain rounded-lg"
+                            className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
                           />
                         )
                    )}
