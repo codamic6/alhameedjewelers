@@ -1,6 +1,6 @@
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import Header from "@/components/layout/Header";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { PanelLeft } from "lucide-react";
 
@@ -24,6 +24,7 @@ export default function DashboardLayout({
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="sm:max-w-xs bg-black p-0">
+                <SheetTitle className="sr-only">Dashboard Menu</SheetTitle>
                 <DashboardSidebar />
               </SheetContent>
             </Sheet>
