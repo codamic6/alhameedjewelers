@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useStorage } from '@/firebase/provider';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { supabase } from '@/lib/supabase';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Loader2, UploadCloud, Trash2, FileVideo, FileImage } from 'lucide-react';
+import { UploadCloud, Trash2, FileVideo, FileImage } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,10 +12,10 @@ import { v4 as uuidv4 } from 'uuid';
 interface FileUploadProps {
   value: string[];
   onChange: (urls: string[]) => void;
+  bucket?: string;
 }
 
-export default function FileUpload({ value, onChange }: FileUploadProps) {
-  const storage = useStorage();
+export default function FileUpload({ value, onChange, bucket = 'Assets' }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const { toast } = useToast();
@@ -32,35 +31,34 @@ export default function FileUpload({ value, onChange }: FileUploadProps) {
       setUploadProgress({});
 
       const uploadPromises = files.map(file => {
-        return new Promise<string | null>((resolve, reject) => {
+        return new Promise<string | null>(async (resolve, reject) => {
             const fileId = uuidv4();
             const fileExt = file.name.split('.').pop();
-            const fileName = `${fileId}.${fileExt}`;
-            const storageRef = ref(storage, `products/${fileName}`);
+            const filePath = `${fileId}.${fileExt}`;
             
-            const uploadTask = uploadBytesResumable(storageRef, file);
+            // Note: We are not passing any auth token here, relying on public bucket policies.
+            const { error: uploadError } = await supabase.storage
+              .from(bucket)
+              .upload(filePath, file);
 
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    setUploadProgress(prev => ({...prev, [fileName]: progress}));
-                },
-                (error) => {
-                    console.error("Upload error:", error);
-                    toast({ variant: 'destructive', title: 'Upload failed', description: `Could not upload ${file.name}.` });
-                    reject(null);
-                },
-                async () => {
-                    try {
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        resolve(downloadURL);
-                    } catch (error) {
-                        console.error("Error getting download URL:", error);
-                        toast({ variant: 'destructive', title: 'Upload failed', description: `Could not get URL for ${file.name}.` });
-                        reject(null);
-                    }
-                }
-            );
+            if (uploadError) {
+                console.error("Upload error:", uploadError);
+                toast({ variant: 'destructive', title: 'Upload failed', description: `Could not upload ${file.name}.` });
+                reject(null);
+                return;
+            }
+
+            const { data } = supabase.storage
+              .from(bucket)
+              .getPublicUrl(filePath);
+
+            if (data?.publicUrl) {
+                resolve(data.publicUrl);
+            } else {
+                console.error("Error getting public URL");
+                toast({ variant: 'destructive', title: 'Upload failed', description: `Could not get URL for ${file.name}.` });
+                reject(null);
+            }
         });
       });
       
@@ -72,24 +70,25 @@ export default function FileUpload({ value, onChange }: FileUploadProps) {
             toast({ title: "Upload complete", description: `${successfulUrls.length} file(s) uploaded.` });
         }
       } catch (error) {
-         // Errors are handled inside the promise, but a catch block is good practice
          console.error("An error occurred during one of the uploads.", error);
       } finally {
         setIsUploading(false);
-        // Reset progress after a short delay
         setTimeout(() => setUploadProgress({}), 2000);
       }
   }
 
   const handleDelete = async (url: string) => {
     try {
-      const fileRef = ref(storage, url);
-      await deleteObject(fileRef);
+      const filePath = new URL(url).pathname.split(`/${bucket}/`)[1];
+      const { error } = await supabase.storage.from(bucket).remove([filePath]);
+
+      if (error) throw error;
+      
       onChange(value.filter((currentUrl) => currentUrl !== url));
       toast({ title: 'File deleted' });
     } catch (error: any) {
        toast({ variant: 'destructive', title: 'Delete failed', description: error.message });
-       console.error('Firebase storage delete error:', error);
+       console.error('Supabase storage delete error:', error);
     }
   };
   
