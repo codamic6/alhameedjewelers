@@ -36,14 +36,14 @@ export default function FileUpload({ value, onChange, bucket = 'Assets' }: FileU
             const fileExt = file.name.split('.').pop();
             const filePath = `${fileId}.${fileExt}`;
             
-            // Note: We are not passing any auth token here, relying on public bucket policies.
+            // NOTE: We are NOT passing any token, this relies on the bucket allowing public anonymous uploads.
             const { error: uploadError } = await supabase.storage
               .from(bucket)
               .upload(filePath, file);
 
             if (uploadError) {
                 console.error("Upload error:", uploadError);
-                toast({ variant: 'destructive', title: 'Upload failed', description: `Could not upload ${file.name}.` });
+                toast({ variant: 'destructive', title: 'Upload failed', description: uploadError.message });
                 reject(null);
                 return;
             }
@@ -80,6 +80,7 @@ export default function FileUpload({ value, onChange, bucket = 'Assets' }: FileU
   const handleDelete = async (url: string) => {
     try {
       const filePath = new URL(url).pathname.split(`/${bucket}/`)[1];
+      // NOTE: We are NOT passing any token, this relies on the bucket allowing public anonymous deletes.
       const { error } = await supabase.storage.from(bucket).remove([filePath]);
 
       if (error) throw error;
