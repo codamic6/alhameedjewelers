@@ -35,6 +35,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRouter } from 'next/navigation';
+import ProductCardActions from './ProductCardActions';
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
@@ -129,12 +130,7 @@ export default function AdminProductsPage() {
                         </div>
                       </div>
                       <CardFooter className="bg-secondary/20 flex gap-2 p-2">
-                        <Button variant="outline" size="sm" className="w-full" onClick={() => handleEdit(product)}>
-                          <Edit className="mr-2 h-4 w-4" /> Edit
-                        </Button>
-                        <Button variant="destructive" size="sm" className="w-full" onClick={() => handleDelete(product.id)}>
-                           <Trash2 className="mr-2 h-4 w-4" /> Delete
-                        </Button>
+                        <ProductCardActions product={product} onEdit={handleEdit} />
                       </CardFooter>
                     </Card>
                   );
