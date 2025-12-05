@@ -38,7 +38,7 @@ function RelatedProducts({ currentProductId }: { currentProductId: string }) {
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12 md:py-20">
             <h2 className="text-3xl font-bold text-center mb-8 text-primary">You Might Also Like</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                 {relatedProducts.map(product => (
                     <ProductCard key={product.id} product={product} />
                 ))}
@@ -135,7 +135,7 @@ export default function ProductDetailPage({
               <Dialog>
                 <DialogTrigger asChild>
                   <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg cursor-zoom-in group">
-                    {selectedImage && (
+                    {selectedImage ? (
                       <Image
                         src={selectedImage.imageUrl}
                         alt={product.name}
@@ -145,7 +145,7 @@ export default function ProductDetailPage({
                         data-ai-hint={selectedImage.imageHint}
                         priority
                       />
-                    )}
+                    ) : <div className="w-full h-full bg-secondary flex items-center justify-center text-muted-foreground">No Image</div>}
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <ZoomIn className="h-12 w-12 text-white/80"/>
                     </div>
@@ -202,7 +202,7 @@ export default function ProductDetailPage({
             <div className="md:hidden w-full">
                 <Carousel className="w-full">
                     <CarouselContent>
-                        {images.map(image => (
+                        {images.length > 0 ? images.map(image => (
                             <CarouselItem key={image.id}>
                                 <div className="aspect-square relative rounded-lg overflow-hidden">
                                     <Image
@@ -219,7 +219,11 @@ export default function ProductDetailPage({
                                     </Button>
                                 </div>
                             </CarouselItem>
-                        ))}
+                        )) : (
+                           <CarouselItem>
+                             <div className="aspect-square relative rounded-lg overflow-hidden bg-secondary flex items-center justify-center text-muted-foreground">No Image</div>
+                           </CarouselItem>
+                        )}
                     </CarouselContent>
                     {images.length > 1 && (
                       <>
@@ -248,8 +252,8 @@ export default function ProductDetailPage({
               
               <Separator />
 
-              {/* Desktop-only action buttons */}
-              <div className="hidden md:flex flex-col gap-4 mt-4">
+              {/* --- ACTION BUTTONS (Mobile & Desktop) --- */}
+              <div className="flex flex-col gap-4 mt-4">
                   <div className="flex items-center gap-4">
                       <div className="flex items-center border rounded-full h-12">
                           <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))} className="rounded-full"><Minus className="h-4 w-4" /></Button>
@@ -261,9 +265,9 @@ export default function ProductDetailPage({
                           <span className="sr-only">Add to favorites</span>
                       </Button>
                   </div>
-                  <div className="flex items-center gap-4">
-                      <Button size="lg" className="flex-1" onClick={() => addToCart(product, quantity)}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
-                      <Button size="lg" variant="outline" className="flex-1" onClick={handleBuyNow}><CreditCard className="mr-2 h-5 w-5" /> Buy Now</Button>
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <Button size="lg" className="w-full sm:flex-1" onClick={() => addToCart(product, quantity)}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
+                      <Button size="lg" variant="outline" className="w-full sm:flex-1" onClick={handleBuyNow}><CreditCard className="mr-2 h-5 w-5" /> Buy Now</Button>
                   </div>
               </div>
           </div>
@@ -274,30 +278,6 @@ export default function ProductDetailPage({
       
       <RelatedProducts currentProductId={product.id} />
 
-      {/* Sticky Action Bar for Mobile */}
-      <div className="md:hidden sticky bottom-0 left-0 right-0 bg-secondary/80 backdrop-blur-sm border-t p-2 sm:p-4 space-y-2">
-        <div className="flex items-center justify-between">
-            <div className="flex items-center border rounded-full h-12 bg-background">
-                <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))} className="rounded-full h-12 w-12"><Minus className="h-5 w-5" /></Button>
-                <span className="w-10 text-center font-bold text-lg">{quantity}</span>
-                <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)} className="rounded-full h-12 w-12"><Plus className="h-5 w-5" /></Button>
-            </div>
-             <div className="text-right">
-                <p className="text-xs text-muted-foreground">Total Price</p>
-                <p className="font-bold text-xl text-primary">${(product.price * quantity).toLocaleString()}</p>
-             </div>
-        </div>
-        <div className="flex items-center gap-2">
-            <Button size="lg" variant="outline" className="flex-1" onClick={() => addToCart(product, quantity)}>
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
-            </Button>
-            <Button size="lg" className="flex-1" onClick={handleBuyNow}>
-                Buy Now
-            </Button>
-        </div>
-      </div>
     </PageTransition>
   );
 }
-
