@@ -1,13 +1,13 @@
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart, Gem, LogOut } from 'lucide-react';
+import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart, Gem, LogOut, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser as useFirebaseUser } from '@/firebase';
 import { ADMIN_EMAIL } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -30,7 +30,7 @@ export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
-  const { user, isUserLoading } = useUser();
+  const { user, isUserLoading } = useFirebaseUser();
   const auth = useAuth();
   const isAdmin = user?.email === ADMIN_EMAIL;
 
