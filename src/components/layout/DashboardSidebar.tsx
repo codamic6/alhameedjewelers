@@ -9,6 +9,7 @@ import { ADMIN_EMAIL } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { SheetTitle } from '../ui/sheet';
 
 export const mainNav = [
   { href: '/dashboard/account', label: 'My Account', icon: Settings },
@@ -74,6 +75,7 @@ export default function DashboardSidebar() {
 
   return (
     <div className="flex h-full max-h-screen flex-col gap-2">
+       <SheetTitle className="sr-only">Dashboard Menu</SheetTitle>
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <Gem className="h-6 w-6 text-primary" />
