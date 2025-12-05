@@ -193,7 +193,7 @@ export default function ProductDetailPage({
               </Dialog>
 
               <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm" onClick={handleFavoriteClick}>
-                <Heart className={cn("h-5 w-5", isProductFavorited && "fill-red-500 text-red-500")} />
+                <Heart className={cn("h-5 w-5", isProductFavorited && "fill-primary text-primary")} />
                 <span className="sr-only">Add to favorites</span>
               </Button>
 
@@ -245,7 +245,7 @@ export default function ProductDetailPage({
                         )}
                     </CarouselContent>
                      <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm" onClick={handleFavoriteClick}>
-                        <Heart className={cn("h-5 w-5", isProductFavorited && "fill-red-500 text-red-500")} />
+                        <Heart className={cn("h-5 w-5", isProductFavorited && "fill-primary text-primary")} />
                         <span className="sr-only">Add to favorites</span>
                     </Button>
                     {images.length > 1 && (
@@ -284,7 +284,7 @@ export default function ProductDetailPage({
                           <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)} className="rounded-full"><Plus className="h-4 w-4" /></Button>
                       </div>
                       <Button variant="ghost" size="icon" className="rounded-full h-12 w-12 border hidden md:flex" onClick={handleFavoriteClick}>
-                          <Heart className={cn("h-5 w-5", isProductFavorited && "fill-red-500 text-red-500")} />
+                          <Heart className={cn("h-5 w-5", isProductFavorited && "fill-primary text-primary")} />
                           <span className="sr-only">Add to favorites</span>
                       </Button>
                   </div>

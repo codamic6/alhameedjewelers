@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -71,7 +72,7 @@ export const FavoriteProvider = ({ children }: { children: ReactNode }) => {
         setFavorites(prev => [...prev, productId]);
         toast({
           title: 'Added to Favorites!',
-          icon: <Heart className="h-5 w-5 fill-red-500 text-red-500" />,
+          icon: <Heart className="h-5 w-5 fill-primary text-primary" />,
         });
       } catch (error) {
         console.error('Error adding favorite:', error);
