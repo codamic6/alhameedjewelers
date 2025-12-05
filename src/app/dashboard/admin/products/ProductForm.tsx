@@ -192,7 +192,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
               <FormLabel>Product Media</FormLabel>
               <FormControl>
                 <FileUpload 
-                  bucket="products"
+                  bucket="Assets"
                   value={field.value}
                   onChange={field.onChange}
                 />
