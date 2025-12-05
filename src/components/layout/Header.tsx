@@ -23,6 +23,7 @@ import { ADMIN_EMAIL } from '@/lib/constants';
 import Search from '../Search';
 import { mainNav, adminNav } from './DashboardSidebar';
 import { Separator } from '../ui/separator';
+import { useSidebar } from '../ui/sidebar';
 
 const topNavLinks = [
   { href: '/', label: 'Home' },
@@ -40,6 +41,8 @@ export default function Header() {
   const { user } = useUser();
   const auth = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
+  const { toggleSidebar } = useSidebar();
+
 
   const isDashboard = pathname.startsWith('/dashboard');
 
@@ -157,7 +160,16 @@ export default function Header() {
       <div className="container flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
            {isDashboard ? (
-             <DashboardMobileNav />
+             <>
+                <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                </Button>
+                <Button variant="ghost" size="icon" className="hidden md:flex" onClick={toggleSidebar}>
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                </Button>
+             </>
            ) : (
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>

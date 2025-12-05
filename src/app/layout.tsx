@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { CartProvider } from '@/hooks/use-cart';
 import { FirebaseClientProvider } from '@/firebase';
 import { FavoriteProvider } from '@/hooks/use-favorites';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 const alegreya = Alegreya({
   subsets: ['latin'],
@@ -41,7 +42,9 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <CartProvider>
             <FavoriteProvider>
-              {children}
+              <SidebarProvider>
+                {children}
+              </SidebarProvider>
               <Toaster />
             </FavoriteProvider>
           </CartProvider>
