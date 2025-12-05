@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 
+// Main dashboard component for the admin panel.
 export default function AdminDashboardPage() {
   const firestore = useFirestore();
 
@@ -55,11 +55,13 @@ export default function AdminDashboardPage() {
   const totalProducts = products?.length ?? 0;
 
   // Helper function to safely convert orderDate to a Date object
-  const getOrderDate = (orderDate: Timestamp | string): Date => {
+  const getOrderDate = (orderDate: Timestamp | string | Date): Date => {
     if (orderDate instanceof Timestamp) {
       return orderDate.toDate();
     }
-    // Attempt to parse if it's a string, with a fallback
+    if (orderDate instanceof Date) {
+        return orderDate;
+    }
     const date = new Date(orderDate);
     return isNaN(date.getTime()) ? new Date() : date;
   };
