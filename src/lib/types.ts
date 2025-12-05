@@ -7,7 +7,7 @@ export type Product = {
   description: string;
   price: number;
   category: string;
-  imageIds: string[]; // Changed from imageId to imageIds
+  imageUrls: string[]; // Changed from imageIds to imageUrls
   tags?: string[];
 };
 

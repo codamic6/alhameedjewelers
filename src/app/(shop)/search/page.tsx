@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
@@ -71,7 +70,7 @@ export default function SearchPage() {
             <div className="space-y-4">
                 <AnimatePresence>
                 {results.map((product, index) => {
-                    const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
+                    const image = product.imageUrls && product.imageUrls[0];
                     return(
                     <motion.div
                         key={product.id}
@@ -84,12 +83,11 @@ export default function SearchPage() {
                             <div className="bg-[#0A0A0A] p-4 rounded-lg flex items-center gap-4 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(212,175,55,0.2)]">
                                 {image && (
                                     <Image
-                                    src={image.imageUrl}
+                                    src={image}
                                     alt={product.name}
                                     width={60}
                                     height={60}
                                     className="rounded-md aspect-square object-cover"
-                                    data-ai-hint={image.imageHint}
                                     />
                                 )}
                                 <div className="flex-1">

@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from './ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
@@ -13,7 +12,7 @@ type ProductCardProps = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
-  const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
+  const image = product.imageUrls && product.imageUrls[0];
 
   return (
     <motion.div
@@ -22,15 +21,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       transition={{ duration: 0.3 }}
     >
       <Link href={`/products/${product.slug}`} className="block">
-        <div className="aspect-square overflow-hidden">
+        <div className="aspect-square overflow-hidden bg-secondary">
           {image && (
             <Image
-              src={image.imageUrl}
+              src={image}
               alt={product.name}
               width={600}
               height={600}
               className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint={image.imageHint}
             />
           )}
         </div>

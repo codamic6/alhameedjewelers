@@ -3,9 +3,8 @@
 
 import Image from 'next/image';
 import { notFound, useRouter } from 'next/navigation';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Plus, Minus, Loader2, CreditCard, Heart, ZoomIn, X } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Loader2, CreditCard, Heart, ZoomIn, X, Video } from 'lucide-react';
 import { useState, useEffect, use } from 'react';
 import { useCart } from '@/hooks/use-cart';
 import PageTransition from '@/components/PageTransition';
@@ -63,7 +62,7 @@ export default function ProductDetailPage({
   const firestore = useFirestore();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedImageId, setSelectedImageId] = useState<string | undefined>(undefined);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | undefined>(undefined);
   const { user } = useUser();
   const { toast } = useToast();
   const { favorites, toggleFavorite, isFavorited } = useFavorites();
@@ -82,8 +81,8 @@ export default function ProductDetailPage({
           const productDoc = querySnapshot.docs[0];
           const productData = { id: productDoc.id, ...productDoc.data() } as Product;
           setProduct(productData);
-          if (productData.imageIds && productData.imageIds.length > 0) {
-            setSelectedImageId(productData.imageIds[0]);
+          if (productData.imageUrls && productData.imageUrls.length > 0) {
+            setSelectedImageUrl(productData.imageUrls[0]);
           }
         } else {
           setProduct(null);
@@ -141,8 +140,7 @@ export default function ProductDetailPage({
     notfound();
   }
 
-  const images = (product.imageIds || []).map(id => PlaceHolderImages.find(p => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
-  const selectedImage = images.find(p => p.id === selectedImageId);
+  const isVideo = (url: string) => /\.(mp4|mov|avi|webm)$/i.test(url);
   const isProductFavorited = isFavorited(product.id);
   
   return (
@@ -156,18 +154,24 @@ export default function ProductDetailPage({
             <div className="hidden md:flex flex-col gap-4 sticky top-24">
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg cursor-zoom-in group">
-                    {selectedImage ? (
-                      <Image
-                        src={selectedImage.imageUrl}
-                        alt={product.name}
-                        width={800}
-                        height={800}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        data-ai-hint={selectedImage.imageHint}
-                        priority
-                      />
-                    ) : <div className="w-full h-full bg-secondary flex items-center justify-center text-muted-foreground">No Image</div>}
+                  <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg cursor-zoom-in group bg-secondary">
+                    {selectedImageUrl ? (
+                        isVideo(selectedImageUrl) ? (
+                            <video key={selectedImageUrl} controls className="w-full h-full object-contain">
+                                <source src={selectedImageUrl} />
+                                Your browser does not support the video tag.
+                            </video>
+                        ) : (
+                          <Image
+                            src={selectedImageUrl}
+                            alt={product.name}
+                            width={800}
+                            height={800}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            priority
+                          />
+                        )
+                    ) : <div className="w-full h-full flex items-center justify-center text-muted-foreground">No Image</div>}
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <ZoomIn className="h-12 w-12 text-white/80"/>
                     </div>
@@ -175,19 +179,26 @@ export default function ProductDetailPage({
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl p-2 bg-transparent border-none shadow-none">
                     <DialogTitle className="sr-only">{product.name} - Enlarged View</DialogTitle>
-                   {selectedImage && (
-                      <Image
-                        src={selectedImage.imageUrl}
-                        alt={product.name}
-                        width={1200}
-                        height={1200}
-                        className="w-full h-auto object-contain rounded-lg"
-                        data-ai-hint={selectedImage.imageHint}
-                      />
+                   {selectedImageUrl && (
+                        isVideo(selectedImageUrl) ? (
+                            <video key={selectedImageUrl} controls autoPlay className="w-full h-auto max-h-[90vh] object-contain rounded-lg">
+                                <source src={selectedImageUrl} />
+                            </video>
+                        ) : (
+                           <Image
+                            src={selectedImageUrl}
+                            alt={product.name}
+                            width={1200}
+                            height={1200}
+                            className="w-full h-auto object-contain rounded-lg"
+                          />
+                        )
                    )}
-                   <DialogClose className="absolute -top-2 -right-2 rounded-full bg-background p-2 opacity-100 hover:opacity-80">
+                   <DialogClose asChild>
+                     <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 rounded-full bg-background h-8 w-8">
                       <X className="h-5 w-5" />
                       <span className="sr-only">Close</span>
+                     </Button>
                    </DialogClose>
                 </DialogContent>
               </Dialog>
@@ -197,24 +208,30 @@ export default function ProductDetailPage({
                 <span className="sr-only">Add to favorites</span>
               </Button>
 
-              {images.length > 1 && (
+              {product.imageUrls.length > 1 && (
                 <div className="grid grid-cols-5 gap-2">
-                  {images.map(image => (
+                  {product.imageUrls.map(url => (
                     <button 
-                      key={image.id}
-                      onClick={() => setSelectedImageId(image.id)}
+                      key={url}
+                      onClick={() => setSelectedImageUrl(url)}
                       className={cn(
                         "aspect-square rounded-md overflow-hidden ring-offset-background ring-offset-2 focus:ring-2 focus:outline-none transition-all",
-                        selectedImageId === image.id ? "ring-2 ring-primary shadow-lg" : "ring-1 ring-transparent hover:ring-primary/50 opacity-70 hover:opacity-100"
+                        selectedImageUrl === url ? "ring-2 ring-primary shadow-lg" : "ring-1 ring-transparent hover:ring-primary/50 opacity-70 hover:opacity-100"
                       )}
                     >
-                      <Image
-                        src={image.imageUrl}
-                        alt={`Thumbnail of ${product.name}`}
-                        width={150}
-                        height={150}
-                        className="w-full h-full object-cover"
-                      />
+                      {isVideo(url) ? (
+                          <div className="w-full h-full bg-black flex items-center justify-center">
+                            <Video className="h-8 w-8 text-white"/>
+                          </div>
+                      ) : (
+                        <Image
+                            src={url}
+                            alt={`Thumbnail of ${product.name}`}
+                            width={150}
+                            height={150}
+                            className="w-full h-full object-cover"
+                        />
+                      )}
                     </button>
                   ))}
                 </div>
@@ -225,17 +242,22 @@ export default function ProductDetailPage({
             <div className="md:hidden w-full">
                 <Carousel className="w-full">
                     <CarouselContent>
-                        {images.length > 0 ? images.map(image => (
-                            <CarouselItem key={image.id}>
-                                <div className="aspect-square relative rounded-lg overflow-hidden">
-                                    <Image
-                                        src={image.imageUrl}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover"
-                                        data-ai-hint={image.imageHint}
-                                        priority
-                                    />
+                        {product.imageUrls.length > 0 ? product.imageUrls.map(url => (
+                            <CarouselItem key={url}>
+                                <div className="aspect-square relative rounded-lg overflow-hidden bg-secondary">
+                                    {isVideo(url) ? (
+                                        <video key={url} controls className="w-full h-full object-contain">
+                                            <source src={url} />
+                                        </video>
+                                    ) : (
+                                        <Image
+                                            src={url}
+                                            alt={product.name}
+                                            fill
+                                            className="object-cover"
+                                            priority
+                                        />
+                                    )}
                                 </div>
                             </CarouselItem>
                         )) : (
@@ -248,7 +270,7 @@ export default function ProductDetailPage({
                         <Heart className={cn("h-5 w-5", isProductFavorited && "fill-primary text-primary")} />
                         <span className="sr-only">Add to favorites</span>
                     </Button>
-                    {images.length > 1 && (
+                    {product.imageUrls.length > 1 && (
                       <>
                         <CarouselPrevious className="left-2" />
                         <CarouselNext className="right-2" />
@@ -275,7 +297,7 @@ export default function ProductDetailPage({
               
               <Separator />
 
-              {/* --- ACTION BUTTONS (Mobile & Desktop) --- */}
+              {/* --- ACTION BUTTONS --- */}
               <div className="flex flex-col gap-4 mt-4">
                   <div className="flex items-center gap-4">
                       <div className="flex items-center border rounded-full h-12">

@@ -2,7 +2,6 @@
 'use client';
 
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import {
   Table,
   TableBody,
@@ -110,7 +109,7 @@ export default function AdminProductsPage() {
               {/* Mobile View */}
               <div className="md:hidden space-y-4">
                 {products.map((product) => {
-                  const image = PlaceHolderImages.find(p => p.id === product.imageIds[0]);
+                  const image = product.imageUrls && product.imageUrls[0];
                   return (
                     <Card key={product.id} className="bg-secondary/50 overflow-hidden">
                       <div className="flex items-start p-4 gap-4">
@@ -119,9 +118,8 @@ export default function AdminProductsPage() {
                             alt={product.name}
                             className="aspect-square rounded-md object-cover"
                             height="80"
-                            src={image.imageUrl}
+                            src={image}
                             width="80"
-                            data-ai-hint={image.imageHint}
                           />
                         )}
                         <div className="flex-1">
@@ -162,9 +160,7 @@ export default function AdminProductsPage() {
                       </TableHeader>
                       <TableBody>
                         {products?.map(product => {
-                          const image = PlaceHolderImages.find(
-                            img => img.id === product.imageIds[0]
-                          );
+                          const image = product.imageUrls && product.imageUrls[0];
                           return (
                             <TableRow key={product.id}>
                               <TableCell className="hidden sm:table-cell">
@@ -173,9 +169,8 @@ export default function AdminProductsPage() {
                                     alt={product.name}
                                     className="aspect-square rounded-md object-cover"
                                     height="64"
-                                    src={image.imageUrl}
+                                    src={image}
                                     width="64"
-                                    data-ai-hint={image.imageHint}
                                   />
                                 )}
                               </TableCell>

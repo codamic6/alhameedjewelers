@@ -5,7 +5,6 @@ import { Search as SearchIcon, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { usePathname } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
@@ -91,7 +90,7 @@ export default function Search() {
             {results.length > 0 ? (
                  <ul>
                     {results.map((product) => {
-                        const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
+                        const image = product.imageUrls && product.imageUrls[0];
                         return (
                         <li key={product.id}>
                             <Link
@@ -100,12 +99,11 @@ export default function Search() {
                             >
                             {image && (
                                 <Image
-                                src={image.imageUrl}
+                                src={image}
                                 alt={product.name}
                                 width={50}
                                 height={50}
                                 className="rounded-md aspect-square object-cover"
-                                data-ai-hint={image.imageHint}
                                 />
                             )}
                             <div className="ml-4 flex-1">

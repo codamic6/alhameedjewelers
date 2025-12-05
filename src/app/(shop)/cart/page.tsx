@@ -4,7 +4,6 @@
 import { useCart } from '@/hooks/use-cart';
 import Image from 'next/image';
 import Link from 'next/link';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus, Trash2, ShoppingCart as ShoppingCartIcon, Loader2, TicketPercent } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -52,18 +51,17 @@ export default function CartPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-2 space-y-4">
             {cartItems.map(({ product, quantity }) => {
-              const image = PlaceHolderImages.find(p => p.id === (product.imageIds && product.imageIds[0]));
+              const image = product.imageUrls && product.imageUrls[0];
               return (
                 <Card key={product.id} className="flex items-center p-4">
                   <div className="w-24 h-24 aspect-square rounded-md overflow-hidden mr-4 shrink-0">
                     {image && (
                       <Image
-                        src={image.imageUrl}
+                        src={image}
                         alt={product.name}
                         width={100}
                         height={100}
                         className="object-cover w-full h-full"
-                        data-ai-hint={image.imageHint}
                       />
                     )}
                   </div>
