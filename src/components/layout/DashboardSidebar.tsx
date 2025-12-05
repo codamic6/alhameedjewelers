@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -69,9 +70,8 @@ export default function DashboardSidebar() {
     <SidebarMenu>
       {items.map(({ href, label, icon: Icon, exact = false }) => (
         <SidebarMenuItem key={href}>
-          <Link href={href} passHref legacyBehavior>
+          <Link href={href}>
             <SidebarMenuButton
-              as="a"
               isActive={exact ? pathname === href : pathname.startsWith(href)}
               tooltip={label}
             >
