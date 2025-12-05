@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useStorage } from '@/firebase/provider';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Loader2, UploadCloud, Trash2, FileVideo, FileImage } from 'lucide-react';
@@ -10,74 +11,91 @@ import Image from 'next/image';
 import { v4 as uuidv4 } from 'uuid';
 
 interface FileUploadProps {
-  bucket: string;
   value: string[];
   onChange: (urls: string[]) => void;
 }
 
-export default function FileUpload({ bucket, value, onChange }: FileUploadProps) {
+export default function FileUpload({ value, onChange }: FileUploadProps) {
+  const storage = useStorage();
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return;
-
     const files = Array.from(event.target.files);
     await uploadFiles(files);
   };
   
   const uploadFiles = async (files: File[]) => {
       setIsUploading(true);
-      setUploadProgress(0);
+      setUploadProgress({});
 
-      const uploadedUrls = [...value];
+      const uploadPromises = files.map(file => {
+        return new Promise<string | null>((resolve, reject) => {
+            const fileId = uuidv4();
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${fileId}.${fileExt}`;
+            const storageRef = ref(storage, `products/${fileName}`);
+            
+            const uploadTask = uploadBytesResumable(storageRef, file);
 
-      for (const file of files) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `${fileName}`;
-
-        const { error } = await supabase.storage.from(bucket).upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setUploadProgress(prev => ({...prev, [fileName]: progress}));
+                },
+                (error) => {
+                    console.error("Upload error:", error);
+                    toast({ variant: 'destructive', title: 'Upload failed', description: `Could not upload ${file.name}.` });
+                    reject(null);
+                },
+                async () => {
+                    try {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve(downloadURL);
+                    } catch (error) {
+                        console.error("Error getting download URL:", error);
+                        toast({ variant: 'destructive', title: 'Upload failed', description: `Could not get URL for ${file.name}.` });
+                        reject(null);
+                    }
+                }
+            );
         });
-
-        if (error) {
-          toast({ variant: 'destructive', title: 'Upload failed', description: error.message });
-          console.error('Supabase upload error:', error);
-          continue; // Move to the next file
+      });
+      
+      try {
+        const urls = await Promise.all(uploadPromises);
+        const successfulUrls = urls.filter((url): url is string => url !== null);
+        onChange([...value, ...successfulUrls]);
+        if (successfulUrls.length > 0) {
+            toast({ title: "Upload complete", description: `${successfulUrls.length} file(s) uploaded.` });
         }
-
-        const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-        if (data.publicUrl) {
-          uploadedUrls.push(data.publicUrl);
-        }
+      } catch (error) {
+         // Errors are handled inside the promise, but a catch block is good practice
+         console.error("An error occurred during one of the uploads.", error);
+      } finally {
+        setIsUploading(false);
+        // Reset progress after a short delay
+        setTimeout(() => setUploadProgress({}), 2000);
       }
-      
-      onChange(uploadedUrls);
-      setIsUploading(false);
-      setUploadProgress(100);
-      
-      toast({ title: "Upload complete", description: `${files.length} file(s) uploaded.` });
-       // Reset progress after a short delay
-      setTimeout(() => setUploadProgress(0), 1000);
   }
 
   const handleDelete = async (url: string) => {
-    const fileName = url.split('/').pop();
-    if (!fileName) return;
-
-    const { error } = await supabase.storage.from(bucket).remove([fileName]);
-
-    if (error) {
-      toast({ variant: 'destructive', title: 'Delete failed', description: error.message });
-      console.error('Supabase delete error:', error);
-    } else {
+    try {
+      const fileRef = ref(storage, url);
+      await deleteObject(fileRef);
       onChange(value.filter((currentUrl) => currentUrl !== url));
       toast({ title: 'File deleted' });
+    } catch (error: any) {
+       toast({ variant: 'destructive', title: 'Delete failed', description: error.message });
+       console.error('Firebase storage delete error:', error);
     }
   };
+  
+  const totalProgress = Object.values(uploadProgress).length > 0
+    ? Object.values(uploadProgress).reduce((acc, p) => acc + p, 0) / Object.values(uploadProgress).length
+    : 0;
 
   const getFileIcon = (url: string) => {
       if (/\.(jpg|jpeg|png|gif|webp)$/i.test(url)) {
@@ -101,6 +119,7 @@ export default function FileUpload({ bucket, value, onChange }: FileUploadProps)
           id="file-upload"
           type="file"
           multiple
+          accept="image/*,video/*"
           className="hidden"
           onChange={handleFileChange}
           disabled={isUploading}
@@ -110,7 +129,7 @@ export default function FileUpload({ bucket, value, onChange }: FileUploadProps)
       {isUploading && (
         <div className="space-y-1">
           <p className="text-sm">Uploading...</p>
-          <Progress value={uploadProgress} />
+          <Progress value={totalProgress} />
         </div>
       )}
 
