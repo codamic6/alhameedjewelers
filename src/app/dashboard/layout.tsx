@@ -8,16 +8,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-    <Header />
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <DashboardSidebar />
-      <div className="flex flex-col">
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/20">
-          <PageTransition>{children}</PageTransition>
+    <div className="min-h-screen w-full bg-background">
+      <Header />
+      <div className="grid md:grid-cols-[260px_1fr]">
+        <DashboardSidebar />
+        <main className="flex flex-col">
+          <div className="flex-1 p-4 lg:p-6">
+            <PageTransition>{children}</PageTransition>
+          </div>
         </main>
       </div>
     </div>
-    </>
   );
 }

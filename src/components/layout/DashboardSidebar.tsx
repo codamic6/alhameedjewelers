@@ -1,17 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart, Gem, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { useUser } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { ADMIN_EMAIL } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { signOut } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
 
 export const mainNav = [
   { href: '/dashboard/account', label: 'My Account', icon: Settings },
@@ -30,55 +28,87 @@ export const adminNav = [
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
   const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const isAdmin = user?.email === ADMIN_EMAIL;
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: 'Logged Out',
+        description: 'You have been successfully logged out.',
+      });
+      router.push('/');
+    } catch (error) {
+      console.error('Logout Error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Logout Failed',
+        description: 'An error occurred during logout. Please try again.',
+      });
+    }
+  };
 
   const renderNav = (items: typeof mainNav | typeof adminNav) => (
-    <TooltipProvider>
-      <nav className="grid items-start gap-1 px-2 text-sm font-medium">
-        {items.map(({ href, label, icon: Icon, exact=false }) => (
-          <Tooltip key={href}>
-            <TooltipTrigger asChild>
-              <Link
-                href={href}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                  (exact ? pathname === href : pathname.startsWith(href)) && 'bg-muted text-primary'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>{label}</p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
-      </nav>
-    </TooltipProvider>
+    <nav className="grid items-start gap-1 text-sm font-medium">
+      {items.map(({ href, label, icon: Icon, exact = false }) => (
+        <Link
+          key={href}
+          href={href}
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:bg-sidebar-hover hover:text-sidebar-hover-foreground',
+            (exact ? pathname === href : pathname.startsWith(href)) && 'bg-sidebar-active text-sidebar-active-foreground'
+          )}
+        >
+          <Icon className="h-4 w-4" />
+          {label}
+        </Link>
+      ))}
+    </nav>
   );
 
   return (
-    <div className="hidden border-r bg-muted/40 md:block">
-      <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex-1 overflow-y-auto pt-8">
-          <div className="py-4">
-            <h3 className="mx-4 mb-2 px-2 text-lg font-semibold tracking-tight">Account</h3>
+    <aside className="hidden md:block bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
+      <div className="flex h-full max-h-screen flex-col">
+        <div className="flex h-16 items-center border-b border-sidebar-border px-4">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <Gem className="h-6 w-6 text-primary" />
+            <span className="font-logo text-xl">Al-Hameed</span>
+          </Link>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <div className="py-4 px-2">
+            <h3 className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground/80">Account</h3>
             {renderNav(mainNav)}
           </div>
           {!isUserLoading && isAdmin && (
-            <div className="py-4">
-              <h3 className="mx-4 mb-2 px-2 text-lg font-semibold tracking-tight flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                Admin
+            <div className="py-4 px-2">
+              <h3 className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground/80 flex items-center gap-2">
+                <Shield className="h-4 w-4" /> Admin
               </h3>
               {renderNav(adminNav)}
             </div>
           )}
         </div>
+        <div className="mt-auto border-t border-sidebar-border p-4">
+          {user && (
+            <div className="flex items-center gap-3">
+              <User className="h-10 w-10 rounded-full bg-sidebar-active p-2 text-sidebar-active-foreground" />
+              <div className="flex-1 overflow-hidden">
+                <p className="truncate font-medium">{user.displayName || user.email}</p>
+                <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
+                <LogOut className="h-5 w-5" />
+                <span className="sr-only">Logout</span>
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }

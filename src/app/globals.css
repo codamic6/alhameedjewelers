@@ -42,10 +42,10 @@
 
     --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 45 68% 52%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 10.2%;
-    --sidebar-accent-foreground: 45 68% 52%;
+    --sidebar-active: 0 0% 10.2%;
+    --sidebar-active-foreground: 0 0% 98%;
+    --sidebar-hover: 0 0% 14.2%;
+    --sidebar-hover-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 16.9%;
     --sidebar-ring: 45 68% 52%;
   }
