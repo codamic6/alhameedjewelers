@@ -48,13 +48,13 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight text-primary">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-primary font-headline">Admin Dashboard</h1>
       <p className="text-muted-foreground">An overview of your store's performance.</p>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-6">
-        <Card>
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium text-primary">Total Revenue</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -62,9 +62,9 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">From delivered orders</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <CardTitle className="text-sm font-medium text-primary">Total Orders</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -72,9 +72,9 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">Across all statuses</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Customers</CardTitle>
+            <CardTitle className="text-sm font-medium text-primary">Customers</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -82,9 +82,9 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">Total registered users</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Products</CardTitle>
+            <CardTitle className="text-sm font-medium text-primary">Products</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -94,9 +94,9 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-       <Card className="mt-8">
+       <Card className="mt-8 bg-card">
           <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
+              <CardTitle className="text-primary">Recent Orders</CardTitle>
           </CardHeader>
           <CardContent>
               {/* A more advanced recent orders component would go here */}

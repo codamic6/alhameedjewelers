@@ -1,28 +1,14 @@
-
 'use client';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart, LogOut, User as UserIcon } from 'lucide-react';
+import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart, LogOut, Gem, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser as useFirebaseUser } from '@/firebase';
 import { ADMIN_EMAIL } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  SidebarTrigger,
-  SidebarGroup,
-  SidebarGroupLabel,
-  useSidebar,
-} from '@/components/ui/sidebar';
 
 export const mainNav = [
   { href: '/dashboard/account', label: 'My Account', icon: Settings },
@@ -46,7 +32,6 @@ export default function DashboardSidebar() {
   const { user, isUserLoading } = useFirebaseUser();
   const auth = useAuth();
   const isAdmin = user?.email === ADMIN_EMAIL;
-  const { state } = useSidebar();
 
   const handleLogout = async () => {
     try {
@@ -66,54 +51,64 @@ export default function DashboardSidebar() {
     }
   };
 
-  const renderNav = (items: typeof mainNav | typeof adminNav, isMobile: boolean = false) => (
-    <SidebarMenu>
-      {items.map(({ href, label, icon: Icon, exact = false }) => (
-        <SidebarMenuItem key={href}>
-          <Link href={href}>
-            <SidebarMenuButton
-              isActive={exact ? pathname === href : pathname.startsWith(href)}
-              tooltip={label}
-            >
-              <Icon />
-              <span>{label}</span>
-            </SidebarMenuButton>
+  const renderNav = (items: typeof mainNav | typeof adminNav) => (
+     <nav className="grid items-start gap-1 text-sm font-medium">
+      {items.map(({ href, label, icon: Icon, exact = false }) => {
+        const isActive = exact ? pathname === href : pathname.startsWith(href);
+        return (
+          <Link
+            key={href}
+            href={href}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+              isActive && 'bg-muted text-primary'
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
           </Link>
-        </SidebarMenuItem>
-      ))}
-    </SidebarMenu>
+        );
+      })}
+    </nav>
   );
 
   return (
-      <Sidebar collapsible="icon" className="hidden md:flex">
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Account</SidebarGroupLabel>
-            {renderNav(mainNav)}
-          </SidebarGroup>
+    <div className="flex h-full max-h-screen flex-col gap-2">
+      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <Gem className="h-6 w-6 text-primary" />
+          <span className="font-logo text-white">Al-Hameed</span>
+        </Link>
+      </div>
+      <div className="flex-1 overflow-auto py-2">
+        <div className="grid items-start p-2 text-sm font-medium lg:p-4">
+            <h3 className="px-3 py-2 text-xs font-semibold uppercase text-muted-foreground/80">Account</h3>
+          {renderNav(mainNav)}
           {!isUserLoading && isAdmin && (
-            <SidebarGroup>
-              <SidebarGroupLabel className="flex items-center gap-2">
-                <Shield /> Admin
-              </SidebarGroupLabel>
+            <>
+              <h3 className="px-3 mt-4 py-2 text-xs font-semibold uppercase text-muted-foreground/80 flex items-center gap-2">
+                <Shield className="h-4 w-4" /> Admin
+              </h3>
               {renderNav(adminNav)}
-            </SidebarGroup>
+            </>
           )}
-        </SidebarContent>
-
-        <SidebarFooter>
-          {user && (
-            <div className="flex items-center gap-2">
-              <UserIcon className={cn("h-8 w-8 rounded-full bg-sidebar-active p-1.5 text-sidebar-active-foreground", state === 'collapsed' && 'h-10 w-10')} />
-              <div className={cn("flex-1 overflow-hidden transition-opacity duration-200", state === 'collapsed' && 'opacity-0 w-0')}>
-                <p className="truncate text-sm font-medium">{user.displayName || user.email}</p>
+        </div>
+      </div>
+        <div className="mt-auto p-4 border-t">
+           {user && (
+            <div className="flex items-center gap-3 mb-4">
+              <UserIcon className="h-10 w-10 rounded-full bg-muted p-2 text-primary" />
+              <div className="flex-1 overflow-hidden">
+                <p className="truncate font-medium text-white">{user.displayName || user.email}</p>
+                <p className="truncate text-sm text-muted-foreground">{user.email}</p>
               </div>
-               <Button variant="ghost" size="icon" onClick={handleLogout} className={cn("transition-opacity duration-200", state === 'collapsed' && 'opacity-0 w-0')}>
-                <LogOut className="h-5 w-5" />
-              </Button>
             </div>
-          )}
-        </SidebarFooter>
-      </Sidebar>
+           )}
+        <Button variant="secondary" className="w-full" onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
+      </div>
+    </div>
   );
 }
