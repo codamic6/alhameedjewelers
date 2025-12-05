@@ -10,9 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Loader2, Edit, Trash2, ShoppingBag } from 'lucide-react';
+import { MoreHorizontal, Loader2, ShoppingBag } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,16 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import ProductForm from './ProductForm';
-import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useRouter } from 'next/navigation';
 import ProductCardActions from './ProductCardActions';
 
@@ -41,7 +32,6 @@ export default function AdminProductsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
-  const isMobile = useIsMobile();
   
   const productsCollection = useMemoFirebase(
     () => (firestore ? collection(firestore, 'products') : null),
@@ -49,25 +39,8 @@ export default function AdminProductsPage() {
   );
   const { data: products, isLoading } = useCollection<Product>(productsCollection);
   
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
-
-  const handleEdit = (product: Product) => {
-    if (isMobile) {
-      router.push(`/dashboard/admin/products/edit/${product.id}`);
-    } else {
-      setSelectedProduct(product);
-      setDialogOpen(true);
-    }
-  };
-
   const handleAdd = () => {
-    if (isMobile) {
-      router.push('/dashboard/admin/products/new');
-    } else {
-      setSelectedProduct(undefined);
-      setDialogOpen(true);
-    }
+    router.push('/dashboard/admin/products/new');
   };
 
   const handleDelete = async (productId: string) => {
@@ -83,7 +56,6 @@ export default function AdminProductsPage() {
   };
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <div>
         <div className="flex items-center justify-between">
           <div>
@@ -130,7 +102,7 @@ export default function AdminProductsPage() {
                         </div>
                       </div>
                       <CardFooter className="bg-secondary/20 flex gap-2 p-2">
-                        <ProductCardActions product={product} onEdit={handleEdit} />
+                        <ProductCardActions product={product} />
                       </CardFooter>
                     </Card>
                   );
@@ -193,7 +165,7 @@ export default function AdminProductsPage() {
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                    <DropdownMenuItem onClick={() => handleEdit(product)}>
+                                    <DropdownMenuItem onClick={() => router.push(`/dashboard/admin/products/edit/${product.id}`)}>
                                       Edit
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
@@ -223,18 +195,5 @@ export default function AdminProductsPage() {
           )}
         </div>
       </div>
-
-      <DialogContent className="sm:max-w-[625px]">
-        <DialogHeader>
-          <DialogTitle>
-            {selectedProduct ? 'Edit Product' : 'Add New Product'}
-          </DialogTitle>
-        </DialogHeader>
-        <ProductForm
-          product={selectedProduct}
-          onFinished={() => setDialogOpen(false)}
-        />
-      </DialogContent>
-    </Dialog>
   );
 }

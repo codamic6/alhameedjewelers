@@ -1,32 +1,25 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
 import type { Product } from "@/lib/types";
 import { deleteDoc, doc } from "firebase/firestore";
 import { Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from 'react';
 import { useFirestore } from '@/firebase';
 
 type ProductCardActionsProps = {
     product: Product;
-    onEdit: (product: Product) => void;
 };
 
-export default function ProductCardActions({ product, onEdit }: ProductCardActionsProps) {
+export default function ProductCardActions({ product }: ProductCardActionsProps) {
     const router = useRouter();
     const firestore = useFirestore();
     const { toast } = useToast();
-    const isMobile = useIsMobile();
 
     const handleEditClick = () => {
-        if (isMobile) {
-            router.push(`/dashboard/admin/products/edit/${product.id}`);
-        } else {
-            onEdit(product);
-        }
+        router.push(`/dashboard/admin/products/edit/${product.id}`);
     };
 
     const handleDeleteClick = async () => {

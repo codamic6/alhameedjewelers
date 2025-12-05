@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -121,9 +122,9 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column: Form Fields */}
-            <div className="space-y-4">
+            <div className="lg:col-span-2 space-y-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -244,8 +245,8 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
             </div>
         </div>
 
-        <div className="pt-4">
-            <Button type="submit" disabled={isSubmitting} className="w-full">
+        <div className="pt-4 flex justify-end">
+            <Button type="submit" disabled={isSubmitting} size="lg">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {product ? 'Update Product' : 'Add Product'}
             </Button>
