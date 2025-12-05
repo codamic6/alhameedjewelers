@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { CartProvider } from '@/hooks/use-cart';
 import { FirebaseClientProvider } from '@/firebase';
+import { FavoriteProvider } from '@/hooks/use-favorites';
 
 const alegreya = Alegreya({
   subsets: ['latin'],
@@ -39,8 +40,10 @@ export default function RootLayout({
       <body className={cn('min-h-screen bg-background font-body antialiased', alegreya.variable, inter.variable, cinzel.variable)}>
         <FirebaseClientProvider>
           <CartProvider>
-            {children}
-            <Toaster />
+            <FavoriteProvider>
+              {children}
+              <Toaster />
+            </FavoriteProvider>
           </CartProvider>
         </FirebaseClientProvider>
       </body>

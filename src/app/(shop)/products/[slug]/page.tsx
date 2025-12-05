@@ -12,12 +12,15 @@ import PageTransition from '@/components/PageTransition';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ProductCard from '@/components/ProductCard';
+import { useFavorites } from '@/hooks/use-favorites';
+import { useToast } from '@/hooks/use-toast';
+
 
 function RelatedProducts({ currentProductId }: { currentProductId: string }) {
     const firestore = useFirestore();
@@ -61,6 +64,9 @@ export default function ProductDetailPage({
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageId, setSelectedImageId] = useState<string | undefined>(undefined);
+  const { user } = useUser();
+  const { toast } = useToast();
+  const { favorites, toggleFavorite, isFavorited } = useFavorites();
 
   useEffect(() => {
     if (!firestore || !slug) return;
@@ -104,6 +110,21 @@ export default function ProductDetailPage({
       }
     }
   }, [product]);
+
+  const handleFavoriteClick = () => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Please log in',
+        description: 'You need to be logged in to add products to your favorites.',
+      });
+      router.push('/login');
+      return;
+    }
+    if (product) {
+      toggleFavorite(product.id);
+    }
+  };
   
   const handleBuyNow = () => {
     if(product) {
@@ -117,11 +138,12 @@ export default function ProductDetailPage({
   }
 
   if (!product) {
-    notFound();
+    notfound();
   }
 
   const images = (product.imageIds || []).map(id => PlaceHolderImages.find(p => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
   const selectedImage = images.find(p => p.id === selectedImageId);
+  const isProductFavorited = isFavorited(product.id);
   
   return (
     <PageTransition>
@@ -149,14 +171,10 @@ export default function ProductDetailPage({
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <ZoomIn className="h-12 w-12 text-white/80"/>
                     </div>
-                    <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm">
-                      <Heart className="h-5 w-5" />
-                      <span className="sr-only">Add to favorites</span>
-                    </Button>
                   </div>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl p-2 bg-transparent border-none shadow-none">
-                  <DialogTitle className="sr-only">{product.name} - Enlarged View</DialogTitle>
+                    <DialogTitle className="sr-only">{product.name} - Enlarged View</DialogTitle>
                    {selectedImage && (
                       <Image
                         src={selectedImage.imageUrl}
@@ -173,6 +191,11 @@ export default function ProductDetailPage({
                    </DialogClose>
                 </DialogContent>
               </Dialog>
+
+              <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm" onClick={handleFavoriteClick}>
+                <Heart className={cn("h-5 w-5", isProductFavorited && "fill-red-500 text-red-500")} />
+                <span className="sr-only">Add to favorites</span>
+              </Button>
 
               {images.length > 1 && (
                 <div className="grid grid-cols-5 gap-2">
@@ -213,10 +236,6 @@ export default function ProductDetailPage({
                                         data-ai-hint={image.imageHint}
                                         priority
                                     />
-                                     <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm">
-                                        <Heart className="h-5 w-5" />
-                                        <span className="sr-only">Add to favorites</span>
-                                    </Button>
                                 </div>
                             </CarouselItem>
                         )) : (
@@ -225,6 +244,10 @@ export default function ProductDetailPage({
                            </CarouselItem>
                         )}
                     </CarouselContent>
+                     <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm" onClick={handleFavoriteClick}>
+                        <Heart className={cn("h-5 w-5", isProductFavorited && "fill-red-500 text-red-500")} />
+                        <span className="sr-only">Add to favorites</span>
+                    </Button>
                     {images.length > 1 && (
                       <>
                         <CarouselPrevious className="left-2" />
@@ -260,8 +283,8 @@ export default function ProductDetailPage({
                           <span className="w-12 text-center font-bold">{quantity}</span>
                           <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)} className="rounded-full"><Plus className="h-4 w-4" /></Button>
                       </div>
-                      <Button variant="ghost" size="icon" className="rounded-full h-12 w-12 border">
-                          <Heart className="h-5 w-5" />
+                      <Button variant="ghost" size="icon" className="rounded-full h-12 w-12 border hidden md:flex" onClick={handleFavoriteClick}>
+                          <Heart className={cn("h-5 w-5", isProductFavorited && "fill-red-500 text-red-500")} />
                           <span className="sr-only">Add to favorites</span>
                       </Button>
                   </div>

@@ -308,6 +308,27 @@
         "slug",
         "description"
       ]
+    },
+    "Favorite": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Favorite",
+      "type": "object",
+      "description": "Represents a user's favorite product.",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "description": "The ID of the favorited product."
+        },
+        "addedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the product was favorited."
+        }
+      },
+      "required": [
+        "productId",
+        "addedAt"
+      ]
     }
   },
   "auth": {
@@ -413,7 +434,27 @@
           ]
         }
       },
-       {
+      {
+        "path": "/users/{userId}/favorites/{productId}",
+        "definition": {
+          "entityName": "Favorite",
+          "schema": {
+            "$ref": "#/backend/entities/Favorite"
+          },
+          "description": "Stores a user's favorite products. The document ID is the product ID. Users can only read/write their own favorites.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "productId",
+              "description": "Unique identifier for the favorited product."
+            }
+          ]
+        }
+      },
+      {
         "path": "/coupons/{couponId}",
         "definition": {
           "entityName": "Coupon",
@@ -446,8 +487,6 @@
         }
       }
     ],
-    "reasoning": "The Firestore data structure is designed to support the Al-Hameed Jewelers application, focusing on products, user management, orders, and personalized recommendations. The structure prioritizes Authorization Independence, DBAC, and supports secure list operations (QAPs).  Authorization Independence is achieved via path-based ownership and avoiding `get()` calls in security rules by storing user specific data under their own paths. This means no data outside of request.auth.uid is required for permission checks. Segregation of data is achieved via placing each entity in their own collection.  User-owned data (Orders, Recommendations) are stored in subcollections under the `/users/{userId}` path, ensuring clear ownership. This simplifies security rules, enabling only the authenticated user to access their own data, and administrators to manage all users data.\n\nThe `products` collection stores product details, accessible for reading by all users, while write access is restricted to administrators (not modeled here, but could be managed via a `/roles_admin/{uid}` collection check in rules). Orders and OrderItems are structured to ensure data integrity and easy retrieval of order information. Each user has their own subcollection for `orders`, facilitating efficient data access and management.\n\nRecommendations are also stored under each user's path, enabling personalized product suggestions.  The Payment on Delivery nature of this application impacts data structure very little but is taken into consideration. A new `coupons` collection is added to store discount information, with access restricted to admins for management. A new 'categories' collection is added for managing product categories."
+    "reasoning": "The Firestore data structure is designed to support the Al-Hameed Jewelers application, focusing on products, user management, orders, and personalized recommendations. The structure prioritizes Authorization Independence, DBAC, and supports secure list operations (QAPs).  Authorization Independence is achieved via path-based ownership and avoiding `get()` calls in security rules by storing user specific data under their own paths. This means no data outside of request.auth.uid is required for permission checks. Segregation of data is achieved via placing each entity in their own collection.  User-owned data (Orders, Recommendations, Favorites) are stored in subcollections under the `/users/{userId}` path, ensuring clear ownership. This simplifies security rules, enabling only the authenticated user to access their own data, and administrators to manage all users data.\n\nThe `products` collection stores product details, accessible for reading by all users, while write access is restricted to administrators (not modeled here, but could be managed via a `/roles_admin/{uid}` collection check in rules). Orders and OrderItems are structured to ensure data integrity and easy retrieval of order information. Each user has their own subcollection for `orders`, facilitating efficient data access and management.\n\nRecommendations are also stored under each user's path, enabling personalized product suggestions.  The Payment on Delivery nature of this application impacts data structure very little but is taken into consideration. A new `coupons` collection is added to store discount information, with access restricted to admins for management. A new 'categories' collection is added for managing product categories."
   }
 }
-
-    

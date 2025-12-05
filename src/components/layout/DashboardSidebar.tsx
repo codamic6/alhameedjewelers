@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid } from 'lucide-react';
+import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -16,6 +16,7 @@ import { ADMIN_EMAIL } from '@/lib/constants';
 export const mainNav = [
   { href: '/dashboard/account', label: 'My Account', icon: Settings },
   { href: '/dashboard/orders', label: 'My Orders', icon: Package },
+  { href: '/dashboard/favorites', label: 'My Favorites', icon: Heart },
 ];
 
 export const adminNav = [
