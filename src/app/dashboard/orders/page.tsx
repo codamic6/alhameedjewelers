@@ -97,7 +97,7 @@ export default function OrdersPage() {
                        </div>
                        <div className="flex justify-between items-center">
                          <span className="text-muted-foreground">Total</span>
-                         <span className="font-semibold text-white">${order.totalAmount.toLocaleString()}</span>
+                         <span className="font-semibold text-white">PKR {order.totalAmount.toLocaleString()}</span>
                        </div>
                     </CardContent>
                   </Card>
@@ -138,7 +138,7 @@ export default function OrdersPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          ${order.totalAmount.toLocaleString()}
+                          PKR {order.totalAmount.toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))}

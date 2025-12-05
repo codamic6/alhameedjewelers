@@ -39,7 +39,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </h3>
         <p className="text-sm text-muted-foreground mb-3">{product.category}</p>
         <div className="flex items-center justify-between">
-          <p className="text-xl font-semibold text-primary font-body">${product.price.toLocaleString()}</p>
+          <p className="text-xl font-semibold text-primary font-body">PKR {product.price.toLocaleString()}</p>
           <Button 
             size="sm" 
             variant="secondary" 

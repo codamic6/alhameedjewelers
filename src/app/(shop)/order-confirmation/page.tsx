@@ -68,13 +68,13 @@ function OrderConfirmationContent() {
                 <p className="font-semibold">{item.productName}</p>
                 <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
               </div>
-              <p className="font-semibold">${(item.itemPrice * item.quantity).toLocaleString()}</p>
+              <p className="font-semibold">PKR {(item.itemPrice * item.quantity).toLocaleString()}</p>
             </div>
           ))}
           <Separator />
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span>${order.totalAmount.toLocaleString()}</span>
+            <span>PKR {order.totalAmount.toLocaleString()}</span>
           </div>
         </CardContent>
       </Card>

@@ -125,7 +125,7 @@ export default function AdminProductsPage() {
                         <div className="flex-1">
                           <CardTitle className="text-lg text-primary">{product.name}</CardTitle>
                           <Badge variant="outline" className="mt-1">{product.category}</Badge>
-                          <p className="font-semibold text-white mt-2">${product.price.toLocaleString()}</p>
+                          <p className="font-semibold text-white mt-2">PKR {product.price.toLocaleString()}</p>
                         </div>
                       </div>
                       <CardFooter className="bg-secondary/20 flex gap-2 p-2">
@@ -181,7 +181,7 @@ export default function AdminProductsPage() {
                                 <Badge variant="outline">{product.category}</Badge>
                               </TableCell>
                               <TableCell className="text-right">
-                                ${product.price.toLocaleString()}
+                                PKR {product.price.toLocaleString()}
                               </TableCell>
                               <TableCell>
                                 <DropdownMenu>

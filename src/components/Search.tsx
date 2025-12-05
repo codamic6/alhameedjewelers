@@ -109,7 +109,7 @@ export default function Search() {
                             <div className="ml-4 flex-1">
                                 <p className="font-body text-white">{product.name}</p>
                             </div>
-                            <p className="font-semibold text-primary font-body">${product.price.toLocaleString()}</p>
+                            <p className="font-semibold text-primary font-body">PKR {product.price.toLocaleString()}</p>
                             </Link>
                         </li>
                         );

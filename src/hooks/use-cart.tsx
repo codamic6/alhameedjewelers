@@ -181,7 +181,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
         const currentCartTotal = cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
         if ((couponData.minimumOrderValue || 0) > 0 && currentCartTotal < couponData.minimumOrderValue!) {
-            toast({ variant: "destructive", title: "Minimum Order Value Not Met", description: `You need to spend at least $${couponData.minimumOrderValue} to use this coupon.` });
+            toast({ variant: "destructive", title: "Minimum Order Value Not Met", description: `You need to spend at least PKR ${couponData.minimumOrderValue} to use this coupon.` });
             return;
         }
         

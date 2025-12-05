@@ -283,7 +283,7 @@ export default function ProductDetailPage({
           {/* --- PRODUCT DETAILS --- */}
           <div className="flex flex-col gap-4 md:gap-6 mt-4 md:mt-0">
               <h1 className="text-3xl md:text-4xl font-bold text-primary">{product.name}</h1>
-              <p className="text-2xl md:text-3xl font-bold text-accent">${product.price.toLocaleString()}</p>
+              <p className="text-2xl md:text-3xl font-bold text-accent">PKR {product.price.toLocaleString()}</p>
               
               <Separator />
 

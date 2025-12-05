@@ -153,7 +153,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price ($)</FormLabel>
+                <FormLabel>Price (PKR)</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="2500" {...field} />
                 </FormControl>
@@ -218,7 +218,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
                           className="ml-2 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                           onClick={() => removeTag(tag)}
                         >
-                          <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                          <X className="h-3 w-3 text-accent-foreground hover:text-foreground" />
                         </button>
                       </Badge>
                     ))}

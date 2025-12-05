@@ -162,19 +162,19 @@ export default function SummaryPage() {
                                         <p className="text-muted-foreground">Qty: {quantity}</p>
                                     </div>
                                     </div>
-                                    <p className="font-semibold">${(product.price * quantity).toLocaleString()}</p>
+                                    <p className="font-semibold">PKR {(product.price * quantity).toLocaleString()}</p>
                                 </div>
                             )
                         })}
                          <Separator className="my-2 !mt-4"/>
                          <div className="flex justify-between">
                             <span>Subtotal</span>
-                            <span>${cartTotal.toLocaleString()}</span>
+                            <span>PKR {cartTotal.toLocaleString()}</span>
                         </div>
                         {couponDiscount > 0 && (
                           <div className="flex justify-between text-green-400">
                             <span>Discount ({coupon?.code})</span>
-                            <span>-${couponDiscount.toLocaleString()}</span>
+                            <span>-PKR {couponDiscount.toLocaleString()}</span>
                           </div>
                         )}
                         <div className="flex justify-between">
@@ -184,7 +184,7 @@ export default function SummaryPage() {
                         <Separator className="my-2"/>
                         <div className="flex justify-between font-bold text-lg text-primary">
                             <span>Total</span>
-                            <span>${totalAfterDiscount.toLocaleString()}</span>
+                            <span>PKR {totalAfterDiscount.toLocaleString()}</span>
                         </div>
                     </CardContent>
                     <CardFooter className="flex-col gap-4 items-stretch">

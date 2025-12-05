@@ -94,7 +94,7 @@ export default function SearchPage() {
                                     <p className="font-body text-white">{product.name}</p>
                                     <p className="text-sm text-muted-foreground">{product.category}</p>
                                 </div>
-                                <p className="font-semibold text-primary font-body">${product.price.toLocaleString()}</p>
+                                <p className="font-semibold text-primary font-body">PKR {product.price.toLocaleString()}</p>
                             </div>
                         </Link>
                     </motion.div>

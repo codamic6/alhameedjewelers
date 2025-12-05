@@ -191,7 +191,7 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
                 name="minimumOrderValue"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Minimum Order Value ($)</FormLabel>
+                    <FormLabel>Minimum Order Value (PKR)</FormLabel>
                     <FormControl>
                        <div className="relative">
                             <Input type="number" placeholder="0" {...field} className="pr-12" />

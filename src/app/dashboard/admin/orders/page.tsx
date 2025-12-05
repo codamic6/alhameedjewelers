@@ -130,7 +130,7 @@ export default function AdminOrdersPage() {
                                 <p className="font-medium text-white">{item.productName}</p>
                                 <p className="text-muted-foreground">Qty: {item.quantity}</p>
                             </div>
-                            <p className="font-mono text-muted-foreground">${(item.itemPrice * item.quantity).toLocaleString()}</p>
+                            <p className="font-mono text-muted-foreground">PKR {(item.itemPrice * item.quantity).toLocaleString()}</p>
                         </div>
                     ))}
                 </div>
@@ -149,18 +149,18 @@ export default function AdminOrdersPage() {
                 <div className="space-y-2 text-sm">
                      <div className="flex justify-between items-center">
                          <span>Subtotal:</span>
-                         <span className="font-semibold">${order.subTotal.toLocaleString()}</span>
+                         <span className="font-semibold">PKR {order.subTotal.toLocaleString()}</span>
                      </div>
                      {order.couponDiscount > 0 && (
                          <div className="flex justify-between items-center text-green-400">
                             <span>Discount ({order.couponCode}):</span>
-                            <span className="font-semibold">-${order.couponDiscount.toLocaleString()}</span>
+                            <span className="font-semibold">-PKR {order.couponDiscount.toLocaleString()}</span>
                         </div>
                      )}
                      <Separator className="my-2"/>
                      <div className="flex justify-between items-center font-bold text-base">
                          <span>Grand Total:</span>
-                         <span className="text-primary">${order.totalAmount.toLocaleString()}</span>
+                         <span className="text-primary">PKR {order.totalAmount.toLocaleString()}</span>
                      </div>
                 </div>
              </div>
@@ -196,7 +196,7 @@ export default function AdminOrdersPage() {
                             </div>
                             <div className="text-sm space-y-1">
                                 <p className="flex items-center gap-2 text-muted-foreground"><User className="h-4 w-4"/> {customerMap.get(order.userId) || 'N/A'}</p>
-                                <p className="font-semibold text-white">Total: ${order.totalAmount.toLocaleString()}</p>
+                                <p className="font-semibold text-white">Total: PKR {order.totalAmount.toLocaleString()}</p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="font-semibold text-muted-foreground text-sm">Status:</span>
@@ -290,7 +290,7 @@ export default function AdminOrdersPage() {
                             </Select>
                             </TableCell>
                             <TableCell className="text-right">
-                            ${order.totalAmount.toLocaleString()}
+                            PKR {order.totalAmount.toLocaleString()}
                             </TableCell>
                         </TableRow>
                          {expandedOrderId === order.id && (

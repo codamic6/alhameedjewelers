@@ -68,7 +68,7 @@ export default function CartPage() {
                   <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex-1">
                       <Link href={`/products/${product.slug}`} className="font-semibold hover:text-primary">{product.name}</Link>
-                      <p className="text-sm text-muted-foreground">${product.price.toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground">PKR {product.price.toLocaleString()}</p>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-4">
                       <div className="flex items-center border rounded-md">
@@ -80,7 +80,7 @@ export default function CartPage() {
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
-                      <p className="text-right font-semibold">${(product.price * quantity).toLocaleString()}</p>
+                      <p className="text-right font-semibold">PKR {(product.price * quantity).toLocaleString()}</p>
                       <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => removeFromCart(product.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -126,12 +126,12 @@ export default function CartPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${cartTotal.toLocaleString()}</span>
+                    <span>PKR {cartTotal.toLocaleString()}</span>
                   </div>
                    {couponDiscount > 0 && (
                     <div className="flex justify-between text-green-400">
                       <span>Discount</span>
-                      <span>-${couponDiscount.toLocaleString()}</span>
+                      <span>-PKR {couponDiscount.toLocaleString()}</span>
                     </div>
                    )}
                   <div className="flex justify-between">
@@ -141,7 +141,7 @@ export default function CartPage() {
                   <Separator className="my-2"/>
                   <div className="flex justify-between font-bold text-lg text-primary">
                     <span>Total</span>
-                    <span>${totalAfterDiscount.toLocaleString()}</span>
+                    <span>PKR {totalAfterDiscount.toLocaleString()}</span>
                   </div>
                 </div>
               </CardContent>
