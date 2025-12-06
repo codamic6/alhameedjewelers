@@ -157,6 +157,10 @@ export default function AdminOrdersPage() {
                             <span className="font-semibold">-PKR {order.couponDiscount.toLocaleString()}</span>
                         </div>
                      )}
+                      <div className="flex justify-between items-center">
+                         <span>Shipping:</span>
+                         <span className="font-semibold">PKR {order.shippingCost.toLocaleString()}</span>
+                     </div>
                      <Separator className="my-2"/>
                      <div className="flex justify-between items-center font-bold text-base">
                          <span>Grand Total:</span>
