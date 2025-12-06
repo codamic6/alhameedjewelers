@@ -26,37 +26,6 @@ export default function ProductsPage() {
   return (
     <PageTransition>
       <div className="container mx-auto max-w-7xl px-4 py-12 md:py-20">
-        <div className="mb-8 flex flex-col items-center justify-center gap-4">
-           <h1 className="text-4xl font-bold text-primary text-center">
-              Our Collection
-            </h1>
-          {/* --- Mobile Filter Button --- */}
-          <div className="md:hidden">
-            <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline">
-                    <SlidersHorizontal className="mr-2 h-4 w-4" />
-                    Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background p-0">
-                  <SheetHeader className="p-4 border-b">
-                    <SheetTitle className="text-primary">Filters</SheetTitle>
-                  </SheetHeader>
-                   <div className="p-4">
-                     <ProductFilters 
-                        filters={filters} 
-                        setFilters={setFilters} 
-                        categories={categories}
-                        maxPrice={maxPrice}
-                        className="p-0 border-none"
-                      />
-                   </div>
-                </SheetContent>
-              </Sheet>
-          </div>
-        </div>
-        
         <div className="grid md:grid-cols-[280px_1fr] gap-8">
             {/* --- Desktop Filter Sidebar --- */}
             <aside className="hidden md:block">
@@ -75,6 +44,37 @@ export default function ProductsPage() {
             
             {/* --- Products Grid --- */}
             <main>
+                <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <h1 className="text-4xl font-bold text-primary">
+                        Our Collection
+                    </h1>
+                    {/* --- Mobile Filter Button --- */}
+                    <div className="md:hidden">
+                        <Sheet>
+                            <SheetTrigger asChild>
+                            <Button variant="outline">
+                                <SlidersHorizontal className="mr-2 h-4 w-4" />
+                                Filters
+                            </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background p-0">
+                            <SheetHeader className="p-4 border-b">
+                                <SheetTitle className="text-primary">Filters</SheetTitle>
+                            </SheetHeader>
+                            <div className="p-4">
+                                <ProductFilters 
+                                    filters={filters} 
+                                    setFilters={setFilters} 
+                                    categories={categories}
+                                    maxPrice={maxPrice}
+                                    className="p-0 border-none"
+                                />
+                            </div>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
+                </div>
+
                 {isLoading ? (
                 <div className="flex justify-center items-center h-64">
                     <Loader2 className="h-10 w-10 animate-spin text-primary" />
