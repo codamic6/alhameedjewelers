@@ -26,7 +26,7 @@ export default function Footer() {
             <div>
                 <h3 className="font-bold text-primary mb-3">Customer Service</h3>
                 <div className="flex flex-col gap-2 text-sm">
-                    <Link href="/help" className="text-white hover:text-primary">Help</Link>
+                    <Link href="/contact" className="text-white hover:text-primary">Contact Us</Link>
                     <Link href="/faqs" className="text-white hover:text-primary">FAQs</Link>
                     <Link href="/dashboard/orders" className="text-white hover:text-primary">Track Order</Link>
                 </div>

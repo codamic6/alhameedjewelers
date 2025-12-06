@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart, LogOut, Gem, User as UserIcon } from 'lucide-react';
+import { Settings, Package, Shield, Home, ShoppingCart, Users, TicketPercent, LayoutGrid, Heart, LogOut, Gem, User as UserIcon, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser as useFirebaseUser } from '@/firebase';
 import { ADMIN_EMAIL } from '@/lib/constants';
@@ -25,6 +25,7 @@ export const adminNav = [
   { href: '/dashboard/admin/orders', label: 'Orders', icon: Package },
   { href: '/dashboard/admin/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/admin/coupons', label: 'Coupons', icon: TicketPercent },
+  { href: '/dashboard/admin/contact', label: 'Contact', icon: Mail },
 ];
 
 export default function DashboardSidebar() {
