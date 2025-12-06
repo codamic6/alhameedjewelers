@@ -158,7 +158,7 @@ function HeaderContent() {
               </SheetTrigger>
               <SheetContent side="left" className="bg-black p-4">
                 <div className="mb-4">
-                     <Link href="/" className="flex items-center gap-2">
+                     <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
                         <Gem className="h-6 w-6 text-primary" />
                         <span className="font-logo font-bold text-xl text-white">Al-Hameed</span>
                       </Link>
@@ -168,27 +168,27 @@ function HeaderContent() {
                   <Separator className="bg-border/50 my-2" />
                    {user ? (
                       <>
-                      <Link href="/dashboard" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                      <Link href="/dashboard" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
                           <LayoutDashboard className="h-5 w-5" />
                           Dashboard
                       </Link>
                       {isAdmin && (
-                          <Link href="/dashboard/admin" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                          <Link href="/dashboard/admin" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
                               <Shield className="h-5 w-5" />
                               Admin Panel
                           </Link>
                       )}
-                      <button onClick={handleLogout} className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-left text-lg">
+                      <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-left text-lg">
                           <LogOut className="h-5 w-5" />
                           Logout
                       </button>
                       </>
                   ) : (
                       <>
-                      <Link href="/login" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                      <Link href="/login" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
                           Log In
                       </Link>
-                      <Link href="/signup" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg">
+                      <Link href="/signup" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
                           Sign Up
                       </Link>
                       </>

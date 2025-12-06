@@ -25,7 +25,7 @@ export default function ProductsPage() {
   return (
     <PageTransition>
       <div className="container mx-auto max-w-7xl px-4 py-12 md:py-20">
-        <div className="mb-8 flex items-center justify-center md:justify-between">
+        <div className="mb-8 flex flex-col items-center justify-center gap-4">
            <h1 className="text-4xl font-bold text-primary text-center">
               Our Collection
             </h1>

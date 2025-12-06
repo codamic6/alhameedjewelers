@@ -3,9 +3,7 @@
 
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { Category } from '@/lib/types';
 import type { Filters } from '@/hooks/use-product-filters';
 import { Search } from 'lucide-react';
@@ -62,40 +60,25 @@ export default function ProductFilters({
         </div>
 
         <div className="space-y-4">
-            <Label>Price Range</Label>
-            <Slider
-                value={[filters.price]}
-                onValueChange={(value) => setFilters({ price: value[0] })}
-                max={maxPrice}
-                step={1000}
-                className="w-full"
-            />
-            <div className="text-sm text-muted-foreground text-center">
-                Up to PKR {filters.price.toLocaleString()}
+            <Label>Price Range (PKR)</Label>
+            <div className="flex items-center gap-2">
+                <Input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.minPrice}
+                    onChange={(e) => setFilters({ minPrice: e.target.value === '' ? 0 : Number(e.target.value) })}
+                    className="w-full bg-[#111111] border-border"
+                />
+                 <span className="text-muted-foreground">-</span>
+                 <Input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.maxPrice}
+                    onChange={(e) => setFilters({ maxPrice: e.target.value === '' ? maxPrice : Number(e.target.value) })}
+                    className="w-full bg-[#111111] border-border"
+                />
             </div>
         </div>
-      
-      <div className="space-y-3">
-        <Label>Metal Type</Label>
-        <RadioGroup
-          value={filters.metalType}
-          onValueChange={(value) => setFilters({ metalType: value === 'all' ? '' : value })}
-          className="flex gap-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="all" id="metal-all" />
-            <Label htmlFor="metal-all" className="font-normal cursor-pointer">All</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="Gold" id="metal-gold" />
-            <Label htmlFor="metal-gold" className="font-normal cursor-pointer">Gold</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="Silver" id="metal-silver" />
-            <Label htmlFor="metal-silver" className="font-normal cursor-pointer">Silver</Label>
-          </div>
-        </RadioGroup>
-      </div>
 
       <div className="space-y-2">
         <Label>Sort By</Label>

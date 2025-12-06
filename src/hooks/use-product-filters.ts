@@ -9,8 +9,8 @@ import type { Product, Category } from '@/lib/types';
 export type Filters = {
   search: string;
   category: string;
-  price: number;
-  metalType: string;
+  minPrice: number;
+  maxPrice: number;
   sortBy: 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 };
 
@@ -22,8 +22,8 @@ export function useProductFilters() {
   const [filters, setFiltersState] = useState<Filters>({
     search: '',
     category: '',
-    price: DEFAULT_MAX_PRICE,
-    metalType: '',
+    minPrice: 0,
+    maxPrice: DEFAULT_MAX_PRICE,
     sortBy: 'price-asc',
   });
 
@@ -48,7 +48,7 @@ export function useProductFilters() {
   // Update price filter default when maxPrice is calculated
   useEffect(() => {
     if(maxPrice > DEFAULT_MAX_PRICE) {
-      setFiltersState(prev => ({...prev, price: maxPrice}))
+      setFiltersState(prev => ({...prev, maxPrice: maxPrice}))
     }
   }, [maxPrice])
 
@@ -70,15 +70,10 @@ export function useProductFilters() {
       products = products.filter(p => p.category === filters.category);
     }
     
-    // 3. Filter by metal type
-    if (filters.metalType) {
-        products = products.filter(p => p.metalType === filters.metalType);
-    }
+    // 3. Filter by price range
+    products = products.filter(p => p.price >= filters.minPrice && p.price <= filters.maxPrice);
 
-    // 4. Filter by price
-    products = products.filter(p => p.price <= filters.price);
-
-    // 5. Sort products
+    // 4. Sort products
     switch (filters.sortBy) {
       case 'price-asc':
         products.sort((a, b) => a.price - b.price);
