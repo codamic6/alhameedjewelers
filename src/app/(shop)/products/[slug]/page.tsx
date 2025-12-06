@@ -195,7 +195,7 @@ export default function ProductDetailPage({
                         )
                    )}
                    <DialogClose asChild>
-                     <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 rounded-full bg-background h-8 w-8">
+                     <Button variant="ghost" size="icon" className="absolute -top-2 -right-2 rounded-full bg-background/50 backdrop-blur-sm h-8 w-8 hover:bg-background">
                       <X className="h-5 w-5" />
                       <span className="sr-only">Close</span>
                      </Button>
