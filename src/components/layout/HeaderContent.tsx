@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ADMIN_EMAIL } from '@/lib/constants';
 import Search from '../Search';
 import { Separator } from '../ui/separator';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 
 const topNavLinks = [
   { href: '/', label: 'Home', icon: Home },
@@ -84,9 +85,9 @@ export default function HeaderContent() {
           className={cn(
             'transition-colors hover:text-primary',
             inSheet 
-              ? 'flex items-center gap-3 py-3 text-lg' 
+              ? 'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:text-primary' 
               : 'text-sm font-medium',
-            pathname === link.href ? 'text-primary' : 'text-white'
+            pathname === link.href ? 'text-primary bg-muted' : inSheet ? 'text-white' : 'text-white'
           )}
           onClick={() => setIsMobileMenuOpen(false)}
         >
@@ -158,43 +159,65 @@ export default function HeaderContent() {
                   <Menu className="h-5 w-5 text-primary" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-black p-4 w-full max-w-sm">
-                <SheetTitle className='sr-only'>Mobile Menu</SheetTitle>
-                <div className="mb-6">
+              <SheetContent side="left" className="flex flex-col bg-black p-0 w-full max-w-sm">
+                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                 <div className="flex h-16 items-center border-b px-4 shrink-0">
                      <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
                         <Gem className="h-6 w-6 text-primary" />
                         <span className="font-logo font-bold text-xl text-white">Al-Hameed</span>
                       </Link>
                 </div>
-                <nav className="flex flex-col gap-1">
-                  <NavLinks inSheet={true} />
-                  <Separator className="bg-border/50 my-3" />
-                   {user ? (
-                      <>
-                      <Link href="/dashboard" className="flex items-center gap-3 py-3 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                          <LayoutDashboard className="h-5 w-5" />
-                          Dashboard
-                      </Link>
-                      {isAdmin && (
-                          <Link href="/dashboard/admin" className="flex items-center gap-3 py-3 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                              <Shield className="h-5 w-5" />
-                              Admin Panel
+
+                <div className="flex-1 overflow-y-auto p-4">
+                  <nav className="flex flex-col gap-1">
+                    <NavLinks inSheet={true} />
+                  </nav>
+                  
+                  <Separator className="my-4 bg-border/50" />
+
+                  {user ? (
+                      <div className="flex flex-col gap-1">
+                          <p className="px-3 text-xs font-semibold uppercase text-muted-foreground">My Account</p>
+                          <Link href="/dashboard" className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary", pathname.startsWith('/dashboard') && "bg-muted text-primary")} onClick={() => setIsMobileMenuOpen(false)}>
+                              <LayoutDashboard className="h-5 w-5" />
+                              Dashboard
                           </Link>
-                      )}
-                      <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 py-3 text-white transition-all hover:text-primary w-full text-left text-lg">
-                          <LogOut className="h-5 w-5" />
-                          Logout
-                      </button>
-                      </>
+                          {isAdmin && (
+                              <Link href="/dashboard/admin" className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary", pathname.startsWith('/dashboard/admin') && "bg-muted text-primary")} onClick={() => setIsMobileMenuOpen(false)}>
+                                  <Shield className="h-5 w-5" />
+                                  Admin Panel
+                              </Link>
+                          )}
+                      </div>
                   ) : (
-                      <>
-                      <Link href="/login" className="flex items-center gap-3 py-3 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Link href="/login" className="flex items-center gap-3 rounded-lg px-3 py-2 text-white transition-all hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
                           <User className="h-5 w-5" />
-                          Log In
+                          Log In / Sign Up
                       </Link>
-                      </>
                   )}
-                </nav>
+                </div>
+
+                <div className="mt-auto border-t p-4">
+                   {user ? (
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-3">
+                           <Avatar className="h-10 w-10 border-2 border-primary">
+                             <AvatarFallback className="bg-muted text-primary">{user.email?.[0].toUpperCase()}</AvatarFallback>
+                           </Avatar>
+                           <div className="overflow-hidden">
+                              <p className="font-semibold text-white truncate">{user.displayName || 'User'}</p>
+                              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                           </div>
+                        </div>
+                        <Button variant="secondary" onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full">
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Logout
+                        </Button>
+                      </div>
+                   ) : (
+                    <p className="text-center text-sm text-muted-foreground">You are browsing as a guest.</p>
+                   )}
+                </div>
               </SheetContent>
             </Sheet>
           <Link href="/" className="flex items-center gap-2">
