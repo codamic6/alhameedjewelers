@@ -3,7 +3,6 @@
 import { getPersonalizedRecommendations } from "@/ai/flows/personalized-product-recommendations";
 import { findGift, type GiftFinderInput } from "@/ai/flows/gift-finder-flow";
 import type { Product, Order, Coupon } from "./types";
-import { firestore } from 'firebase-admin';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
 
@@ -14,11 +13,15 @@ if (!getApps().length) {
         // When running on Google Cloud, credentials will be automatically discovered.
         initializeApp();
     } catch (e) {
-        // For local development, you might need a service account key.
-        // Make sure to not commit the service account key to your repository.
-        console.warn("Firebase Admin SDK not initialized. This is expected in local dev without a service account key. Some server actions may fail.");
+        // For local development without a service account key, this will fail.
+        // We log a warning but don't throw an error, allowing the app to run.
+        // Server-side Firebase Admin actions will not work locally without the key.
+        console.warn(
+            "Firebase Admin SDK initialization failed. This is expected in local development without a service account key. Server-side Firebase actions will not work."
+        );
     }
 }
+
 
 const db = getFirestore();
 
@@ -73,6 +76,13 @@ export async function placeOrder(
   orderData: Omit<Order, 'id' | 'orderDate'>,
   couponId: string | null
 ): Promise<{ orderId?: string; error?: string }> {
+  // Defensive check in case the Admin SDK failed to initialize
+  if (!getApps().length) {
+    const errorMessage = "Order placement failed: Firebase Admin SDK not initialized on the server.";
+    console.error(errorMessage);
+    return { error: errorMessage };
+  }
+
   try {
     const finalOrderData = {
       ...orderData,
