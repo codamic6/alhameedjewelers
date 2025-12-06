@@ -89,9 +89,9 @@ export default function HeaderContent() {
                 inSheet 
                 ? 'flex items-center gap-3 rounded-lg px-3 py-2' 
                 : 'text-sm font-medium',
-                isActive 
+                isActive
                 ? 'text-primary'
-                : inSheet ? 'text-white hover:text-primary' : 'text-white hover:text-primary',
+                : 'text-white hover:text-primary',
                 isActive && !inSheet && 'underline underline-offset-4'
             )}
             onClick={() => setIsMobileMenuOpen(false)}
