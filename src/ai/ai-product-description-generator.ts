@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -48,7 +49,7 @@ const prompt = ai.definePrompt({
   Material: {{{productMaterial}}}
   Style: {{{productStyle}}}
   Features: {{{productFeatures}}}
-  Current Gold Price (per gram): ${{{goldPrice}}}
+  Current Gold Price (per gram): {{{goldPrice}}}
 
   Description:`, // Ensure that 'Description:' is present at the end.
 });
