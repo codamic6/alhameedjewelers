@@ -13,7 +13,7 @@ import type { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ProductCard from '@/components/ProductCard';
@@ -151,11 +151,12 @@ export default function ProductDetailPage({
     const isModalVideo = isVideo(mediaUrl);
 
     return (
-        <DialogContent 
-            className="max-w-none w-auto h-auto max-h-[90vh] bg-transparent border-none shadow-none p-2" 
+        <DialogContent
+            className="max-w-none w-auto h-auto max-h-[90vh] bg-transparent border-none shadow-none p-2"
             hideCloseButton={false}
             onInteractOutside={(e) => e.preventDefault()}
         >
+            <DialogTitle className="sr-only">{product.name}</DialogTitle>
             {isModalVideo ? (
                 <video key={mediaUrl} controls autoPlay className="w-auto h-auto max-h-[90vh] object-contain rounded-lg">
                     <source src={mediaUrl} />
