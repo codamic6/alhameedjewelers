@@ -27,10 +27,11 @@ import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Product, Category } from '@/lib/types';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, Sparkles } from 'lucide-react';
 import { useState, KeyboardEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
 import FileUpload from '@/components/FileUpload';
+import { generateProductDescription, type AIProductDescriptionInput } from '@/ai/ai-product-description-generator';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -39,6 +40,8 @@ const productSchema = z.object({
   category: z.string().min(1, 'Please select a category'),
   imageUrls: z.array(z.string()).min(1, 'Please upload at least one image or video'),
   tags: z.array(z.string()).optional(),
+  metalType: z.string().min(2, 'Please specify the metal type.'),
+  style: z.string().optional(),
 });
 
 type ProductFormProps = {
@@ -50,6 +53,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [tagInput, setTagInput] = useState('');
 
   const categoriesCollection = useMemoFirebase(
@@ -65,6 +69,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
           ...product,
           tags: product.tags || [],
           imageUrls: product.imageUrls || [],
+          style: product.style || '',
         }
       : {
           name: '',
@@ -73,6 +78,8 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
           category: '',
           imageUrls: [],
           tags: [],
+          metalType: 'Gold',
+          style: '',
         },
   });
   
@@ -92,6 +99,39 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   const removeTag = (tagToRemove: string) => {
     form.setValue('tags', tags.filter(tag => tag !== tagToRemove));
   };
+
+  const handleGenerateDescription = async () => {
+    const { name, category, metalType, style, tags } = form.getValues();
+    if (!name || !category || !metalType) {
+        toast({
+            variant: "destructive",
+            title: "Missing Information",
+            description: "Please fill in Name, Category, and Metal Type before generating."
+        });
+        return;
+    }
+    
+    setIsGenerating(true);
+    try {
+        const input: AIProductDescriptionInput = {
+            productName: name,
+            productCategory: category,
+            productMaterial: metalType,
+            productStyle: style || 'Elegant',
+            productFeatures: tags?.join(', ') || '',
+            goldPrice: 65.50, // Mock price, can be replaced with a live API call
+        };
+        const result = await generateProductDescription(input);
+        form.setValue('description', result.description, { shouldValidate: true });
+        toast({ title: 'Description Generated!', description: 'The AI has crafted a new description.' });
+    } catch (error) {
+        console.error("AI generation failed:", error);
+        toast({ variant: 'destructive', title: 'Generation Failed', description: 'Could not generate description.' });
+    } finally {
+        setIsGenerating(false);
+    }
+  }
+
 
   const onSubmit = async (values: z.infer<typeof productSchema>) => {
     if (!firestore) return;
@@ -138,19 +178,29 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Describe the product..." {...field} rows={5} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <FormLabel htmlFor="description">Description</FormLabel>
+                         <Button type="button" variant="outline" size="sm" onClick={handleGenerateDescription} disabled={isGenerating}>
+                            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4 text-primary"/>}
+                            Generate with AI
+                         </Button>
+                    </div>
+                    <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                        <FormItem className="!mt-0">
+                        <FormControl>
+                            <Textarea id="description" placeholder="Describe the product..." {...field} rows={5} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -188,12 +238,49 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
                     )}
                   />
                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                     <FormField
+                        control={form.control}
+                        name="metalType"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Metal Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a metal" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="Gold">Gold</SelectItem>
+                                    <SelectItem value="Silver">Silver</SelectItem>
+                                    <SelectItem value="Platinum">Platinum</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="style"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Style</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g., Modern, Vintage" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                 </div>
                  <FormField
                   control={form.control}
                   name="tags"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tags</FormLabel>
+                      <FormLabel>Features / Tags</FormLabel>
                       <FormControl>
                         <div>
                           <div className="flex flex-wrap gap-2 mb-2 min-h-[24px]">
@@ -211,7 +298,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
                             ))}
                           </div>
                           <Input
-                            placeholder="Add tags and press Enter..."
+                            placeholder="Add tags (e.g., Handcrafted) and press Enter..."
                             value={tagInput}
                             onChange={(e) => setTagInput(e.target.value)}
                             onKeyDown={handleTagKeyDown}
@@ -246,8 +333,8 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
         </div>
 
         <div className="pt-4 flex justify-end">
-            <Button type="submit" disabled={isSubmitting} size="lg">
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" disabled={isSubmitting || isGenerating} size="lg">
+                {(isSubmitting || isGenerating) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {product ? 'Update Product' : 'Add Product'}
             </Button>
         </div>
