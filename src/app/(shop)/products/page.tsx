@@ -8,7 +8,7 @@ import { Loader2, SlidersHorizontal } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 import { useProductFilters } from '@/hooks/use-product-filters';
 import ProductFilters from '@/components/ProductFilters';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
@@ -25,29 +25,34 @@ export default function ProductsPage() {
   return (
     <PageTransition>
       <div className="container mx-auto max-w-7xl px-4 py-12 md:py-20">
-        <div className="mb-8 flex items-center justify-between">
-           <h1 className="text-4xl font-bold text-primary">
+        <div className="mb-8 flex items-center justify-center md:justify-between">
+           <h1 className="text-4xl font-bold text-primary text-center">
               Our Collection
             </h1>
           {/* --- Mobile Filter Button --- */}
           <div className="md:hidden">
-            <Collapsible>
-                <CollapsibleTrigger asChild>
+            <Sheet>
+                <SheetTrigger asChild>
                   <Button variant="outline">
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
                     Filters
                   </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="absolute top-full left-0 mt-2 w-full z-20 p-4 bg-secondary border rounded-lg shadow-lg">
-                    <ProductFilters 
-                      filters={filters} 
-                      setFilters={setFilters} 
-                      categories={categories}
-                      maxPrice={maxPrice}
-                      className="p-0 border-none"
-                    />
-                </CollapsibleContent>
-              </Collapsible>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background">
+                  <SheetHeader>
+                    <SheetTitle className="text-primary">Filters</SheetTitle>
+                  </SheetHeader>
+                   <div className="mt-4">
+                     <ProductFilters 
+                        filters={filters} 
+                        setFilters={setFilters} 
+                        categories={categories}
+                        maxPrice={maxPrice}
+                        className="p-0 border-none"
+                      />
+                   </div>
+                </SheetContent>
+              </Sheet>
           </div>
         </div>
         
