@@ -80,20 +80,22 @@ export default function HeaderContent() {
     <>
       {topNavLinks.map(link => {
         const isActive = pathname === link.href;
+        
+        const baseClasses = inSheet 
+          ? 'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors' 
+          : 'text-sm font-medium transition-colors';
+
+        const activeClasses = inSheet 
+          ? 'bg-muted text-primary' 
+          : 'text-primary underline underline-offset-4';
+          
+        const inactiveClasses = 'text-white hover:text-primary';
+
         return (
             <Link
             key={link.href}
             href={link.href}
-            className={cn(
-                'transition-colors',
-                inSheet 
-                ? 'flex items-center gap-3 rounded-lg px-3 py-2' 
-                : 'text-sm font-medium',
-                isActive
-                ? 'text-primary'
-                : 'text-white hover:text-primary',
-                isActive && !inSheet && 'underline underline-offset-4'
-            )}
+            className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
             onClick={() => setIsMobileMenuOpen(false)}
             >
             {inSheet && <link.icon className="h-5 w-5" />}
