@@ -23,6 +23,7 @@ export default function SummaryPage() {
   const firestore = useFirestore();
   const { cartItems, clearCart, checkoutState, cartCount, cartTotal, coupon, couponDiscount, totalAfterDiscount } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [shippingCost, setShippingCost] = useState(0); // Placeholder for shipping cost
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -33,6 +34,17 @@ export default function SummaryPage() {
     }
     if (!checkoutState.shippingAddress || !checkoutState.paymentMethod) {
       router.replace('/checkout/shipping');
+    }
+    // In a real app, you would fetch shipping cost based on checkoutState.shippingAddress.city
+    // For now, we'll keep it simple.
+    if(checkoutState.shippingAddress) {
+        // Mock shipping cost logic
+        const city = checkoutState.shippingAddress.city.toLowerCase();
+        if (city === 'karachi' || city === 'lahore' || city === 'islamabad') {
+            setShippingCost(250);
+        } else {
+            setShippingCost(400);
+        }
     }
   }, [user, isUserLoading, checkoutState, cartCount, router]);
 
@@ -47,15 +59,17 @@ export default function SummaryPage() {
     }
 
     setIsSubmitting(true);
+    const finalTotal = totalAfterDiscount + shippingCost;
 
     const orderData = {
       userId: user.uid,
       orderDate: serverTimestamp(),
       status: 'Pending' as const,
       subTotal: cartTotal,
+      shippingCost: shippingCost,
       couponCode: coupon?.code || null,
       couponDiscount: couponDiscount,
-      totalAmount: totalAfterDiscount,
+      totalAmount: finalTotal,
       shippingAddress: checkoutState.shippingAddress,
       paymentMethod: checkoutState.paymentMethod,
       items: cartItems.map(item => ({
@@ -107,6 +121,8 @@ export default function SummaryPage() {
       </div>
     );
   }
+
+  const finalTotal = totalAfterDiscount + shippingCost;
 
   return (
     <PageTransition>
@@ -179,12 +195,12 @@ export default function SummaryPage() {
                         )}
                         <div className="flex justify-between">
                             <span>Shipping</span>
-                            <span>Free</span>
+                            <span>PKR {shippingCost.toLocaleString()}</span>
                         </div>
                         <Separator className="my-2"/>
                         <div className="flex justify-between font-bold text-lg text-primary">
                             <span>Total</span>
-                            <span>PKR {totalAfterDiscount.toLocaleString()}</span>
+                            <span>PKR {finalTotal.toLocaleString()}</span>
                         </div>
                     </CardContent>
                     <CardFooter className="flex-col gap-4 items-stretch">

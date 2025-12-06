@@ -2,7 +2,7 @@
 
 import PageTransition from '@/components/PageTransition';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Package, Clock, MapPin } from 'lucide-react';
+import { Package, Clock, MapPin, DollarSign } from 'lucide-react';
 
 export default function ShippingPolicyPage() {
   return (
@@ -41,11 +41,24 @@ export default function ShippingPolicyPage() {
 
              <Card>
                 <CardHeader className="flex flex-row items-center gap-4">
-                    <MapPin className="h-8 w-8 text-primary"/>
-                    <CardTitle>Shipping Charges & Locations</CardTitle>
+                    <DollarSign className="h-8 w-8 text-primary"/>
+                    <CardTitle>Shipping Charges</CardTitle>
                 </CardHeader>
                 <CardContent>
-                     <p className="text-muted-foreground">We are proud to offer <span className="font-semibold text-accent">FREE shipping</span> on all orders within Pakistan. Currently, we only ship to addresses within Pakistan and do not offer international shipping.</p>
+                     <p className="text-muted-foreground">Shipping charges are calculated based on your city at checkout. We strive to offer competitive and fair shipping rates across Pakistan.</p>
+                       <ul className="list-disc list-inside space-y-2 text-muted-foreground mt-4">
+                        <li><span className="font-semibold text-white">Tier 1 Cities (e.g., Karachi, Lahore):</span> PKR 250</li>
+                        <li><span className="font-semibold text-white">Tier 2 Cities:</span> PKR 400</li>
+                    </ul>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader className="flex flex-row items-center gap-4">
+                    <MapPin className="h-8 w-8 text-primary"/>
+                    <CardTitle>Shipping Locations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                     <p className="text-muted-foreground">We ship to addresses all across Pakistan. Currently, we do not offer international shipping.</p>
                 </CardContent>
             </Card>
         </div>

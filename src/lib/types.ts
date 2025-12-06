@@ -20,6 +20,7 @@ export type Order = {
   userId: string;
   orderDate: Timestamp | string; // Can be a timestamp or an ISO string initially
   subTotal: number;
+  shippingCost: number;
   couponCode: string | null;
   couponDiscount: number;
   totalAmount: number;
@@ -35,6 +36,9 @@ export type UserProfile = {
   lastName: string;
   email: string;
   phone: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
 };
 
 export type Coupon = {

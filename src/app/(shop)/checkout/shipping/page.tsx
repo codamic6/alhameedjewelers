@@ -70,9 +70,9 @@ export default function ShippingPage() {
         lastName: userProfile?.lastName || '',
         email: user?.email || '',
         phone: userProfile?.phone || '',
-        address: '', 
-        city: '',
-        postalCode: '',
+        address: userProfile?.address || '', 
+        city: userProfile?.city || '',
+        postalCode: userProfile?.postalCode || '',
         country: 'Pakistan',
       });
     }

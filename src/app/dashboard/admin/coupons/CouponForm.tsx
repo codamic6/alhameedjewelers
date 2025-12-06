@@ -138,7 +138,10 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
 
   const handleNumberChange = (name: NumberFieldName, change: number) => {
       const currentValue = form.getValues(name) || 0;
-      const newValue = currentValue + change;
+      let increment = 1;
+      if (name === 'minimumOrderValue') increment = 100;
+
+      const newValue = currentValue + (change > 0 ? increment : -increment);
       if (newValue >= 0) {
         form.setValue(name, newValue, { shouldValidate: true });
       }
@@ -196,10 +199,10 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
                        <div className="relative">
                             <Input type="number" placeholder="0" {...field} className="pr-12" />
                             <div className="absolute inset-y-0 right-0 flex items-center">
-                                 <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-r-none" onClick={() => handleNumberChange('minimumOrderValue', -5)} tabIndex={-1}>
+                                 <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-r-none" onClick={() => handleNumberChange('minimumOrderValue', -1)} tabIndex={-1}>
                                     <Minus className="h-4 w-4" />
                                 </Button>
-                                 <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-l-none" onClick={() => handleNumberChange('minimumOrderValue', 5)} tabIndex={-1}>
+                                 <Button type="button" variant="ghost" size="icon" className="h-full w-8 rounded-l-none" onClick={() => handleNumberChange('minimumOrderValue', 1)} tabIndex={-1}>
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -415,5 +418,3 @@ export default function CouponForm({ coupon, onFinished }: CouponFormProps) {
     </Form>
   );
 }
-
-    
