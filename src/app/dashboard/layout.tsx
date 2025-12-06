@@ -2,7 +2,8 @@ import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import Header from "@/components/layout/Header";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft } from "lucide-react";
+import { Home, PanelLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardLayout({
   children,
@@ -28,6 +29,15 @@ export default function DashboardLayout({
                 <DashboardSidebar />
               </SheetContent>
             </Sheet>
+            
+            {/* Home link for desktop */}
+            <Button asChild variant="link" className="hidden md:flex text-primary">
+              <Link href="/">
+                <Home className="mr-2 h-4 w-4" />
+                Home
+              </Link>
+            </Button>
+
             <div className="w-full flex-1">
               {/* You can add a search bar here if needed */}
             </div>

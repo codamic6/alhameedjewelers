@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SheetTitle } from '../ui/sheet';
 
 export const mainNav = [
+  { href: '/', label: 'Home', icon: Home, exact: true },
   { href: '/dashboard/account', label: 'My Account', icon: Settings },
   { href: '/dashboard/orders', label: 'My Orders', icon: Package },
   { href: '/dashboard/favorites', label: 'My Favorites', icon: Heart },
