@@ -76,6 +76,12 @@ export async function placeOrder(
   orderData: Omit<Order, 'id' | 'orderDate'>,
   couponId: string | null
 ): Promise<{ orderId?: string; error?: string }> {
+  // Gracefully handle local development where Admin SDK isn't initialized
+  if (process.env.NODE_ENV !== 'production' && !getApps().length) {
+    console.log("Local development: Skipping Firebase Admin action. Returning dummy order ID.");
+    return { orderId: `local-dev-${Date.now()}` };
+  }
+
   // Defensive check in case the Admin SDK failed to initialize
   if (!getApps().length) {
     const errorMessage = "Order placement failed: Firebase Admin SDK not initialized on the server.";
