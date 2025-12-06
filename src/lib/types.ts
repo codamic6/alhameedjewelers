@@ -18,7 +18,7 @@ export type OrderStatus = 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled';
 export type Order = {
   id: string;
   userId: string;
-  orderDate: Timestamp | string; // Can be a timestamp or an ISO string initially
+  orderDate: Timestamp; 
   subTotal: number;
   shippingCost: number;
   couponCode: string | null;

@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useUser, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { setDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,9 @@ const profileSchema = z.object({
   firstName: z.string().min(2, { message: 'First name must be at least 2 characters.' }),
   lastName: z.string().min(2, { message: 'Last name must be at least 2 characters.' }),
   phone: z.string().regex(/^\+92\d{10}$/, { message: 'Phone number must be in the format +92XXXXXXXXXX.' }),
+  address: z.string().min(10, { message: 'Please enter a valid address.' }),
+  city: z.string().min(3, { message: 'Please enter a city.' }),
+  postalCode: z.string().min(4, { message: 'Please enter a valid postal code.' }),
 });
 
 export default function CreateProfilePage() {
@@ -47,6 +50,9 @@ export default function CreateProfilePage() {
       firstName: '',
       lastName: '',
       phone: '+92',
+      address: '',
+      city: '',
+      postalCode: '',
     },
   });
 
@@ -71,15 +77,13 @@ export default function CreateProfilePage() {
 
     const userProfile = {
       id: user.uid,
-      firstName: values.firstName,
-      lastName: values.lastName,
       email: user.email, // email is from the auth user object
-      phone: values.phone,
+      ...values,
     };
 
     try {
       const userDocRef = doc(firestore, 'users', user.uid);
-      setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
+      await setDoc(userDocRef, userProfile, { merge: true });
 
       toast({
         title: 'Profile Created!',
@@ -93,7 +97,8 @@ export default function CreateProfilePage() {
         title: 'Uh oh! Something went wrong.',
         description: error.message || 'Could not save your profile.',
       });
-      setIsSubmitting(false);
+    } finally {
+        setIsSubmitting(false);
     }
   }
   
@@ -125,7 +130,7 @@ export default function CreateProfilePage() {
       <Header />
       <PageTransition>
       <div className="flex items-center justify-center min-h-[calc(100vh-64px)] p-4">
-          <Card className="w-full max-w-md">
+          <Card className="w-full max-w-lg">
           <CardHeader className="text-center">
               <Gem className="mx-auto h-10 w-10 text-primary mb-2" />
               <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
@@ -162,23 +167,12 @@ export default function CreateProfilePage() {
                       )}
                   />
                   </div>
-                  <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                          <Input 
-                          {...field}
-                          onFocus={handlePhoneFocus}
-                          onClick={handlePhoneClick}
-                          />
-                      </FormControl>
-                      <FormMessage />
-                      </FormItem>
-                  )}
-                  />
+                   <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input placeholder="+92 300 1234567" {...field} onFocus={handlePhoneFocus} onClick={handlePhoneClick} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="address" render={({ field }) => ( <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="House #123, Street 4" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="city" render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input placeholder="Karachi" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="postalCode" render={({ field }) => ( <FormItem><FormLabel>Postal Code</FormLabel><FormControl><Input placeholder="75500" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    </div>
                   <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground" disabled={isSubmitting}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save and Continue
