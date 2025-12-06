@@ -1,7 +1,8 @@
+
 'use client';
 
 import Link from 'next/link';
-import { Gem, ShoppingCart, User, Menu, Shield, Search as SearchIcon, LogOut, LayoutDashboard, PanelLeft } from 'lucide-react';
+import { Gem, ShoppingCart, User, Menu, Shield, Search as SearchIcon, LogOut, LayoutDashboard, Home, Package, LifeBuoy, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { usePathname, useRouter } from 'next/navigation';
@@ -24,10 +25,10 @@ import Search from '../Search';
 import { Separator } from '../ui/separator';
 
 const topNavLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/products', label: 'Products' },
-  { href: '/help', label: 'Help' },
-  { href: '/faqs', label: 'FAQs' },
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/products', label: 'Products', icon: Package },
+  { href: '/help', label: 'Help', icon: LifeBuoy },
+  { href: '/faqs', label: 'FAQs', icon: HelpCircle },
 ];
 
 
@@ -81,13 +82,15 @@ export default function HeaderContent() {
           key={link.href}
           href={link.href}
           className={cn(
-            'font-medium transition-colors hover:text-primary',
-            'font-body',
-            pathname === link.href ? 'text-primary' : 'text-white',
-            inSheet ? 'text-lg py-2' : 'text-sm',
+            'transition-colors hover:text-primary',
+            inSheet 
+              ? 'flex items-center gap-3 py-3 text-lg' 
+              : 'text-sm font-medium',
+            pathname === link.href ? 'text-primary' : 'text-white'
           )}
           onClick={() => setIsMobileMenuOpen(false)}
         >
+          {inSheet && <link.icon className="h-5 w-5" />}
           {link.label}
         </Link>
       ))}
@@ -155,41 +158,39 @@ export default function HeaderContent() {
                   <Menu className="h-5 w-5 text-primary" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-black p-4">
+              <SheetContent side="left" className="bg-black p-4 w-full max-w-sm">
                 <SheetTitle className='sr-only'>Mobile Menu</SheetTitle>
-                <div className="mb-4">
+                <div className="mb-6">
                      <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
                         <Gem className="h-6 w-6 text-primary" />
                         <span className="font-logo font-bold text-xl text-white">Al-Hameed</span>
                       </Link>
                 </div>
-                <nav className="flex flex-col gap-4">
+                <nav className="flex flex-col gap-1">
                   <NavLinks inSheet={true} />
-                  <Separator className="bg-border/50 my-2" />
+                  <Separator className="bg-border/50 my-3" />
                    {user ? (
                       <>
-                      <Link href="/dashboard" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Link href="/dashboard" className="flex items-center gap-3 py-3 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
                           <LayoutDashboard className="h-5 w-5" />
                           Dashboard
                       </Link>
                       {isAdmin && (
-                          <Link href="/dashboard/admin" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Link href="/dashboard/admin" className="flex items-center gap-3 py-3 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
                               <Shield className="h-5 w-5" />
                               Admin Panel
                           </Link>
                       )}
-                      <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-left text-lg">
+                      <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 py-3 text-white transition-all hover:text-primary w-full text-left text-lg">
                           <LogOut className="h-5 w-5" />
                           Logout
                       </button>
                       </>
                   ) : (
                       <>
-                      <Link href="/login" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Link href="/login" className="flex items-center gap-3 py-3 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
+                          <User className="h-5 w-5" />
                           Log In
-                      </Link>
-                      <Link href="/signup" className="flex items-center gap-3 py-2 text-white transition-all hover:text-primary w-full text-lg" onClick={() => setIsMobileMenuOpen(false)}>
-                          Sign Up
                       </Link>
                       </>
                   )}

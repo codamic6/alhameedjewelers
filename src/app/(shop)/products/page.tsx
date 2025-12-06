@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import ProductCard from '@/components/ProductCard';
@@ -38,11 +39,11 @@ export default function ProductsPage() {
                     Filters
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background">
-                  <SheetHeader>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background p-0">
+                  <SheetHeader className="p-4 border-b">
                     <SheetTitle className="text-primary">Filters</SheetTitle>
                   </SheetHeader>
-                   <div className="mt-4">
+                   <div className="p-4">
                      <ProductFilters 
                         filters={filters} 
                         setFilters={setFilters} 
