@@ -77,7 +77,7 @@ export default function GiftFinder({ allProducts }: GiftFinderProps) {
                 <Wand2 className="mr-2 h-5 w-5" />
                 Ask Our AI Assistant
             </Button>
-            <DialogContent className="sm:max-w-[480px] md:max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col">
+            <DialogContent className="sm:max-w-[625px] md:max-w-2xl lg:max-w-4xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="text-center text-2xl">AI Gift Finder</DialogTitle>
                     <DialogDescription className="text-center">

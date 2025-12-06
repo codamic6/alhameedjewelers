@@ -1,11 +1,12 @@
 
+
 'use client';
 
 import Image from 'next/image';
 import { notFound, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Plus, Minus, Loader2, CreditCard, Heart, ZoomIn, X, Video } from 'lucide-react';
-import { useState, useEffect, use, useRef } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useCart } from '@/hooks/use-cart';
 import PageTransition from '@/components/PageTransition';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
@@ -19,7 +20,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import ProductCard from '@/components/ProductCard';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useToast } from '@/hooks/use-toast';
-import { motion, PanInfo } from 'framer-motion';
+import { motion } from 'framer-motion';
+import CustomVideoPlayer from '@/components/CustomVideoPlayer';
 
 
 function RelatedProducts({ currentProductId }: { currentProductId: string }) {
@@ -62,9 +64,9 @@ const MediaDialogContent = ({ mediaUrl, productName }: { mediaUrl: string | null
         >
             <DialogTitle className="sr-only">{productName}</DialogTitle>
              {isModalVideo ? (
-                <video key={mediaUrl} controls autoPlay className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg">
-                    <source src={mediaUrl} />
-                </video>
+                <div className="w-full h-full max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                    <CustomVideoPlayer src={mediaUrl} />
+                </div>
             ) : (
                 <motion.div
                     drag
@@ -204,10 +206,9 @@ export default function ProductDetailPage({
                      <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg group bg-secondary cursor-pointer" onClick={() => setModalMediaUrl(selectedImageUrl || null)}>
                       {selectedImageUrl ? (
                           currentMediaIsVideo ? (
-                              <video key={selectedImageUrl} controls className="w-full h-full object-contain">
-                                  <source src={selectedImageUrl} />
-                                  Your browser does not support the video tag.
-                              </video>
+                            <div className="w-full h-full object-cover">
+                               <CustomVideoPlayer src={selectedImageUrl} />
+                            </div>
                           ) : (
                             <Image
                               src={selectedImageUrl}
@@ -271,9 +272,9 @@ export default function ProductDetailPage({
                                 <DialogTrigger asChild>
                                   <div className="aspect-square relative rounded-lg overflow-hidden bg-secondary cursor-pointer" onClick={() => setModalMediaUrl(url)}>
                                       {isVideo(url) ? (
-                                          <video key={url} controls className="w-full h-full object-contain">
-                                              <source src={url} />
-                                          </video>
+                                        <div className="w-full h-full object-cover">
+                                          <CustomVideoPlayer src={url} />
+                                        </div>
                                       ) : (
                                           <Image
                                               src={url}
