@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/personalized-product-recommendations.ts';
 import '@/ai/ai-product-description-generator.ts';
+import '@/ai/flows/virtual-try-on-flow.ts';
