@@ -232,15 +232,13 @@ export default function AdminContactPage() {
             <>
               <DialogHeader>
                 <DialogTitle className="text-primary">{selectedMessage.subject}</DialogTitle>
-                <DialogDescription>
-                  <div className="flex items-center gap-4 text-xs mt-2">
+                <div className="flex items-center gap-4 text-xs pt-2 text-muted-foreground">
                     <span className="flex items-center gap-1.5"><User className="h-3 w-3"/> {selectedMessage.name}</span>
                     <span className="flex items-center gap-1.5"><Mail className="h-3 w-3"/> {selectedMessage.email}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                      Received on {format(getTimestamp(selectedMessage.timestamp), "PPP p")}
-                  </div>
-                </DialogDescription>
+                </div>
+                <div className="text-xs text-muted-foreground pt-1">
+                    Received on {format(getTimestamp(selectedMessage.timestamp), "PPP p")}
+                </div>
               </DialogHeader>
               <Separator />
               <div className="py-4 text-base text-foreground whitespace-pre-wrap">
