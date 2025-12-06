@@ -41,6 +41,7 @@ import { useState, KeyboardEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
 import FileUpload from '@/components/FileUpload';
 import { generateProductDescription, type AIProductDescriptionInput } from '@/ai/ai-product-description-generator';
+import { Label } from '@/components/ui/label';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -49,8 +50,6 @@ const productSchema = z.object({
   category: z.string().min(1, 'Please select a category'),
   imageUrls: z.array(z.string()).min(1, 'Please upload at least one image or video'),
   tags: z.array(z.string()).optional(),
-  metalType: z.string().optional(),
-  style: z.string().optional(),
 });
 
 type ProductFormProps = {
@@ -81,7 +80,6 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
           ...product,
           tags: product.tags || [],
           imageUrls: product.imageUrls || [],
-          style: product.style || '',
         }
       : {
           name: '',
@@ -90,8 +88,6 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
           category: '',
           imageUrls: [],
           tags: [],
-          metalType: '',
-          style: '',
         },
   });
   
@@ -164,7 +160,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
     setIsSubmitting(true);
 
     const slug = values.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-    const productData = { ...values, slug, metalType: values.metalType || '', style: values.style || '' };
+    const productData = { ...values, slug };
 
     try {
       if (product) {
