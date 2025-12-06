@@ -241,7 +241,7 @@ export default function AdminContactPage() {
                 </div>
               </DialogHeader>
               <Separator />
-              <div className="py-4 text-base text-foreground whitespace-pre-wrap text-left">
+              <div className="my-4 max-h-[50vh] overflow-y-auto rounded-md border bg-secondary/30 p-4 text-base text-foreground whitespace-pre-wrap text-left">
                 {selectedMessage.message}
               </div>
               <Separator />
