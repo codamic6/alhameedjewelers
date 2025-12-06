@@ -77,7 +77,7 @@ export async function placeOrder(
   couponId: string | null
 ): Promise<{ orderId?: string; error?: string }> {
   // Gracefully handle local development where Admin SDK isn't initialized
-  if (process.env.NODE_ENV !== 'production' && !getApps().length) {
+  if (process.env.NODE_ENV !== 'production' && getApps().length === 0) {
     console.log("Local development: Skipping Firebase Admin action. Returning dummy order ID.");
     return { orderId: `local-dev-${Date.now()}` };
   }
