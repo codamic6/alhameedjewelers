@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Gem, ShoppingCart, User, Menu, Shield, Search as SearchIcon, LogOut, LayoutDashboard, Home, Package, LifeBuoy, HelpCircle } from 'lucide-react';
+import { Gem, ShoppingCart, User, Menu, Shield, Search as SearchIcon, LogOut, LayoutDashboard, Home, Package, LifeBuoy, HelpCircle, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { usePathname, useRouter } from 'next/navigation';
@@ -28,7 +28,7 @@ import { Avatar, AvatarFallback } from '../ui/avatar';
 const topNavLinks = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/products', label: 'Products', icon: Package },
-  { href: '/help', label: 'Help', icon: LifeBuoy },
+  { href: '/contact', label: 'Contact Us', icon: Mail },
   { href: '/faqs', label: 'FAQs', icon: HelpCircle },
 ];
 
