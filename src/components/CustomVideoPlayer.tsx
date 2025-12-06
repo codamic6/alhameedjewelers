@@ -190,7 +190,7 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
                 </div>
 
                 {/* Center Controls */}
-                 <div className="flex items-center gap-3">
+                 <div className="flex-1 flex justify-center items-center gap-3">
                     <button onClick={() => handleSkip(-10)}>
                         <Rewind className="w-6 h-6"/>
                     </button>
@@ -242,7 +242,7 @@ declare module 'react' {
 const originalSliderRender = (Slider as any).render;
 
 if (originalSliderRender) {
-  (Slider as any).render = (props: any, ref: any) => {
+  (Slider as any).render = function(props: any, ref: any) {
     const { styles, ...rest } = props;
     return (
       <SliderPrimitive.Root
