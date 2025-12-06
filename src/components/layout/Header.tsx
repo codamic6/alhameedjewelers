@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -22,7 +23,6 @@ import { useToast } from '@/hooks/use-toast';
 import { ADMIN_EMAIL } from '@/lib/constants';
 import Search from '../Search';
 import { Separator } from '../ui/separator';
-import DashboardSidebar from './DashboardSidebar';
 
 const topNavLinks = [
   { href: '/', label: 'Home' },
@@ -31,7 +31,8 @@ const topNavLinks = [
   { href: '/faqs', label: 'FAQs' },
 ];
 
-export default function Header() {
+
+function HeaderContent() {
   const { cartCount } = useCart();
   const pathname = usePathname();
   const router = useRouter();
@@ -266,4 +267,9 @@ export default function Header() {
       </div>
     </header>
   );
+}
+
+
+export default function Header() {
+  return <HeaderContent />
 }
