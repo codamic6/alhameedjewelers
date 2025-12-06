@@ -2,39 +2,9 @@
 "use server";
 import { getPersonalizedRecommendations } from "@/ai/flows/personalized-product-recommendations";
 import { findGift, type GiftFinderInput } from "@/ai/flows/gift-finder-flow";
-import type { Product, Order, Coupon } from "./types";
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
-
-// Initialize Firebase Admin SDK
-// This should ideally be done once.
-if (!getApps().length) {
-    try {
-        // When running on Google Cloud, credentials will be automatically discovered.
-        initializeApp();
-    } catch (e) {
-        // For local development without a service account key, this will fail.
-        // We log a warning but don't throw an error, allowing the app to run.
-        // Server-side Firebase Admin actions will not work locally without the key.
-        console.warn(
-            "Firebase Admin SDK initialization failed. This is expected in local development without a service account key. Server-side Firebase actions will not work."
-        );
-    }
-}
-
-
-const db = getFirestore();
-
-async function getAllProducts(): Promise<Product[]> {
-    try {
-        const productsSnapshot = await db.collection('products').get();
-        return productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-    } catch (error) {
-        console.error("Failed to fetch all products on server:", error);
-        return [];
-    }
-}
-
+import type { Product, Order } from "./types";
+import { initializeApp, getApps } from 'firebase-admin/app';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 export async function getAIRecommendations(browsingHistory: string[]) {
   try {
@@ -76,18 +46,27 @@ export async function placeOrder(
   orderData: Omit<Order, 'id' | 'orderDate'>,
   couponId: string | null
 ): Promise<{ orderId?: string; error?: string }> {
-  // Gracefully handle local development where Admin SDK isn't initialized
-  if (process.env.NODE_ENV !== 'production' && getApps().length === 0) {
+  
+  // For local development, Firebase Admin SDK will fail without credentials.
+  // We bypass the logic and return a dummy success response to allow UI testing.
+  if (process.env.NODE_ENV !== 'production') {
     console.log("Local development: Skipping Firebase Admin action. Returning dummy order ID.");
-    return { orderId: `local-dev-${Date.now()}` };
+    return { orderId: `local-dev-${Date.now().toString().slice(-6)}` };
   }
 
-  // Defensive check in case the Admin SDK failed to initialize
+  // --- Production Logic ---
+  // Initialize admin SDK only when needed and in a production environment.
   if (!getApps().length) {
-    const errorMessage = "Order placement failed: Firebase Admin SDK not initialized on the server.";
-    console.error(errorMessage);
-    return { error: errorMessage };
+    try {
+      initializeApp();
+    } catch (e) {
+      const errorMessage = "Order placement failed: Firebase Admin SDK could not be initialized on the server.";
+      console.error(errorMessage, e);
+      return { error: errorMessage };
+    }
   }
+
+  const db = getFirestore();
 
   try {
     const finalOrderData = {
