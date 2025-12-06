@@ -4,7 +4,7 @@
 import Image from 'next/image';
 import { notFound, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Plus, Minus, Loader2, CreditCard, Heart, ZoomIn, X, Video, Camera } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Loader2, CreditCard, Heart, ZoomIn, X, Video } from 'lucide-react';
 import { useState, useEffect, use } from 'react';
 import { useCart } from '@/hooks/use-cart';
 import PageTransition from '@/components/PageTransition';
@@ -19,7 +19,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import ProductCard from '@/components/ProductCard';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useToast } from '@/hooks/use-toast';
-import VirtualTryOn from '@/components/VirtualTryOn';
 
 
 function RelatedProducts({ currentProductId }: { currentProductId: string }) {
@@ -66,7 +65,6 @@ export default function ProductDetailPage({
   const [loading, setLoading] = useState(true);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | undefined>(undefined);
   const [modalMediaUrl, setModalMediaUrl] = useState<string | null>(null);
-  const [isTryOnOpen, setIsTryOnOpen] = useState(false);
 
   const { user } = useUser();
   const { toast } = useToast();
@@ -324,17 +322,6 @@ export default function ProductDetailPage({
                             <span className="sr-only">Add to favorites</span>
                         </Button>
                     </div>
-                     <Dialog open={isTryOnOpen} onOpenChange={setIsTryOnOpen}>
-                        <DialogTrigger asChild>
-                            <Button size="lg" variant="outline" className="w-full">
-                                <Camera className="mr-2 h-5 w-5" /> Virtual Try-On
-                            </Button>
-                        </DialogTrigger>
-                        <VirtualTryOn 
-                            product={product} 
-                            onClose={() => setIsTryOnOpen(false)}
-                        />
-                    </Dialog>
                     <div className="flex flex-col sm:flex-row items-center gap-4">
                         <Button size="lg" className="w-full sm:flex-1" onClick={() => addToCart(product, quantity)}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
                         <Button size="lg" variant="outline" className="w-full sm:flex-1" onClick={handleBuyNow}><CreditCard className="mr-2 h-5 w-5" /> Buy Now</Button>
