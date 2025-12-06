@@ -2,12 +2,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Rewind, FastForward } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
-import * as SliderPrimitive from '@radix-ui/react-slider';
-
 
 interface CustomVideoPlayerProps {
   src: string;
@@ -18,15 +16,15 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  let controlTimeout: NodeJS.Timeout;
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handlePlayPause = () => {
+  const handlePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (videoRef.current) {
       if (videoRef.current.paused) {
         videoRef.current.play();
@@ -37,6 +35,10 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
       }
     }
   };
+  
+  const handleVideoClick = () => {
+    handlePlayPause({ stopPropagation: () => {} } as React.MouseEvent);
+  }
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
@@ -53,36 +55,17 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     }
   };
   
-  const handleSkip = (amount: number) => {
-    if(videoRef.current) {
-        videoRef.current.currentTime += amount;
-    }
-  }
-
-  const handleVolumeChange = (value: number[]) => {
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (videoRef.current) {
-      const newVolume = value[0];
-      videoRef.current.volume = newVolume;
-      setVolume(newVolume);
-      if (newVolume > 0) {
-        setIsMuted(false);
-        videoRef.current.muted = false;
-      }
+      const newMutedState = !videoRef.current.muted;
+      videoRef.current.muted = newMutedState;
+      setIsMuted(newMutedState);
     }
   };
 
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-      if (!isMuted && videoRef.current.volume === 0) {
-        videoRef.current.volume = 1;
-        setVolume(1);
-      }
-    }
-  };
-
-  const toggleFullScreen = () => {
+  const toggleFullScreen = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!containerRef.current) return;
 
     if (!document.fullscreenElement) {
@@ -95,10 +78,25 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
   };
 
   const formatTime = (time: number) => {
+    if (isNaN(time) || time === 0) return '0:00';
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+  
+  const hideControls = () => {
+    if (videoRef.current && !videoRef.current.paused) {
+        setShowControls(false);
+    }
+  }
+
+  const handleMouseMove = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(hideControls, 3000);
+  }
 
   useEffect(() => {
     const video = videoRef.current;
@@ -112,19 +110,17 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
       setIsFullScreen(!!document.fullscreenElement);
     };
     
-    const handleMouseMove = () => {
-        setShowControls(true);
-        clearTimeout(controlTimeout);
-        controlTimeout = setTimeout(() => setShowControls(false), 3000);
-    }
-    
     if (video) {
       video.addEventListener('timeupdate', handleTimeUpdate);
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      // Mute by default
+      video.muted = true;
+      setIsMuted(true);
     }
     
     if (container) {
         container.addEventListener('mousemove', handleMouseMove);
+        container.addEventListener('mouseleave', hideControls);
     }
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -136,137 +132,76 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
       }
       if (container) {
           container.removeEventListener('mousemove', handleMouseMove);
+          container.removeEventListener('mouseleave', hideControls);
       }
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      clearTimeout(controlTimeout);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full group bg-black rounded-lg overflow-hidden">
+    <div ref={containerRef} className="relative w-full h-full group bg-black rounded-lg overflow-hidden" onMouseMove={handleMouseMove}>
       <video
         ref={videoRef}
         src={src}
         className="w-full h-full object-contain"
-        onClick={handlePlayPause}
+        onClick={handleVideoClick}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        loop
+        playsInline
       />
+      
+      <div 
+        className={cn(
+            "absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-300",
+            isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+        )}
+      >
+        <button onClick={handleVideoClick} className="bg-black/50 text-white p-4 rounded-full">
+            {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
+        </button>
+      </div>
 
       <div 
         className={cn(
-            "absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300",
+            "absolute bottom-0 left-0 right-0 p-2 md:p-3 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300",
             showControls ? "opacity-100" : "opacity-0"
         )}
       >
-        <div className="flex flex-col gap-2">
-            <Slider
-                value={[progress]}
-                onValueChange={handleSeek}
-                max={100}
-                step={0.1}
-                className="w-full cursor-pointer h-2 [&>span:first-child]:h-2"
-                styles={{
-                    track: { backgroundColor: 'hsl(var(--primary) / 0.3)' },
-                    range: { backgroundColor: 'hsl(var(--primary))' },
-                    thumb: {
-                        backgroundColor: 'hsl(var(--primary))',
-                        boxShadow: '0 0 5px hsl(var(--primary))'
-                    }
-                }}
-            />
-            <div className="flex items-center justify-between text-white">
-                {/* Left Controls */}
-                <div className="flex items-center gap-3">
-                    <button onClick={handlePlayPause}>
-                        {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-                    </button>
-                    <div className="flex items-center gap-2 text-sm font-mono">
-                        <span>{formatTime(currentTime)}</span>
-                        <span>/</span>
-                        <span>{formatTime(duration)}</span>
-                    </div>
+          <Slider
+            value={[progress]}
+            onValueChange={handleSeek}
+            max={100}
+            step={0.1}
+            className="w-full cursor-pointer h-2.5 group/slider"
+          />
+        <div className="flex items-center justify-between text-white mt-1.5">
+            {/* Left Controls */}
+            <div className="flex items-center gap-2 md:gap-3">
+                <button onClick={handlePlayPause} className="p-1">
+                    {isPlaying ? <Pause className="w-5 h-5 md:w-6 md:h-6" /> : <Play className="w-5 h-5 md:w-6 md:h-6" />}
+                </button>
+                <div className="text-xs md:text-sm font-mono tracking-tighter">
+                    <span>{formatTime(currentTime)}</span>
+                    <span className="mx-1">/</span>
+                    <span className="text-white/70">{formatTime(duration)}</span>
                 </div>
+            </div>
 
-                {/* Center Controls */}
-                 <div className="flex-1 flex justify-center items-center gap-3">
-                    <button onClick={() => handleSkip(-10)}>
-                        <Rewind className="w-6 h-6"/>
-                    </button>
-                     <button onClick={() => handleSkip(10)}>
-                        <FastForward className="w-6 h-6"/>
-                    </button>
-                </div>
-
-                {/* Right Controls */}
-                <div className="flex items-center gap-3">
-                    <button onClick={toggleMute}>
-                        {isMuted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-                    </button>
-                    <Slider
-                        value={[isMuted ? 0 : volume]}
-                        onValueChange={handleVolumeChange}
-                        max={1}
-                        step={0.05}
-                        className="w-24 cursor-pointer h-2 [&>span:first-child]:h-2"
-                         styles={{
-                            track: { backgroundColor: 'hsl(var(--primary) / 0.3)' },
-                            range: { backgroundColor: 'hsl(var(--primary))' },
-                            thumb: {
-                                backgroundColor: 'hsl(var(--primary))',
-                                boxShadow: '0 0 5px hsl(var(--primary))'
-                            }
-                        }}
-                    />
-                    <button onClick={toggleFullScreen}>
-                        {isFullScreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
-                    </button>
-                </div>
+            {/* Right Controls */}
+            <div className="flex items-center gap-2 md:gap-3">
+                <button onClick={toggleMute} className="p-1">
+                    {isMuted ? <VolumeX className="w-5 h-5 md:w-6 md:h-6" /> : <Volume2 className="w-5 h-5 md:w-6 md:h-6" />}
+                </button>
+                <button onClick={toggleFullScreen} className="p-1">
+                    {isFullScreen ? <Minimize className="w-5 h-5 md:w-6 md:h-6" /> : <Maximize className="w-5 h-5 md:w-6 md:h-6" />}
+                </button>
             </div>
         </div>
       </div>
     </div>
   );
-}
-
-// Extend slider to accept styles for custom coloring
-declare module 'react' {
-  interface ForwardRefExoticComponent<P extends object> {
-    <T extends object>(
-      props: P & { styles?: T } & React.RefAttributes<HTMLElement>
-    ): React.ReactElement | null;
-  }
-}
-
-const originalSliderRender = (Slider as any).render;
-
-if (originalSliderRender) {
-  (Slider as any).render = function(props: any, ref: any) {
-    const { styles, ...rest } = props;
-    return (
-      <SliderPrimitive.Root
-        ref={ref}
-        className={cn(
-          'relative flex w-full touch-none select-none items-center',
-          props.className
-        )}
-        {...rest}
-      >
-        <SliderPrimitive.Track
-          className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary"
-          style={styles?.track}
-        >
-          <SliderPrimitive.Range
-            className="absolute h-full bg-primary"
-            style={styles?.range}
-          />
-        </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb
-          className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          style={styles?.thumb}
-        />
-      </SliderPrimitive.Root>
-    );
-  };
 }
