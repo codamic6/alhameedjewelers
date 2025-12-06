@@ -78,23 +78,29 @@ export default function HeaderContent() {
 
   const NavLinks = ({ inSheet = false }: { inSheet?: boolean }) => (
     <>
-      {topNavLinks.map(link => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={cn(
-            'transition-colors hover:text-primary',
-            inSheet 
-              ? 'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:text-primary' 
-              : 'text-sm font-medium',
-            pathname === link.href ? 'text-primary bg-muted' : inSheet ? 'text-white' : 'text-white'
-          )}
-          onClick={() => setIsMobileMenuOpen(false)}
-        >
-          {inSheet && <link.icon className="h-5 w-5" />}
-          {link.label}
-        </Link>
-      ))}
+      {topNavLinks.map(link => {
+        const isActive = pathname === link.href;
+        return (
+            <Link
+            key={link.href}
+            href={link.href}
+            className={cn(
+                'transition-colors',
+                inSheet 
+                ? 'flex items-center gap-3 rounded-lg px-3 py-2' 
+                : 'text-sm font-medium',
+                isActive 
+                ? 'text-primary'
+                : inSheet ? 'text-white hover:text-primary' : 'text-white hover:text-primary',
+                isActive && !inSheet && 'underline underline-offset-4'
+            )}
+            onClick={() => setIsMobileMenuOpen(false)}
+            >
+            {inSheet && <link.icon className="h-5 w-5" />}
+            {link.label}
+            </Link>
+        )
+      })}
     </>
   );
 
