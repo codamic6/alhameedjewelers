@@ -177,6 +177,7 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
                 }}
             />
             <div className="flex items-center justify-between text-white">
+                {/* Left Controls */}
                 <div className="flex items-center gap-3">
                     <button onClick={handlePlayPause}>
                         {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
@@ -188,6 +189,7 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
                     </div>
                 </div>
 
+                {/* Center Controls */}
                  <div className="flex items-center gap-3">
                     <button onClick={() => handleSkip(-10)}>
                         <Rewind className="w-6 h-6"/>
@@ -197,7 +199,7 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
                     </button>
                 </div>
 
-
+                {/* Right Controls */}
                 <div className="flex items-center gap-3">
                     <button onClick={toggleMute}>
                         {isMuted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
