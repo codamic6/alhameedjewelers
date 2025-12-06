@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -41,6 +42,11 @@ export default function Header() {
   const { user } = useUser();
   const auth = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
 
   const isDashboard = pathname.startsWith('/dashboard');
@@ -104,6 +110,10 @@ export default function Header() {
       })}
     </>
   );
+
+  if (!isClient) {
+    return <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black h-16" />;
+  }
 
   if (isDashboard) {
     return (
