@@ -1,38 +1,28 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Search as SearchIcon, X } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Loader2, SlidersHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
-import type { Product } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { useProductFilters } from '@/hooks/use-product-filters';
+import ProductFilters from '@/components/ProductFilters';
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 
 export default function SearchPage() {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [results, setResults] = useState<Product[]>([]);
-  const firestore = useFirestore();
-
-  const productsCollection = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'products') : null),
-    [firestore]
-  );
-  const { data: products, isLoading: productsLoading } = useCollection<Product>(productsCollection);
-
-  useEffect(() => {
-    if (searchTerm.length > 1 && products) {
-      const filtered = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setResults(filtered);
-    } else {
-      setResults([]);
-    }
-  }, [searchTerm, products]);
+  const { 
+    filteredProducts, 
+    isLoading,
+    filters,
+    setFilters,
+    categories,
+    maxPrice
+  } = useProductFilters();
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -45,31 +35,26 @@ export default function SearchPage() {
       </header>
 
       <main className="p-5">
-        <div className="relative mb-6">
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
-          <input
-            type="text"
-            placeholder="Search gold jewelry..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            autoFocus
-            className="w-full h-[56px] bg-[#111111] border border-[#2B2B2B] rounded-lg text-white placeholder:text-[#777777] pl-12 pr-10 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all duration-200 ease-in-out"
-          />
-          {searchTerm && (
-            <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-              <X className="h-5 w-5 text-primary" />
-            </button>
-          )}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex-1">
+             <ProductFilters 
+                filters={filters} 
+                setFilters={setFilters} 
+                categories={categories}
+                maxPrice={maxPrice}
+                className="p-0 border-none"
+              />
+          </div>
         </div>
 
-        {productsLoading ? (
+        {isLoading ? (
             <div className="flex justify-center items-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         ) : (
             <div className="space-y-4">
                 <AnimatePresence>
-                {results.map((product, index) => {
+                {filteredProducts.map((product, index) => {
                     const image = product.imageUrls && product.imageUrls[0];
                     return(
                     <motion.div
@@ -101,6 +86,12 @@ export default function SearchPage() {
                     )
                 })}
                 </AnimatePresence>
+                {filteredProducts.length === 0 && !isLoading && (
+                     <div className="text-center py-10">
+                        <h3 className="text-xl font-bold text-white">No Products Found</h3>
+                        <p className="text-muted-foreground mt-2">Try adjusting your search or filters.</p>
+                    </div>
+                )}
             </div>
         )}
       </main>

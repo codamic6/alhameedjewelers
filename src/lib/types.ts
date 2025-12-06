@@ -7,7 +7,8 @@ export type Product = {
   description: string;
   price: number;
   category: string;
-  imageUrls: string[]; // Changed from imageIds to imageUrls
+  metalType: 'Gold' | 'Silver' | 'Platinum'; // Added for filtering
+  imageUrls: string[];
   tags?: string[];
 };
 
