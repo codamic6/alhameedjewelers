@@ -1,9 +1,13 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Rewind, FastForward } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import * as React from 'react';
+import * as SliderPrimitive from '@radix-ui/react-slider';
+
 
 interface CustomVideoPlayerProps {
   src: string;
@@ -136,6 +140,7 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       clearTimeout(controlTimeout);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -224,31 +229,42 @@ export default function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
 }
 
 // Extend slider to accept styles for custom coloring
-declare module "react" {
-    interface ForwardRefExoticComponent<P> {
-      <T>(props: P & { styles?: T }): React.ReactElement | null;
-    }
+declare module 'react' {
+  interface ForwardRefExoticComponent<P extends object> {
+    <T extends object>(
+      props: P & { styles?: T } & React.RefAttributes<HTMLElement>
+    ): React.ReactElement | null;
+  }
 }
 
-const originalSlider = Slider;
-(originalSlider as any).render = (props: any, ref: any) => {
+const originalSliderRender = (Slider as any).render;
+
+if (originalSliderRender) {
+  (Slider as any).render = (props: any, ref: any) => {
     const { styles, ...rest } = props;
     return (
-        <SliderPrimitive.Root
-            ref={ref}
-            className={cn(
-                "relative flex w-full touch-none select-none items-center",
-                props.className
-            )}
-            {...rest}
+      <SliderPrimitive.Root
+        ref={ref}
+        className={cn(
+          'relative flex w-full touch-none select-none items-center',
+          props.className
+        )}
+        {...rest}
+      >
+        <SliderPrimitive.Track
+          className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary"
+          style={styles?.track}
         >
-            <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary" style={styles?.track}>
-                <SliderPrimitive.Range className="absolute h-full bg-primary" style={styles?.range} />
-            </SliderPrimitive.Track>
-            <SliderPrimitive.Thumb 
-                className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" 
-                style={styles?.thumb}
-            />
-        </SliderPrimitive.Root>
-    )
-};
+          <SliderPrimitive.Range
+            className="absolute h-full bg-primary"
+            style={styles?.range}
+          />
+        </SliderPrimitive.Track>
+        <SliderPrimitive.Thumb
+          className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+          style={styles?.thumb}
+        />
+      </SliderPrimitive.Root>
+    );
+  };
+}
