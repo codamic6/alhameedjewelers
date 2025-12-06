@@ -231,7 +231,7 @@ export default function AdminContactPage() {
           {selectedMessage && (
             <>
               <DialogHeader className="text-center sm:text-left">
-                <DialogTitle className="text-primary">{selectedMessage.subject}</DialogTitle>
+                <DialogTitle className="text-primary break-words">{selectedMessage.subject}</DialogTitle>
                  <div className="flex flex-col md:flex-row items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs pt-2 text-muted-foreground">
                     <span className="flex items-center gap-1.5"><User className="h-3 w-3"/> {selectedMessage.name}</span>
                     <span className="flex items-center gap-1.5"><Mail className="h-3 w-3"/> {selectedMessage.email}</span>
