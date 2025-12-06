@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 export default function Hero() {
   return (
-    <section className="relative w-full py-24 md:py-32 lg:py-40 flex items-center justify-center text-center bg-background overflow-hidden">
+    <section className="relative w-full py-20 md:py-32 lg:py-40 flex items-center justify-center text-center bg-background overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -22,7 +22,7 @@ export default function Hero() {
           Discover our exquisite collection of handcrafted gold jewelry, designed to be cherished for a lifetime.
         </p>
         <Button asChild size="lg">
-          <Link href="#featured-products">Explore Collection</Link>
+          <Link href="/products">Explore Collection</Link>
         </Button>
       </motion.div>
     </section>
