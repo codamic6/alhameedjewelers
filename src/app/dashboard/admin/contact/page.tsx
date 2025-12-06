@@ -177,7 +177,7 @@ export default function AdminContactPage() {
                               {formatDistanceToNow(getTimestamp(msg.timestamp), { addSuffix: true })}
                             </TableCell>
                             <TableCell className="text-right">
-                              <AlertDialog onOpenChange={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+                              <AlertDialog>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button aria-haspopup="true" size="icon" variant="ghost" onClick={(e) => e.stopPropagation()}>
@@ -189,7 +189,7 @@ export default function AdminContactPage() {
                                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                       <DropdownMenuItem onClick={() => setSelectedMessage(msg)}>View Message</DropdownMenuItem>
                                       <AlertDialogTrigger asChild>
-                                        <DropdownMenuItem className="text-destructive">
+                                        <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>
                                           Delete
                                         </DropdownMenuItem>
                                       </AlertDialogTrigger>
@@ -240,12 +240,12 @@ export default function AdminContactPage() {
                     Received on {format(getTimestamp(selectedMessage.timestamp), "PPP p")}
                 </div>
               </DialogHeader>
-              <Separator />
+              
               <div className="my-4 max-h-[50vh] overflow-y-auto rounded-md border bg-secondary/30 p-4 text-base text-foreground whitespace-pre-wrap text-left">
                 {selectedMessage.message}
               </div>
-              <Separator />
-              <div className="flex justify-end gap-2">
+              
+              <div className="flex justify-end gap-2 pt-4 border-t">
                 <DialogClose asChild>
                   <Button type="button" variant="secondary">
                     Close
