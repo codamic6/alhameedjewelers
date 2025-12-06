@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
@@ -160,13 +160,14 @@ export default function HeaderContent() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col bg-black p-0 w-full max-w-sm">
-                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-                 <div className="flex h-16 items-center border-b px-4 shrink-0">
+                <SheetHeader className="p-4 border-b">
+                   <SheetTitle>
                      <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
                         <Gem className="h-6 w-6 text-primary" />
                         <span className="font-logo font-bold text-xl text-white">Al-Hameed</span>
                       </Link>
-                </div>
+                   </SheetTitle>
+                </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto p-4">
                   <nav className="flex flex-col gap-1">
