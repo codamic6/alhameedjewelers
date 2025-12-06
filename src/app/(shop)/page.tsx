@@ -10,6 +10,8 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import type { Product } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
+import GiftFinder from '@/components/GiftFinder';
+import { Separator } from '@/components/ui/separator';
 
 export default function HomePage() {
   const [viewedProducts, setViewedProducts] = useState<string[]>([]);
@@ -62,6 +64,12 @@ export default function HomePage() {
             </div>
           )}
         </section>
+
+        <Separator className="my-16 bg-border/40" />
+
+        <GiftFinder allProducts={products || []} />
+        
+        <Separator className="my-16 bg-border/40" />
 
         <Recommendations viewedProducts={viewedProducts} />
       </div>
