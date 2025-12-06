@@ -36,16 +36,14 @@ export default function ProductsPage() {
                   Filters
                 </Button>
               </CollapsibleTrigger>
-              <CollapsibleContent className="mt-4 md:mt-0 md:absolute md:top-full md:right-0 md:w-full md:max-w-xs md:z-20 md:p-0">
-                  <div className="md:bg-secondary md:border md:rounded-lg md:shadow-lg md:p-4">
-                     <ProductFilters 
-                        filters={filters} 
-                        setFilters={setFilters} 
-                        categories={categories}
-                        maxPrice={maxPrice}
-                        className="p-4 border rounded-lg md:p-0 md:border-none"
-                      />
-                  </div>
+              <CollapsibleContent className="mt-4 md:mt-0 md:absolute md:top-full md:right-0 md:w-full md:max-w-xs md:z-20 md:p-0 md:bg-secondary md:border md:rounded-lg md:shadow-lg">
+                  <ProductFilters 
+                    filters={filters} 
+                    setFilters={setFilters} 
+                    categories={categories}
+                    maxPrice={maxPrice}
+                    className="p-4 border rounded-lg md:p-4 md:border-none"
+                  />
               </CollapsibleContent>
             </Collapsible>
           </div>
