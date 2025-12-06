@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { notFound, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Plus, Minus, Loader2, CreditCard, Heart, ZoomIn, X, Video } from 'lucide-react';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useRef } from 'react';
 import { useCart } from '@/hooks/use-cart';
 import PageTransition from '@/components/PageTransition';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
@@ -19,6 +19,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import ProductCard from '@/components/ProductCard';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useToast } from '@/hooks/use-toast';
+import { motion, PanInfo } from 'framer-motion';
 
 
 function RelatedProducts({ currentProductId }: { currentProductId: string }) {
@@ -50,6 +51,49 @@ function RelatedProducts({ currentProductId }: { currentProductId: string }) {
 }
 
 const isVideo = (url: string) => /\.(mp4|mov|avi|webm)$/i.test(url);
+
+const MediaDialogContent = ({ mediaUrl, productName }: { mediaUrl: string | null, productName: string }) => {
+    if (!mediaUrl) return null;
+    const isModalVideo = isVideo(mediaUrl);
+
+    return (
+        <DialogContent
+            className="w-screen h-screen max-w-full max-h-full bg-black/80 backdrop-blur-md border-none p-0 flex items-center justify-center"
+        >
+            <DialogTitle className="sr-only">{productName}</DialogTitle>
+             {isModalVideo ? (
+                <video key={mediaUrl} controls autoPlay className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg">
+                    <source src={mediaUrl} />
+                </video>
+            ) : (
+                <motion.div
+                    drag
+                    dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                    dragElastic={0.1}
+                    className="relative w-full h-full flex items-center justify-center overflow-hidden"
+                >
+                    <motion.div
+                        className="relative cursor-zoom-in"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        animate={{ scale: 1, x: 0, y: 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    >
+                        <Image
+                            src={mediaUrl}
+                            alt={productName}
+                            width={1200}
+                            height={1200}
+                            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                            draggable={false}
+                        />
+                    </motion.div>
+                </motion.div>
+            )}
+        </DialogContent>
+    );
+};
+
 
 export default function ProductDetailPage({
   params,
@@ -145,33 +189,6 @@ export default function ProductDetailPage({
 
   const isProductFavorited = isFavorited(product.id);
   const currentMediaIsVideo = selectedImageUrl ? isVideo(selectedImageUrl) : false;
-  
-  const MediaDialogContent = ({ mediaUrl }: { mediaUrl: string | null }) => {
-    if (!mediaUrl) return null;
-    const isModalVideo = isVideo(mediaUrl);
-
-    return (
-        <DialogContent
-            className="max-w-none w-auto h-auto max-h-[90vh] bg-transparent border-none shadow-none p-2"
-        >
-            <DialogTitle className="sr-only">{product.name}</DialogTitle>
-            {isModalVideo ? (
-                <video key={mediaUrl} controls autoPlay className="w-auto h-auto max-h-[90vh] object-contain rounded-lg">
-                    <source src={mediaUrl} />
-                </video>
-            ) : (
-                <Image
-                    src={mediaUrl}
-                    alt={product.name}
-                    width={1200}
-                    height={1200}
-                    className="w-auto h-auto max-h-[90vh] object-contain rounded-lg"
-                />
-            )}
-        </DialogContent>
-    );
-};
-
 
   return (
     <PageTransition>
@@ -335,7 +352,7 @@ export default function ProductDetailPage({
         
         <RelatedProducts currentProductId={product.id} />
         
-        <MediaDialogContent mediaUrl={modalMediaUrl} />
+        <MediaDialogContent mediaUrl={modalMediaUrl} productName={product.name} />
       </Dialog>
     </PageTransition>
   );
