@@ -2,8 +2,7 @@
 'use client';
 
 import { useCart } from '@/hooks/use-cart';
-import { useUser, useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -15,12 +14,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShoppingCart, ArrowLeft, CheckCircle } from 'lucide-react';
 import CheckoutSteps from '../CheckoutSteps';
 import { Separator } from '@/components/ui/separator';
+import { placeOrder as placeOrderAction } from '@/lib/actions';
+import type { Order } from '@/lib/types';
+
 
 export default function SummaryPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
   const { cartItems, clearCart, checkoutState, cartCount, cartTotal, coupon, couponDiscount, totalAfterDiscount } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shippingCost, setShippingCost] = useState(0); // Placeholder for shipping cost
@@ -48,8 +49,8 @@ export default function SummaryPage() {
     }
   }, [user, isUserLoading, checkoutState, cartCount, router]);
 
-  async function placeOrder() {
-    if (!user || !firestore || !checkoutState.shippingAddress || !checkoutState.paymentMethod) {
+  async function handlePlaceOrder() {
+    if (!user || !checkoutState.shippingAddress || !checkoutState.paymentMethod) {
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -61,10 +62,9 @@ export default function SummaryPage() {
     setIsSubmitting(true);
     const finalTotal = totalAfterDiscount + shippingCost;
 
-    const orderData = {
+    const orderData: Omit<Order, 'id' | 'orderDate'> = {
       userId: user.uid,
-      orderDate: serverTimestamp(),
-      status: 'Pending' as const,
+      status: 'Pending',
       subTotal: cartTotal,
       shippingCost: shippingCost,
       couponCode: coupon?.code || null,
@@ -81,16 +81,11 @@ export default function SummaryPage() {
     };
 
     try {
-      // Increment coupon usage if a coupon was applied
-      if (coupon) {
-          const couponRef = doc(firestore, 'coupons', coupon.id);
-          await updateDoc(couponRef, {
-              timesUsed: increment(1)
-          });
+      const result = await placeOrderAction(orderData, coupon);
+      
+      if (result.error) {
+        throw new Error(result.error);
       }
-
-      const ordersRef = collection(firestore, 'orders'); // Placing orders in a top-level collection now
-      const docRef = await addDoc(ordersRef, orderData);
       
       toast({
         title: 'Order Placed!',
@@ -100,7 +95,7 @@ export default function SummaryPage() {
       });
       
       clearCart();
-      router.push(`/order-confirmation?orderId=${docRef.id}`);
+      router.push(`/order-confirmation?orderId=${result.orderId}`);
 
     } catch (error: any) {
       toast({
@@ -204,7 +199,7 @@ export default function SummaryPage() {
                         </div>
                     </CardContent>
                     <CardFooter className="flex-col gap-4 items-stretch">
-                         <Button onClick={placeOrder} size="lg" className="w-full" disabled={isSubmitting}>
+                         <Button onClick={handlePlaceOrder} size="lg" className="w-full" disabled={isSubmitting}>
                             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShoppingCart className="mr-2 h-5 w-5" />}
                             Confirm & Place Order
                         </Button>
