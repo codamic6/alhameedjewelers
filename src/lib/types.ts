@@ -7,7 +7,7 @@ export type Product = {
   description: string;
   price: number;
   category: string;
-  metalType: string;
+  metalType?: string;
   style?: string;
   imageUrls: string[];
   tags?: string[];

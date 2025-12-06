@@ -49,6 +49,7 @@ function RelatedProducts({ currentProductId }: { currentProductId: string }) {
     );
 }
 
+const isVideo = (url: string) => /\.(mp4|mov|avi|webm)$/i.test(url);
 
 export default function ProductDetailPage({
   params,
@@ -66,6 +67,7 @@ export default function ProductDetailPage({
   const { user } = useUser();
   const { toast } = useToast();
   const { favorites, toggleFavorite, isFavorited } = useFavorites();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!firestore || !slug) return;
@@ -140,8 +142,8 @@ export default function ProductDetailPage({
     notFound();
   }
 
-  const isVideo = (url: string) => /\.(mp4|mov|avi|webm)$/i.test(url);
   const isProductFavorited = isFavorited(product.id);
+  const currentMediaIsVideo = selectedImageUrl ? isVideo(selectedImageUrl) : false;
   
   return (
     <PageTransition>
@@ -152,11 +154,11 @@ export default function ProductDetailPage({
           <div>
             {/* Desktop Gallery */}
             <div className="hidden md:flex flex-col gap-4 sticky top-24">
-              <Dialog>
+               <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogTrigger asChild>
-                  <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg cursor-zoom-in group bg-secondary">
+                   <div className="relative aspect-square w-full rounded-lg overflow-hidden shadow-lg group bg-secondary cursor-pointer">
                     {selectedImageUrl ? (
-                        isVideo(selectedImageUrl) ? (
+                        currentMediaIsVideo ? (
                             <video key={selectedImageUrl} controls className="w-full h-full object-contain">
                                 <source src={selectedImageUrl} />
                                 Your browser does not support the video tag.
@@ -172,15 +174,17 @@ export default function ProductDetailPage({
                           />
                         )
                     ) : <div className="w-full h-full flex items-center justify-center text-muted-foreground">No Image</div>}
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ZoomIn className="h-12 w-12 text-white/80"/>
-                    </div>
+                    {!currentMediaIsVideo && (
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ZoomIn className="h-12 w-12 text-white/80"/>
+                      </div>
+                    )}
                   </div>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl w-full p-2 bg-transparent border-none shadow-none">
+                <DialogContent className="max-w-4xl w-full p-2 bg-transparent border-none shadow-none" hideCloseButton={false}>
                     <DialogTitle className="sr-only">{product.name} - Enlarged View</DialogTitle>
                    {selectedImageUrl && (
-                        isVideo(selectedImageUrl) ? (
+                        currentMediaIsVideo ? (
                             <video key={selectedImageUrl} controls autoPlay className="w-full h-auto max-h-[90vh] object-contain rounded-lg">
                                 <source src={selectedImageUrl} />
                             </video>
@@ -197,7 +201,7 @@ export default function ProductDetailPage({
                 </DialogContent>
               </Dialog>
 
-              <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm" onClick={handleFavoriteClick}>
+              <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm z-10" onClick={handleFavoriteClick}>
                 <Heart className={cn("h-5 w-5", isProductFavorited && "fill-primary text-primary")} />
                 <span className="sr-only">Add to favorites</span>
               </Button>
@@ -260,7 +264,7 @@ export default function ProductDetailPage({
                            </CarouselItem>
                         )}
                     </CarouselContent>
-                     <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm" onClick={handleFavoriteClick}>
+                     <Button variant="ghost" size="icon" className="absolute top-3 right-3 rounded-full h-10 w-10 bg-black/20 text-white hover:bg-black/50 backdrop-blur-sm z-10" onClick={handleFavoriteClick}>
                         <Heart className={cn("h-5 w-5", isProductFavorited && "fill-primary text-primary")} />
                         <span className="sr-only">Add to favorites</span>
                     </Button>

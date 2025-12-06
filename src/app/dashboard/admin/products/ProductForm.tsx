@@ -23,6 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -40,7 +49,7 @@ const productSchema = z.object({
   category: z.string().min(1, 'Please select a category'),
   imageUrls: z.array(z.string()).min(1, 'Please upload at least one image or video'),
   tags: z.array(z.string()).optional(),
-  metalType: z.string().min(2, 'Please specify the metal type.'),
+  metalType: z.string().optional(),
   style: z.string().optional(),
 });
 
@@ -54,6 +63,9 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
+  const [aiMetalType, setAiMetalType] = useState('Gold');
+  const [aiStyle, setAiStyle] = useState('');
   const [tagInput, setTagInput] = useState('');
 
   const categoriesCollection = useMemoFirebase(
@@ -78,7 +90,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
           category: '',
           imageUrls: [],
           tags: [],
-          metalType: 'Gold',
+          metalType: '',
           style: '',
         },
   });
@@ -101,12 +113,12 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   };
 
   const handleGenerateDescription = async () => {
-    const { name, category, metalType, style, tags } = form.getValues();
-    if (!name || !category || !metalType) {
+    const { name, category, tags } = form.getValues();
+    if (!name || !category) {
         toast({
             variant: "destructive",
             title: "Missing Information",
-            description: "Please fill in Name, Category, and Metal Type before generating."
+            description: "Please fill in Name and Category before generating."
         });
         return;
     }
@@ -116,8 +128,8 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
         const input: AIProductDescriptionInput = {
             productName: name,
             productCategory: category,
-            productMaterial: metalType,
-            productStyle: style || 'Elegant',
+            productMaterial: aiMetalType,
+            productStyle: aiStyle,
             productFeatures: tags?.join(', ') || '',
             goldPrice: 65.50, // Mock price, can be replaced with a live API call
         };
@@ -129,16 +141,30 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
         toast({ variant: 'destructive', title: 'Generation Failed', description: 'Could not generate description.' });
     } finally {
         setIsGenerating(false);
+        setIsAiDialogOpen(false);
+        setAiStyle('');
     }
   }
 
+  const openAiDialog = () => {
+    const { name, category } = form.getValues();
+    if (!name || !category) {
+        toast({
+            variant: "destructive",
+            title: "Missing Information",
+            description: "Please fill in the Product Name and Category first."
+        });
+        return;
+    }
+    setIsAiDialogOpen(true);
+  }
 
   const onSubmit = async (values: z.infer<typeof productSchema>) => {
     if (!firestore) return;
     setIsSubmitting(true);
 
     const slug = values.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-    const productData = { ...values, slug };
+    const productData = { ...values, slug, metalType: values.metalType || '', style: values.style || '' };
 
     try {
       if (product) {
@@ -160,6 +186,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
   };
 
   return (
+    <>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -182,8 +209,8 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
                         <FormLabel htmlFor="description">Description</FormLabel>
-                         <Button type="button" variant="outline" size="sm" onClick={handleGenerateDescription} disabled={isGenerating}>
-                            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4 text-primary"/>}
+                         <Button type="button" variant="outline" size="sm" onClick={openAiDialog}>
+                            <Sparkles className="mr-2 h-4 w-4 text-primary"/>
                             Generate with AI
                          </Button>
                     </div>
@@ -238,43 +265,7 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
                     )}
                   />
                 </div>
-                 <div className="grid grid-cols-2 gap-4">
-                     <FormField
-                        control={form.control}
-                        name="metalType"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Metal Type</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a metal" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Gold">Gold</SelectItem>
-                                    <SelectItem value="Silver">Silver</SelectItem>
-                                    <SelectItem value="Platinum">Platinum</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                     <FormField
-                        control={form.control}
-                        name="style"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Style</FormLabel>
-                            <FormControl>
-                            <Input placeholder="e.g., Modern, Vintage" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                 </div>
+                
                  <FormField
                   control={form.control}
                   name="tags"
@@ -340,5 +331,51 @@ export default function ProductForm({ product, onFinished }: ProductFormProps) {
         </div>
       </form>
     </Form>
+
+    <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Generate AI Description</DialogTitle>
+          <DialogDescription>
+            Provide a few more details for a better description.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="ai-metal-type">Metal Type</Label>
+               <Select onValueChange={setAiMetalType} defaultValue={aiMetalType}>
+                  <SelectTrigger id="ai-metal-type">
+                      <SelectValue placeholder="Select a metal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="Gold">Gold</SelectItem>
+                      <SelectItem value="Silver">Silver</SelectItem>
+                      <SelectItem value="Platinum">Platinum</SelectItem>
+                      <SelectItem value="Rose Gold">Rose Gold</SelectItem>
+                  </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="ai-style">Style (optional)</Label>
+                <Input 
+                    id="ai-style" 
+                    placeholder="e.g., Modern, Vintage, Royal" 
+                    value={aiStyle}
+                    onChange={(e) => setAiStyle(e.target.value)}
+                />
+            </div>
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="secondary" disabled={isGenerating}>Cancel</Button>
+          </DialogClose>
+          <Button onClick={handleGenerateDescription} disabled={isGenerating}>
+             {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4"/>}
+            Generate
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
