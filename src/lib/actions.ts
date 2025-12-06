@@ -71,7 +71,7 @@ export async function getAIGiftRecommendations(
 
 export async function placeOrder(
   orderData: Omit<Order, 'id' | 'orderDate'>,
-  coupon: Coupon | null
+  couponId: string | null
 ): Promise<{ orderId?: string; error?: string }> {
   try {
     const finalOrderData = {
@@ -86,8 +86,8 @@ export async function placeOrder(
     batch.set(orderRef, finalOrderData);
 
     // 2. If a coupon was used, increment its usage count
-    if (coupon) {
-      const couponRef = db.collection('coupons').doc(coupon.id);
+    if (couponId) {
+      const couponRef = db.collection('coupons').doc(couponId);
       batch.update(couponRef, { timesUsed: FieldValue.increment(1) });
     }
 

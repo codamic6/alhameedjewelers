@@ -81,7 +81,7 @@ export default function SummaryPage() {
     };
 
     try {
-      const result = await placeOrderAction(orderData, coupon);
+      const result = await placeOrderAction(orderData, coupon ? coupon.id : null);
       
       if (result.error) {
         throw new Error(result.error);
