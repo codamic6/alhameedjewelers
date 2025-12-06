@@ -227,7 +227,7 @@ export default function AdminContactPage() {
         </div>
       </div>
        <Dialog open={!!selectedMessage} onOpenChange={(isOpen) => !isOpen && setSelectedMessage(null)}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl" hideCloseButton={true}>
           {selectedMessage && (
             <>
               <DialogHeader className="text-center sm:text-left">
@@ -281,5 +281,3 @@ export default function AdminContactPage() {
     </>
   );
 }
-
-
