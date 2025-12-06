@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for virtually trying on jewelry.
@@ -10,7 +11,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const VirtualTryOnInputSchema = z.object({
+const VirtualTryOnInputSchema = z.object({
   userImage: z
     .string()
     .describe(
@@ -27,7 +28,7 @@ export const VirtualTryOnInputSchema = z.object({
 });
 export type VirtualTryOnInput = z.infer<typeof VirtualTryOnInputSchema>;
 
-export const VirtualTryOnOutputSchema = z.object({
+const VirtualTryOnOutputSchema = z.object({
   generatedImage: z
     .string()
     .describe(
