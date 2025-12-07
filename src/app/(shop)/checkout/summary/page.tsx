@@ -2,10 +2,11 @@
 'use client';
 
 import { useCart } from '@/hooks/use-cart';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { collection, addDoc, doc, updateDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -14,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShoppingCart, ArrowLeft, CheckCircle } from 'lucide-react';
 import CheckoutSteps from '../CheckoutSteps';
 import { Separator } from '@/components/ui/separator';
-import { placeOrder as placeOrderAction } from '@/lib/actions';
 import type { Order } from '@/lib/types';
 
 
@@ -22,6 +22,7 @@ export default function SummaryPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
   const { cartItems, clearCart, checkoutState, cartCount, cartTotal, coupon, couponDiscount, totalAfterDiscount } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shippingCost, setShippingCost] = useState(0); // Placeholder for shipping cost
@@ -50,7 +51,7 @@ export default function SummaryPage() {
   }, [user, isUserLoading, checkoutState, cartCount, router]);
 
   async function handlePlaceOrder() {
-    if (!user || !checkoutState.shippingAddress || !checkoutState.paymentMethod) {
+    if (!user || !firestore || !checkoutState.shippingAddress || !checkoutState.paymentMethod) {
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -81,11 +82,21 @@ export default function SummaryPage() {
     };
 
     try {
-      const result = await placeOrderAction(orderData, coupon ? coupon.id : null);
+      const batch = writeBatch(firestore);
       
-      if (result.error) {
-        throw new Error(result.error);
+      const orderRef = doc(collection(firestore, 'orders'));
+      batch.set(orderRef, {
+        ...orderData,
+        orderDate: serverTimestamp(),
+      });
+
+      if (coupon) {
+        const couponRef = doc(firestore, 'coupons', coupon.id);
+        const newTimesUsed = (coupon.timesUsed || 0) + 1;
+        batch.update(couponRef, { timesUsed: newTimesUsed });
       }
+
+      await batch.commit();
       
       toast({
         title: 'Order Placed!',
@@ -95,9 +106,10 @@ export default function SummaryPage() {
       });
       
       clearCart();
-      router.push(`/order-confirmation?orderId=${result.orderId}`);
+      router.push(`/order-confirmation?orderId=${orderRef.id}`);
 
     } catch (error: any) {
+      console.error("Order placement error: ", error);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
